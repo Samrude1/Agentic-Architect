@@ -78,6 +78,14 @@ Tässä on katsaus kaikkiin saatavilla oleviin työnkulkuihin ja siihen, milloin
 - **Mihin käytetään**: Kun haluat tekoälyn etsivän aktiivisesti haavoittuvuuksia olemassa olevasta koodipohjasta.
 - **Mitä se tekee**: Ajaa kolmivaiheisen auditoinnin (staattinen analyysi, infrastruktuuri, ja raportointi) etsien tietoturvapuutteita, turvattomia riippuvuuksia tai kovakoodattuja salaisuuksia.
 
+### `code-optimization-workflow.md`
+- **Mihin käytetään**: Kun koodia on tuotettu nopeasti (esim. AI:n tai juniorien toimesta) ja se vaatii siistimistä, tiivistämistä tai arkkitehtuurin mukaista refaktorointia (ns. spagetin siivoamista).
+- **Mitä se tekee**: Tekoäly analysoi koodipohjan, tekee suunnitelman toistuvan tai sekavan koodin poistamiseksi ja refaktoroi koodin ammattimaiseksi ja selkeäksi rikkomatta toiminnallisuutta.
+
+### `testing-workflow.md`
+- **Mihin käytetään**: Koodin laadunvarmistukseen ja regressioiden estämiseen automaattisten testien avulla.
+- **Mitä se tekee**: Ohjaa tekoälyn suunnittelemaan ja kirjoittamaan yksikkö-, integraatio- tai end-to-end-testejä luodulle ominaisuudelle ennen kuin se voidaan katsoa valmiiksi.
+
 > **Esimerkki työnkulun pyytämisestä**:
 > *"Tee uusi API-reitti käyttäjän datan hakemiseen. Käytä `api-development-workflow.md`."*
 
@@ -88,6 +96,10 @@ Tässä on katsaus kaikkiin saatavilla oleviin työnkulkuihin ja siihen, milloin
 Skills-kansio eroaa Workflows-kansiosta siinä, että taidot ovat spesifejä *työkaluja* tai *kyvykkyyksiä*, joita tekoäly käyttää suorittaakseen workflows-vaiheita. Ne sisältävät `SKILL.md` tiedostoja, jotka opettavat tekoälylle, miten sen kuuluu reagoida eri tilanteisiin.
 
 Voit joko pyytää tekoälyä ajamaan taidon ("Aja `/architect`"), tai tekoäly kutsuu niitä itse työnkulkujen vaatimana.
+
+### `/init` (Projektin alustustaito)
+- **Mitä se tekee**: Haastattelee sinua uuden projektin tavoitteista ja täyttää automaattisesti `.agents/context/` -kansion tiedostot (arkkitehtuuri, tietokanta, tyylit).
+- **Miksi tärkeä**: Säästää aikaa uuden projektin boilerplate-tekstien täyttämisessä ja opettaa tekoälylle heti alussa projektisi oikean kontekstin.
 
 ### `/architect` (Suunnittelutaito)
 - **Mitä se tekee**: Pakottaa tekoälyn miettimään ennen koodaamista. Pysäyttää hätiköinnin. Tekoäly luo `implementation_plan.md` -tiedoston ja odottaa ihmisen hyväksyntää.
@@ -109,15 +121,25 @@ Voit joko pyytää tekoälyä ajamaan taidon ("Aja `/architect`"), tai tekoäly 
 - **Mitä se tekee**: Kun asiat menevät todella solmuun (tekoäly korjaa samaa virhettä kolmatta kertaa turhaan), ihminen voi komentaa `/recover`. Tekoäly pysähtyy, analysoi tilanteen objektiivisesti ja antaa diagnoosin (esim. "Targeted Fix", "Hard Reset" tai "Rethink").
 - **Miksi tärkeä**: Katkaisee tekoälyn hallusinointikierteen ja ohjaa takaisin oikealle polulle.
 
+### `/optimize` (Koodin optimointitaito)
+- **Mitä se tekee**: Analysoi valitun tiedoston tai komponentin ja purkaa "spagettikoodin" modulaariseksi, noudattaen parhaita käytäntöjä.
+- **Miksi tärkeä**: Palauttaa koodipohjan ammattimaisen laadun ja rakenteen nopeiden kokeilujen tai AI:n harhailujen jälkeen.
+
+### `/test` (Testaustaito)
+- **Mitä se tekee**: Kirjoittaa, ajaa ja korjaa automaattisia testejä koodipohjaan valitun testikehyksen (esim. Jest, Vitest) avulla.
+- **Miksi tärkeä**: Varmistaa, että koodi oikeasti toimii ja kestää jatkokehityksen ilman regressioita.
+
 ---
 
 ## 5. Konteksti (`.agents/context/`)
 
 Tämä on ohjelmistosi "perustuslaki". Koko tekoälyavusteinen kehitys rakentuu näiden dokumenttien varaan. Pidä huoli, että nämä ovat aina ajan tasalla.
-- `architecture.md`: Miten eri osat juttelevat toisilleen. Tietokannat, API:t, taustatyöt.
-- `code-standards.md`: Linttaus-säännöt, nimeämiskäytännöt, tiedostorakenteet.
 - `project-overview.md`: Miksi tämä sovellus on olemassa ja kenelle sitä tehdään.
-- `ui-context.md` (tai registry): Tyylit, väriteemat ja komponenttien visuaaliset säännöt.
+- `architecture.md`: Miten eri osat juttelevat toisilleen (Tech stack, API:t, taustatyöt).
+- `database-schema.md`: Sovelluksen tietokantataulut, relaatiot ja tyypit.
+- `ui-registry.md` / `ui-context.md`: Tyylit, väriteemat ja komponenttien visuaaliset säännöt.
+- `env-context.md`: Projektin vaatimat ympäristömuuttujat ja salaisuuksien dokumentointi.
+- `code-standards.md`: Linttaus-säännöt, nimeämiskäytännöt, tiedostorakenteet.
 
 ---
 

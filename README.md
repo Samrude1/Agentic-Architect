@@ -13,9 +13,9 @@ Most importantly, it includes an **AI Brain** (`.agents/` directory) that forces
 AI agents are fast, but without discipline, they create technical debt. This template solves that with the `.agents` workspace—a set of rules, workflows, and cognitive skills that your AI assistant must read and follow.
 
 ### 📁 Structure
-- **`/context`**: The Ground Truth. Inspired by JS Mastery's Spec-Driven Dev methodology. Contains your `project-overview.md`, `architecture.md`, `ui-context.md`, and `code-standards.md`. The AI reads this before modifying *any* code.
+- **`/context`**: The Ground Truth. Inspired by JS Mastery's Spec-Driven Dev methodology. Contains your `project-overview.md`, `architecture.md`, `database-schema.md`, `ui-registry.md`, and `env-context.md`. The AI reads this before modifying *any* code.
 - **`/workflows`**: The Processes. Defines *what* the AI should do (e.g., API development, Database migrations, CI/CD setup).
-- **`/skills`**: The Cognitive Tools. Defines *how* the AI should think and execute. Includes commands like `/architect`, `/review`, and `/imprint`.
+- **`/skills`**: The Cognitive Tools. Defines *how* the AI should think and execute. Includes commands like `/init`, `/architect`, `/optimize`, `/test`, and `/review`.
 - **`/feature-specs`**: The History. A permanent, numbered archive (`01-feature.md`) of all approved implementation plans, providing a perfect spec-driven audit trail.
 
 ---
