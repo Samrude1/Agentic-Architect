@@ -9,16 +9,17 @@ Run this skill ONLY when starting a brand new project, or when the user explicit
 
 ---
 
-## Step 1 — Interview and Understand
+## Step 1 — Gather Initial Requirements
 
 Do not start writing files immediately. First, gather the requirements.
-Ask the user to describe their new project:
-- What is the core purpose of the app?
-- Who are the users?
-- What are the main features and user flows?
-- Are there any specific architectural constraints (e.g., mobile-first, highly relational data, specific 3rd party APIs)?
+1. **Check for existing specs**: Always look for and read `docs/future-project-vision.md` or any initial prompt the user provides. This usually contains the "big picture" of what is being built.
+2. **Interview if needed**: If a vision document exists, use it as your foundation. Only ask the user clarifying questions about details that are missing from the document. If no document exists, ask the user to describe:
+   - What is the core purpose of the app?
+   - Who are the users?
+   - What are the main features and user flows?
+   - Are there any specific architectural constraints?
 
-Wait for the user's response before proceeding.
+Wait for the user's response (or confirmation that you have enough info) before proceeding.
 
 ---
 
