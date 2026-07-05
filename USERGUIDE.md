@@ -18,11 +18,14 @@ Kaikki äly ja säännöstö asuu projektin juuren `.agents/` -kansiossa. Tämä
 ## 2. Projektin Elinkaari: Aloitus, Tallennus ja Palautus
 
 ### Uuden projektin aloitus (Quick-Start)
-1. **Pohjatyö**: Kloonaa repo. Täytä `docs/future-project-vision.md` ja `.agents/context/` -kansion tiedostot (arkkitehtuuri, tavoitteet) vastaamaan *sinun* sovellustasi.
-2. **Tekoälyn herätys**: Avaa tekoäly-IDE:si chat ja anna ensimmäinen komento:
-   > *"Moikka! Luodaan uusi sovellus. Lue `docs/future-project-vision.md` ja aletaan hommiin. Käytä `.agents/workflows/new-feature-workflow.md` työnkulkua ensimmäisen MVP-ominaisuuden rakentamiseen."*
-3. **Arkkitehtuurin lukitus**: Tekoäly ajaa automaattisesti `/architect`-taidon. Se tekee Implementation Planin ja päivittää arkkitehtuuridokumentit. **Sinä hyväksyt.**
-4. **Koodaus**: Hyväksynnän jälkeen tekoäly aloittaa konkreettisen koodauksen.
+1. **Pohjatyö**: Kloonaa repo. Kirjoita visiosi ja tavoitteesi tiedostoon `docs/future-project-vision.md`.
+2. **Tekoälyn herätys ja alustus**: Avaa tekoäly-IDE:si chat ja anna ensimmäinen komento:
+   > *"Moikka! Luodaan uusi sovellus. Aja `/init`."*
+   Tekoäly lukee visiosi ja täyttää automaattisesti `.agents/context/` -kansion tiedostot (arkkitehtuuri, tavoitteet) vastaamaan sovellustasi.
+3. **Ensimmäisen ominaisuuden rakennus**: Kun konteksti on alustettu, pyydä tekoälyä aloittamaan koodaus:
+   > *"Aloitetaan ensimmäisen MVP-ominaisuuden rakentaminen. Käytä `.agents/workflows/new-feature-workflow.md` työnkulkua."*
+4. **Arkkitehtuurin lukitus**: Tekoäly ajaa automaattisesti `/architect`-taidon. Se tekee Implementation Planin ja päivittää arkkitehtuuridokumentit. **Sinä hyväksyt.**
+5. **Koodaus**: Hyväksynnän jälkeen tekoäly aloittaa konkreettisen koodauksen.
 
 ### Session tallentaminen (Työpäivän päätös)
 Tekoälyllä ei ole omaa muistia eri sessioiden (chat-ikkunoiden) välillä. Ennen kuin suljet ohjelman, varmista jatkuvuus:
@@ -77,6 +80,10 @@ Tässä on katsaus kaikkiin saatavilla oleviin työnkulkuihin ja siihen, milloin
 ### `security-audit-workflow.md`
 - **Mihin käytetään**: Kun haluat tekoälyn etsivän aktiivisesti haavoittuvuuksia olemassa olevasta koodipohjasta.
 - **Mitä se tekee**: Ajaa kolmivaiheisen auditoinnin (staattinen analyysi, infrastruktuuri, ja raportointi) etsien tietoturvapuutteita, turvattomia riippuvuuksia tai kovakoodattuja salaisuuksia.
+
+### `legacy-project-onboarding.md`
+- **Mihin käytetään**: Kun tuot tämän templaatin jo olemassa olevaan koodipohjaan.
+- **Mitä se tekee**: Auttaa tekoälyä kartoittamaan nykyisen koodin tilan ja luomaan tarvittavat kontekstitiedostot jatkokehitystä varten.
 
 ### `code-optimization-workflow.md`
 - **Mihin käytetään**: Kun koodia on tuotettu nopeasti (esim. AI:n tai juniorien toimesta) ja se vaatii siistimistä, tiivistämistä tai arkkitehtuurin mukaista refaktorointia (ns. spagetin siivoamista).
