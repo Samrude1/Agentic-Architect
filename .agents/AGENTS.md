@@ -13,4 +13,7 @@ This `.agents` directory serves as the "brain" for the project. All AI code gene
 <!-- BEGIN:nextjs-agent-rules -->
 ## Next.js Framework Rules
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
+## General Rules
+1. **Documentation Sync**: Whenever you create a new core file, move a file, or change the architecture/database structure, you MUST immediately update `README.md` (specifically the 'Project Structure', 'Tech Stack', and 'Architecture' sections) to reflect reality. Never leave the README out of sync with the actual codebase.
 <!-- END:nextjs-agent-rules -->
