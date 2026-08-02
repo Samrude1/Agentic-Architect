@@ -1,16 +1,14 @@
 # Environment Variables & Secrets Context
 
-This document tracks all environment variables required by this project. AI agents should update this document whenever a new external service, API key, or configuration setting is introduced.
-
-**Security Warning**: NEVER store actual secrets, passwords, or API keys in this file. This document only describes the *keys* and their *purpose*, so developers know how to configure their `.env` files.
-
 ## Required Environment Variables
 
-| Variable Name | Required | Purpose | Example Value (DO NOT USE REAL SECRETS) |
+| Variable Name | Required | Purpose | Example Value |
 | :--- | :--- | :--- | :--- |
 | `DATABASE_URL` | Yes | Connection string for the primary database | `postgres://user:pass@localhost:5432/db` |
-| `[VARIABLE_NAME]` | `[Yes/No]` | `[What this controls]` | `[Dummy example]` |
-
----
-
-*(Note: When setting up a new project, use this list to create your `.env.local` or configure your CI/CD environment.)*
+| `OPENAI_API_KEY` | Yes | API key for high-tier models (GPT-4o) | `sk-...` |
+| `ANTHROPIC_API_KEY` | Yes | API key for high-tier models (Claude 3.5 Sonnet) | `sk-ant-...` |
+| `GEMINI_API_KEY` | Yes | API key for fast/cheap testing models (Gemini Flash) | `AIza...` |
+| `AWS_ACCESS_KEY_ID` | Yes | AWS credentials for SQS / Lambda | `AKIA...` |
+| `AWS_SECRET_ACCESS_KEY` | Yes | AWS credentials for SQS / Lambda | `...` |
+| `AWS_REGION` | Yes | AWS region for services | `eu-north-1` |
+| `SQS_QUEUE_URL` | Yes | URL for the agent orchestration queue | `https://sqs.eu-north-1.amazonaws.com/...` |

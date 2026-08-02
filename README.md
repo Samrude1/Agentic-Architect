@@ -1,67 +1,75 @@
-# 🧠 Agentic Fullstack Template (Anti-SaaS)
+# 🧠 Agentic Architect
 
-Welcome to the **Agentic Fullstack Template**. This is not just another Next.js boilerplate. It is a highly opinionated, AI-first development environment designed for **Autonomous Engineering**. 
-
-Instead of relying on expensive, closed-ecosystem SaaS products (like Clerk, Trigger.dev, or Liveblocks), this template provides a robust, self-hosted "Anti-SaaS" architecture (Next.js 15, Auth.js, AWS SQS/Lambda, FastAPI).
-
-Most importantly, it includes an **AI Brain** (`.agents/` directory) that forces your AI coding assistant (like Antigravity IDE, Claude, or Cursor) to act like a disciplined Senior Engineer, rather than a junior developer writing spaghetti code.
+**An AI-driven fullstack development platform that translates business requirements into production-ready architecture using interactive visual canvases.**
 
 ---
 
-## 🚀 The Secret Sauce: The `.agents` Directory
+## 🚀 Overview
 
-AI agents are fast, but without discipline, they create technical debt. This template solves that with the `.agents` workspace—a set of rules, workflows, and cognitive skills that your AI assistant must read and follow.
+Agentic Architect is a tool designed for technical founders, software architects, and developers to scale their expertise and automate routine coding tasks. It bridges the gap between high-level business requirements and technical implementation by combining human oversight with autonomous AI agents.
 
-### 📁 Structure
-- **`/context`**: The Ground Truth. Inspired by JS Mastery's Spec-Driven Dev methodology. Contains your `project-overview.md`, `architecture.md`, `database-schema.md`, `ui-registry.md`, and `env-context.md`. The AI reads this before modifying *any* code.
-- **`/workflows`**: The Processes. Defines *what* the AI should do (e.g., API development, Database migrations, CI/CD setup).
-- **`/skills`**: The Cognitive Tools. Defines *how* the AI should think and execute. Includes commands like `/init`, `/architect`, `/optimize`, `/test`, and `/review`.
-- **`/feature-specs`**: The History. A permanent, numbered archive (`01-feature.md`) of all approved implementation plans, providing a perfect spec-driven audit trail.
+Instead of writing boilerplate or setting up basic infrastructure, users define their project through a high-level prompt. The system generates an interactive, node-based **Visual Architecture Canvas** (using React Flow) representing database models, APIs, and UI components. The user can tweak this architecture visually before letting AI agents generate the underlying code.
+
+## ✨ Key Features
+
+1. **Visual Architecture Canvas**
+   - Automatically generates interactive architecture diagrams (nodes and edges) from text prompts.
+   - Real-time visual editing of the system design before any code is written.
+
+2. **Intelligent Workflow Orchestration**
+   - Dynamic routing of tasks using AWS SQS and AWS Lambda for scalable AI background processing.
+   - Leverages LangGraph for complex, cyclic agent workflows with built-in human-in-the-loop checkpoints.
+
+3. **Autonomous Quality Assurance (Read-Act-Repeat-Plan-Stop)**
+   - Test-driven code generation and validation.
+   - AI agents analyze error logs and self-heal code to pass tests autonomously.
+
+4. **Quality Gates & Human Oversight**
+   - The development process is divided into logical phases (Data Models, Backend, Design System, Features).
+   - Each phase requires expert approval, ensuring the AI does not deviate from the intended architecture.
+
+5. **No Vendor Lock-In Delivery**
+   - The final output is an independent, complete source code repository. You own the code and can deploy it anywhere (AWS, Vercel, etc.).
+
+## 📦 Tech Stack
+
+- **Frontend & Dashboard**: Next.js (App Router), Tailwind CSS, Shadcn/UI
+- **Visual Canvas**: React Flow (`@xyflow/react`)
+- **Database & ORM**: Prisma + SQLite (Local Dev) / PostgreSQL (Prod)
+- **AI Engine**: LangGraph for cyclic agentic workflows
+- **Async Processing**: AWS SQS + AWS Lambda
+- **Preview Environment**: Sandpack / WebContainers for in-browser testing
 
 ---
 
-## ⚙️ The Engineering Loop
+## 🛠️ Getting Started
 
-You don't tell the AI to "just build a feature". You put it through the **Engineering Loop**.
+### Prerequisites
 
-1. **Architect (`/architect`)**: The AI creates an Implementation Plan and surfaces architectural decisions. It waits for your approval.
-2. **Develop**: The AI writes the code according to the approved plan.
-3. **Review (`/review`)**: The AI audits its own code against the project's architecture and design system.
-4. **Imprint (`/imprint`)**: If a new UI component was built, the AI extracts the design tokens and saves them to `ui-registry.md` to guarantee perfect consistency in the future.
-5. **Remember (`/remember save`)**: At the end of the session, the AI saves the state to `memory.md` so it never loses context between days.
+Ensure you have Node.js and npm installed on your machine.
 
----
+### Installation
 
-## 🛠️ How to Start Using This Template
-
-1. **Clone & Initialize**
+1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/agentic-fullstack-template.git my-new-project
-   cd my-new-project
+   git clone https://github.com/yourusername/agentic-architect.git
+   cd agentic-architect
+   ```
+
+2. Install dependencies:
+   ```bash
    npm install
    ```
 
-2. **Set Your Project Context**
-   Open your AI editor (Antigravity IDE, Cursor, etc.) and run the `/init` skill.
-   > *"Run `/init` to set up this new project."*
-   The AI will read your `docs/future-project-vision.md` and automatically populate the `.agents/context/` directory (`project-overview.md`, `architecture.md`, etc.) with your specific goals and tech stack.
+3. Setup the database:
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
 
-3. **Engage the AI**
-   Once the context is initialized, give your prompt to kick off the development of the first feature:
-   > *"Let's start building the core feature. Follow the `.agents/workflows/new-feature-workflow.md`."*
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-4. **Follow the Loop**
-   Watch the AI run `/architect`, ask for your approval, build the feature, and run `/review`.
-
----
-
-## 📦 Tech Stack (Anti-SaaS Philosophy)
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS v4 + Custom UI Registry
-- **Auth**: Auth.js / NextAuth (Self-hosted)
-- **Background Jobs**: AWS SQS + AWS Lambda
-- **AI Agent Backend**: FastAPI + LangGraph/CrewAI
-
-*Built for engineers who want to own their stack and lead their AI.*
-
----
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. You can start creating projects and generating visual architectures immediately!

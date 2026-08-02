@@ -1,37 +1,43 @@
-# Projektivisio (Templaatti)
-
-*Tämä on pohja projektin visiodokumentille. Kun aloitat uuden projektin, täytä tämä tiedosto (tai luo uusi vastaava, esim. `project-vision.md`) ja korvaa alla olevat kohdat oman projektisi tiedoilla. Tekoälyagentti käyttää tätä dokumenttia arkkitehtuurin ja koodin suunnittelun perustana.*
-
----
+# Agentic Architecture Builder
 
 ## 1. Ydinkonsepti
-*Kirjoita tähän lyhyesti (1-3 lausetta) mikä sovellus on kyseessä, mitä ongelmaa se ratkoo ja mikä sen ydinajatus on.*
+Tekoälyohjattu ohjelmistokehitysalusta, joka automatisoi liiketoimintavaatimusten kääntämisen tuotantovalmiiksi täyden pinon sovelluksiksi. Järjestelmä yhdistää ihmisen osallistumisen autonomisiin tekoälyagentteihin, tarjoten organisaatiolle kyvyn iteroida nopeasti tinkimättä ohjelmistoarkkitehtuurin laadusta ja koodipohjan hallittavuudesta.
 
-**Esimerkki:**
-> Yksinkertainen "Ideaseinä", johon tiimin jäsenet voivat jättää ideoita ja äänestää muiden ideoita. Tavoitteena on kerätä paras palaute talteen nopeasti ja tehokkaasti.
+## 2. Arkkitehtuuri ja Pääominaisuudet
 
-## 2. Pääominaisuudet (MVP)
-*Listaa sovelluksen tärkeimmät toiminnot (MVP eli Minimum Viable Product -tasolla). Pidä lista ytimekkäänä, jotta agentti ymmärtää heti, mihin asioihin sen tulee keskittyä ensimmäisenä.*
+### A. Visuaalinen Arkkitehtuurikangas
+Käyttäjä ohjaa kehitystä korkean tason syötteillä, joista alusta generoi välittömästi visuaalisen ja muokattavan arkkitehtuurikaavion (esim. tietokantamallit, API-rajapinnat ja käyttöliittymäkomponentit). Tämä poistaa kuilun liiketoimintavaatimusten ja teknisen toteutuksen väliltä jo ennen koodauksen aloittamista.
 
-1. **Ominaisuus 1:** Kuvaus siitä, mitä käyttäjä voi tehdä (esim. Käyttäjä voi kirjautua sisään sähköpostilla).
-2. **Ominaisuus 2:** ...
-3. **Ominaisuus 3:** ...
+### B. Automaattinen Työnkulkujen Orkestrointi
+Järjestelmä päättelee ja valitsee oikeat työnkulut dynaamisesti (esim. tietokantamigraatiot vs. käyttöliittymän kehitys). Tekoälyagentit saavat kontekstisidonnaiset ohjeistukset automaattisesti, mikä vähentää manuaalista konfigurointia ja inhimillisiä virheitä.
 
-## 3. Kohderyhmä ja Julkaisu
-*Kenelle sovellus on suunnattu? Minne se on tarkoitus julkaista?*
+### C. Autonominen Laadunvarmistus
+Kehitysprosessi nojaa testiohjattuun kehitykseen. Agentti suorittaa lue-toimi-toista-suunnittele-pysäytä -sykliä:
+1. **Toteutus:** Koodin generointi vaatimusten pohjalta.
+2. **Validointi:** Automaattisten testien ja koontien suoritus.
+3. **Iteraatio:** Virheilmoitusten analysointi ja automaattinen korjaus.
+4. **Luovutus:** Ominaisuus siirtyy asiantuntijan arvioitavaksi vasta, kun kaikki laatuportit on läpäisty.
 
-- **Kohderyhmä:** (Esim. Sisäinen tiimi, kuluttajat, B2B-asiakkaat...)
-- **Julkaisualusta:** (Esim. Frontend Verceliin, tietokanta MongoDB Atlasiin...)
+### D. Laatuportit ja Ihmisen Osallistuminen
+Kehitysprosessi on jaettu loogisiin vaiheisiin, jotka vaativat asiantuntijan hyväksynnän varmistaakseen ohjelmiston laadun ja suunnan:
+1. **Tietomallit:** Tietokantaskeemojen ja migraatioiden validointi.
+2. **Taustajärjestelmä:** API-rajapintojen ja tietoturvan (esim. autentikaatio) tarkastus.
+3. **Suunnittelujärjestelmä:** Käyttöliittymäkomponenttien ja brändi-ilmeen vahvistus.
+4. **Ominaisuudet:** Yksittäisten toiminnallisuuksien ja liiketoimintalogiikan hyväksyntä.
 
-## 4. Teknologiapino ja Integraatiot
-*Onko sinulla jotain erityisiä vaatimuksia käytettäville teknologioille (tämän templaatin Next.js, React ja Tailwind -pohjan lisäksi)?*
+## 3. Kohderyhmä ja Julkaisustrategia
+- **Kohderyhmä:** Suunnattu asiantuntijoiden – kuten teknisten perustajien, arkkitehtien ja ohjelmistokehittäjien – työkaluksi. Alusta on tehty skaalaamaan asiantuntijatyötä ja automatisoimaan rutiinit, ei korvaamaan teknistä ymmärrystä.
+- **Toimitusmalli (Pienin elinkelpoinen tuote):** Lähdekoodin luovutus. Valmis ratkaisu luovutetaan asiakkaalle täydellisenä ja riippumattomana koodivarastona valmiine asennus- ja julkaisuohjeineen. Tämä lähestymistapa poistaa toimittajaloukun riskin, sillä asiakas saa täyden omistajuuden tuotettuun ohjelmistoon ja voi integroida sen saumattomasti suoraan omaan pilviympäristöönsä (esim. AWS tai Vercel).
 
-- **Tietokanta:** (Esim. PostgreSQL, MongoDB, Supabase...)
-- **Autentikaatio:** (Esim. NextAuth, Clerk, omat JWT-tokenit...)
-- **Muut integraatiot:** (Esim. Stripe-maksut, OpenAI API, AWS S3...)
+## 4. Teknologiapino
+- **Käyttöliittymä / Ohjausnäkymä:** Next.js (App Router), Tailwind CSS ja React Flow visuaaliseen mallinnukseen.
+- **Orkestrointi ja Skaalautuvuus:** Asynkroninen arkkitehtuuri hyödyntäen AWS SQS -jonotuspalvelua ja AWS Lambda -funktioita resurssi-intensiivisten tekoälyprosessien hallintaan.
+- **Tekoälymoottori (LangGraph):** LangGraph mahdollistaa monimutkaiset, sykliset työnkulut ja tukee natiivisti ihmisen osallistumisen pysäytyspisteitä hallitummin kuin pelkät vapaat agenttikehykset.
+- **Kustannusoptimoitu mallireititys:** Kielimallien resurssien älykäs allokointi tehtävän vaativuuden mukaan:
+  - *Arkkitehtuuri ja Kompleksinen Logiikka*: Korkean kapasiteetin mallit (esim. Claude 3.5 Sonnet / GPT-4o / Gemini 1.5 Pro).
+  - *Testaus ja Validointi*: Kustannustehokkaat ja nopeat mallit (esim. Gemini Flash / Claude Haiku) mahdollistavat laajan testauskattavuuden edullisesti.
 
-## 5. Suunnittelu ja muut reunaehdot (Valinnainen)
-*Tänne voit kirjata ylös asioita, joihin agentin tulisi kiinnittää erityistä huomiota.*
-
-- **Visuaalinen tyyli:** (Esim. Tumma teema, minimalistinen Apple-tyylinen design...)
-- **Muuta huomioitavaa:** (Esim. Erityiset tietoturvavaatimukset tai skaalautuvuus.)
+## 5. Käyttökokemus ja Tuottavuus
+- **Jaettu näkymä:** Reaaliaikainen näkyvyys visuaaliseen arkkitehtuuriin ja kontekstuaaliseen ohjaukseen samanaikaisesti.
+- **Kontekstuaalinen vuorovaikutus:** Älykäs dialogi, joka ehdottaa seuraavia loogisia askeleita laatuporttien kohdalla (esim. testien läpäisyn jälkeen ehdotus siirtymisestä käyttöliittymän kehitykseen). Asiantuntija säilyttää täyden ohjausvallan lisävaatimusten antamiseen milloin tahansa.
+- **Reaaliaikainen esikatselu:** Sisäänrakennettu esikatseluympäristö (esim. Sandpack/WebContainer -integraatio) generoidun sovelluksen välittömään iterointiin ja testaukseen selainympäristössä.

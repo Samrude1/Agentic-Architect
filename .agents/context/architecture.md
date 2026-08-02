@@ -2,41 +2,34 @@
 
 ## Stack
 
-| Layer     | Technology                  | Role   |
-| --------- | --------------------------- | ------ |
-| Framework | [e.g. Next.js + TypeScript] | [Role] |
-| UI        | [e.g. Tailwind + shadcn/ui] | [Role] |
-| Auth      | [e.g. Auth.js / NextAuth]   | [Role] |
-| Database  | [e.g. Prisma + PostgreSQL]  | [Role] |
-| [Layer]   | [Technology]                | [Role] |
+| Layer | Technology | Role |
+| --- | --- | --- |
+| Framework | Next.js (App Router) | Web application, API routes, and Server Actions |
+| UI | Tailwind CSS + React Flow | Styling and visual architecture canvas |
+| AI Engine | LangGraph | Complex, cyclic agent workflows and human-in-the-loop orchestration |
+| Async Processing | AWS SQS + AWS Lambda | Resource-intensive AI process management and scaling |
+| Preview | Sandpack / WebContainers | In-browser real-time preview of generated applications |
 
 ## System Boundaries
 
-- `[folder]` — [What this folder owns and is responsible for]
-- `[folder]` — [What this folder owns and is responsible for]
-- `[folder]` — [What this folder owns and is responsible for]
-- `[folder]` — [What this folder owns and is responsible for]
+- `src/app` — Next.js App Router pages and layouts.
+- `src/components` — Reusable UI components, including React Flow nodes and edges.
+- `src/agents` — LangGraph agent definitions, tools, and prompts.
+- `src/services/aws` — Integration with SQS and Lambda for background tasks.
+- `src/services/preview` — Sandpack/WebContainer integration logic.
 
 ## Storage Model
 
-- **[Storage type e.g. Database]**: [What lives here —
-  e.g. metadata, ownership, relationships]
-- **[Storage type e.g. Blob/File Storage]**: [What lives
-  here — e.g. generated files, media, large artifacts]
+- **Primary Database**: Project metadata, user configurations, generated schemas, and quality gate statuses.
+- **Blob/File Storage**: Generated source code artifacts, temporary build files.
 
 ## Auth and Access Model
 
-- [How authentication works — e.g. Every user signs in
-  via self-hosted Auth.js credentials]
-- [How ownership works — e.g. Every project has a single
-  owner]
-- [How access control works — e.g. Only the owner or a
-  collaborator can mutate project resources]
+- Expert/Developer authentication to manage and approve agent outputs.
+- Project ownership linking generated codebases to specific users/organizations.
 
 ## Invariants
 
-1. [Rule the codebase must never violate — e.g. Request
-   handlers do not run long-lived background work]
-2. [Invariant two]
-3. [Invariant three]
-4. [Invariant four]
+1. Agents must not bypass quality gates; expert human approval is strictly required before moving between phases (Data -> Backend -> Design -> Features).
+2. The output must always be a clean, independent source code repository without proprietary vendor lock-in.
+3. Expensive AI models (Claude 3.5 Sonnet/GPT-4o) are reserved for architecture and complex logic; cheaper models (Gemini Flash/Haiku) are used for testing and validation.

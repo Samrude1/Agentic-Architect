@@ -3,45 +3,81 @@ name: init
 description: Bootstraps a new project from the template by interviewing the user and automatically populating all context files (architecture, project-overview, ui-registry, etc.).
 ---
 
-The `Agentic-fullstack-template` is a generic foundation. When a developer clones it to start a new project, this skill transforms the generic template into a specific, documented project foundation.
+A generic template is not a project. A project has a purpose, a specific architecture, and strict boundaries. 
+
+When a developer clones this generic template to start something new, this skill transforms the empty shell into a highly opinionated, context-aware foundation. It ensures that every future AI session starts with a deep understanding of what is actually being built.
 
 Run this skill ONLY when starting a brand new project, or when the user explicitly calls `/init` or `/bootstrap`.
 
 ---
 
-## Step 1 — Gather Initial Requirements
+## Step 1 — The Context Interview
 
-Do not start writing files immediately. First, gather the requirements.
-1. **Check for existing specs**: Always look for and read `docs/future-project-vision.md` or any initial prompt the user provides. This usually contains the "big picture" of what is being built.
-2. **Interview if needed**: If a vision document exists, use it as your foundation. Only ask the user clarifying questions about details that are missing from the document. If no document exists, ask the user to describe:
-   - What is the core purpose of the app?
-   - Who are the users?
-   - What are the main features and user flows?
-   - Are there any specific architectural constraints?
+Do not start writing files immediately. Do not guess what the project is about. Your first job is to extract the vision.
 
-Wait for the user's response (or confirmation that you have enough info) before proceeding.
+Check for an existing vision document (e.g., `docs/future-project-vision.md` or a prompt). If one exists, use it. If not, or if it is incomplete, interview the developer.
 
----
+Ask exactly these questions, one at a time if necessary:
 
-## Step 2 — Plan the Context
+```
+Let's bootstrap this project. Before I populate the context files, I need to know what we are building:
 
-Based on the user's answers, formulate a plan to update the `.agents/context/` files.
-- `project-overview.md`: Replace all `[bracketed]` boilerplate with the actual project details, goals, and scope.
-- `architecture.md`: Define the specific stack choices, boundaries, and patterns suited for this project.
-- `database-schema.md`: Draft the initial core tables and relationships.
-- `ui-registry.md`: Define the primary design tokens (colors, fonts) if the user has a theme in mind.
-- `env-context.md`: List the environment variables this specific project will need (e.g., Stripe keys, OpenAI keys).
+1. What is the core purpose of the app in one sentence?
+2. Who are the primary users?
+3. What are the 3-4 main features or user flows?
+4. Are there any strict architectural or tech stack constraints I should know about?
+```
+
+Wait for the developer to answer. Do not proceed until you have a clear picture.
 
 ---
 
-## Step 3 — Populate the Files
+## Step 2 — Propose the Context Mapping
 
-Once the user approves the overall plan, aggressively overwrite the boilerplate in the `.agents/context/` folder with the new, specific information. 
-Use your file editing tools to remove the generic `[Project Name]` placeholders and insert the real data.
+Once you understand the vision, map out exactly how you will alter the `.agents/context/` files. Do not write the files yet. Present the plan.
+
+```
+Got it. Here is how I will configure the project context:
+
+- project-overview.md: [Brief summary of how you will describe the project's goals]
+- architecture.md: [The specific boundaries and stack choices you will enforce]
+- database-schema.md: [The 2-3 core tables you will draft initially]
+- ui-registry.md: [The initial design tokens or theme, if any]
+
+Does this foundation look correct?
+```
+
+Wait for explicit approval.
 
 ---
 
-## Step 4 — Handoff
+## Step 3 — Aggressive Overwrite
 
-Once the context is populated, the project is officially bootstrapped. 
-Inform the user that the AI is now fully aware of the project's rules, goals, and architecture, and ask what feature they would like to build first (often triggering `/architect` for the first feature).
+Once approved, execute the plan. You must aggressively overwrite the generic boilerplate in the `.agents/context/` directory.
+
+- Remove all `[Project Name]` or `[Insert description]` placeholders.
+- Write definitive, confident documentation based on the interview.
+- Ensure `architecture.md` clearly states what is allowed and what is forbidden in this specific project.
+
+---
+
+## Step 4 — The Handoff
+
+When the files are updated, the project is officially bootstrapped. The template is now a bespoke codebase.
+
+Close the loop with the developer:
+
+```
+Bootstrap complete. All context files are populated.
+The AI now understands the rules, goals, and boundaries of this project.
+
+What is the first feature we are building? (I recommend running /architect when you are ready).
+```
+
+---
+
+## ⚠️ Anti-Patterns — Never Do These
+
+- ❌ **Never invent requirements.** If the user gives a vague one-word idea, ask clarifying questions. Do not hallucinate a massive feature set they didn't ask for.
+- ❌ **Never leave generic boilerplate behind.** A context file with `[Insert purpose here]` is a failure.
+- ❌ **Never skip the interview.** Bootstrapping without understanding the domain leads to architecture drift on day one.
