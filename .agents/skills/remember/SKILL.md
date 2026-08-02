@@ -165,6 +165,7 @@ Read `memory.md` first. Then check for these specific context files if they exis
 
 - `.agents/AGENTS.md` — Core workflow rules
 - `.agents/context/*` — All architecture, schema, and UI registry documents
+- `docs/future-project-vision.md` — Future project vision and roadmap (if present)
 - `task.md` — Antigravity task artifact (if present)
 - `walkthrough.md` — Antigravity walkthrough artifact (if present)
 
