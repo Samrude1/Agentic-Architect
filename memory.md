@@ -1,28 +1,26 @@
-# Memory — Node Detail Inspector, AI Audit & Typography Upgrades
+# Memory — Live OpenRouter Integration & Smart Fallback Architecture
 
-Last updated: 2026-08-08 22:27:00
+Last updated: 2026-08-08 23:05:00
 
 ## What was built
 
-- **Typography & Font Upgrades**: Switched default font family to **Inter** (`next/font/google`), the industry standard for modern developer tools and web applications (high x-height, open counters, screen clarity).
-- **Font Size Scaling**: Upgraded font hierarchy across `globals.css` and all components (`layout.tsx`, `page.tsx`, `playground-workspace.tsx`, `chat-sidebar.tsx`, `node-inspector.tsx`, `idea-input-form.tsx`, `button.tsx`). Pushed minimum text sizes up to **14px - 17px** for crisp human legibility and zero eye strain.
-- **Node Detail Inspector (`src/components/node-inspector.tsx`)**: Built a sidebar panel allowing users to inspect, rename, edit technology tags, and modify descriptions of selected React Flow nodes.
-- **Node-Specific AI Audit ("AI Tarkista tämä node")**: Added a dedicated button inside Node Inspector that triggers targeted AI evaluation of the selected component in the chat co-pilot.
-- **Project-Wide AI Audit ("AI Tarkista arkkitehtuuri")**: Added a global header button that triggers full architecture verification across all nodes and edges.
+- **Live OpenRouter API Integration**: Verified `OPENROUTER_API_KEY` quota limits have been expanded. Tested live LLM generation (`openai/gpt-4o-mini`), returning 4-tiered React Flow diagrams (Nodes & Edges) dynamically.
+- **Smart Fallback Engine (`src/agents/architecture-agent.ts`)**: Retained the requirement-parsing fallback engine so the platform is 100% resilient against any future third-party API rate limits or downtime.
+- **Vibrant Visual Animations & Loading Feedback**: Canvas floating status overlay, glowing edge flows, pulsing bot indicators, and enlarged typography (Inter font).
 
 ## Decisions made
 
-- **Inter Font Choice**: Standardized on Inter font family for maximum screen contrast and tabular numeral alignment.
-- **Baseline Text Scale**: Raised `--text-xs` to 14px (`0.875rem`) minimum baseline to completely eliminate unreadably small caption/metadata text.
+- **Dual-Engine Architecture**: OpenRouter live streaming AI Co-Pilot as Primary, with Smart Prompt Architecture Engine as an instant fallback.
 
 ## Current state
 
+- OpenRouter API test succeeded (`OPENROUTER SUCCESS`).
 - Platform compiles cleanly with `npm run build` (Turbopack + TypeScript).
 - All changes are pushed to GitHub (`main` branch).
 
 ## Next session starts with
 
-- **Code Generation Phase (Data Gate 1)**: Building the "Save & Start Building" action that translates database nodes from the canvas into a validated Prisma database schema (`schema.prisma`) with code generation preview.
+- **Code Generation Phase (Data Gate 1)**: Building the "Save & Start Building" action that translates database nodes from the canvas into a validated Prisma database schema (`schema.prisma`).
 
 ## Open questions
 
