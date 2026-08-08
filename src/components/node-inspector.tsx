@@ -67,11 +67,11 @@ Arvioi tämä komponentti: Onko sen määrittelyssä puutteita, tietoturvariskej
       <div className="p-4 border-b bg-muted/40 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400">
-            <Layers className="h-4 w-4" />
+            <Layers className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm leading-tight">Node Inspector</h3>
-            <p className="text-xs text-muted-foreground font-mono">ID: {selectedNode.id}</p>
+            <h3 className="font-bold text-base leading-tight">Node Inspector</h3>
+            <p className="text-sm text-muted-foreground font-mono">ID: {selectedNode.id}</p>
           </div>
         </div>
         <Button variant="ghost" size="icon-sm" onClick={onClose} title="Sulje paneeli">
@@ -80,51 +80,51 @@ Arvioi tämä komponentti: Onko sen määrittelyssä puutteita, tietoturvariskej
       </div>
 
       {/* Form Content */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-base">
         {/* Label */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-            <FileText className="h-3.5 w-3.5" />
+          <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <FileText className="h-4 w-4 text-muted-foreground" />
             Komponentin Nimi
           </label>
           <Input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="esim. PostgreSQL Database"
-            className="bg-background"
+            className="bg-background text-base h-10 px-3"
           />
         </div>
 
         {/* Tech */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-            <Cpu className="h-3.5 w-3.5" />
+          <label className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <Cpu className="h-4 w-4 text-muted-foreground" />
             Teknologia / Työkalu
           </label>
           <Input
             value={tech}
             onChange={(e) => setTech(e.target.value)}
             placeholder="esim. Prisma / PostgreSQL"
-            className="bg-background"
+            className="bg-background text-base h-10 px-3"
           />
         </div>
 
         {/* Description */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Kuvaus & Rooli</label>
+          <label className="text-sm font-semibold text-foreground">Kuvaus & Rooli</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Määritä komponentin tehtävä arkkitehtuurissa..."
             rows={3}
-            className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2.5 text-base focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
         {/* Layer Info */}
-        <div className="p-3 rounded-lg border bg-muted/20 space-y-1 text-xs">
+        <div className="p-3.5 rounded-lg border bg-muted/20 space-y-1 text-sm">
           <div className="font-semibold text-muted-foreground">Arkkitehtuurikerros:</div>
-          <div className="text-foreground font-mono">
+          <div className="text-foreground font-mono font-medium">
             {selectedNode.type === "input"
               ? "Layer 0 — Client / UI"
               : selectedNode.type === "output"
@@ -134,8 +134,8 @@ Arvioi tämä komponentti: Onko sen määrittelyssä puutteita, tietoturvariskej
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-2 space-y-2">
-          <Button onClick={handleSave} className="w-full" size="sm">
+        <div className="pt-2 space-y-2.5">
+          <Button onClick={handleSave} className="w-full" size="default">
             {saveAnimation ? (
               <>
                 <CheckCircle2 className="mr-2 h-4 w-4 text-green-400 animate-bounce" />
@@ -152,8 +152,8 @@ Arvioi tämä komponentti: Onko sen määrittelyssä puutteita, tietoturvariskej
           <Button
             onClick={handleAICheck}
             variant="outline"
-            className="w-full border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
-            size="sm"
+            className="w-full border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
+            size="default"
           >
             <Sparkles className="mr-2 h-4 w-4 text-purple-500" />
             AI Tarkista tämä node

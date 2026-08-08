@@ -89,12 +89,12 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center space-x-2">
-            <Sparkles className="h-4 w-4 text-purple-500" />
-            <h1 className="font-bold text-base tracking-tight">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            <h1 className="font-bold text-lg tracking-tight">
               {projectName ? `Ajatushautomo: ${projectName}` : "Arkkitehtuurin Hiekkalaatikko"}
             </h1>
           </div>
-          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded font-mono">
+          <span className="text-sm bg-muted text-muted-foreground px-2.5 py-1 rounded font-mono font-medium">
             Interaktiivinen Suunnittelu
           </span>
         </div>
@@ -105,7 +105,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
             onClick={handleProjectAICheck}
             variant="outline"
             size="sm"
-            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
+            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
           >
             <ShieldCheck className="mr-1.5 h-4 w-4 text-purple-500" />
             AI Tarkista arkkitehtuuri
@@ -140,8 +140,8 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-muted-foreground">Visuaalinen Kaavio</h2>
-            <span className="text-xs text-muted-foreground">
+            <h2 className="text-base font-semibold text-foreground">Visuaalinen Kaavio</h2>
+            <span className="text-sm text-muted-foreground font-medium">
               {nodes.length} komponenttia kaaviossa {selectedNode ? "• Valittuna: " + ((selectedNode.data?.label as string) || selectedNode.id) : ""}
             </span>
           </div>

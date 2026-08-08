@@ -14,14 +14,14 @@ export default async function Home() {
       <div className="mx-auto max-w-4xl space-y-12">
         {/* Header Hero */}
         <header className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3.5 py-1.5 rounded-full text-sm font-semibold">
+            <Sparkles className="h-4 w-4" />
             <span>Tekoälyavusteinen Arkkitehtuurisuunnittelu</span>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
             Agentic Architect
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg">
+          <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed">
             Muuta ohjelmistoideasi tai vaatimusdokumenttisi (.pdf, .txt, .md) interaktiiviseksi visuaaliseksi arkkitehtuurikaavioksi ja hiot sitä yhdessä tekoälyn kanssa.
           </p>
         </header>
@@ -35,8 +35,8 @@ export default async function Home() {
         {projects.length > 0 && (
           <section className="space-y-4 pt-6 border-t">
             <div className="flex items-center space-x-2">
-              <Layers className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-lg font-semibold tracking-tight">Tallennetut Projektit</h2>
+              <Layers className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-xl font-bold tracking-tight">Tallennetut Projektit</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
@@ -45,16 +45,16 @@ export default async function Home() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
                           {project.status}
                         </span>
                       </div>
-                      <CardDescription>
+                      <CardDescription className="text-sm">
                         {formatDistanceToNow(project.createdAt, { addSuffix: true, locale: fi })}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                      <p className="line-clamp-2 text-sm text-muted-foreground">
                         {project.prompt}
                       </p>
                     </CardContent>

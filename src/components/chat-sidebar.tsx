@@ -95,17 +95,17 @@ export function ChatSidebar({
       <div className="p-4 border-b bg-muted/30 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Bot className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-sm">Arkkitehti Co-Pilot</h3>
+          <h3 className="font-bold text-base">Arkkitehti Co-Pilot</h3>
         </div>
-        <span className="text-xs text-muted-foreground bg-primary/10 px-2 py-0.5 rounded-full font-medium text-primary">
+        <span className="text-xs text-muted-foreground bg-primary/10 px-2.5 py-1 rounded-full font-medium text-primary">
           Reaaliaikainen
         </span>
       </div>
 
       {/* Messages list */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-base">
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-muted-foreground text-center p-4 text-xs">
+          <div className="h-full flex items-center justify-center text-muted-foreground text-center p-4 text-sm">
             Anna ohjelmistoideasi tai kysy tekoälyltä ehdotuksia arkkitehtuurin hiomiseen.
           </div>
         ) : (
@@ -117,34 +117,34 @@ export function ChatSidebar({
               }`}
             >
               {message.role !== "user" && (
-                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-none mt-0.5">
-                  <Bot className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-none mt-0.5">
+                  <Bot className="h-4.5 w-4.5" />
                 </div>
               )}
               <div
-                className={`rounded-lg px-3 py-2 max-w-[85%] whitespace-pre-wrap ${
+                className={`rounded-lg px-3.5 py-2.5 max-w-[85%] whitespace-pre-wrap text-base leading-relaxed ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground font-medium"
                     : "bg-muted/60 text-foreground border"
                 }`}
               >
                 {message.content}
                 {message.toolInvocations?.map((tool: any) => (
-                  <div key={tool.toolCallId} className="mt-2 text-xs text-muted-foreground italic border-t pt-1">
+                  <div key={tool.toolCallId} className="mt-2 text-sm text-muted-foreground italic border-t pt-1.5">
                     ⚡ Arkkitehtuurikaaviota päivitetty
                   </div>
                 ))}
               </div>
               {message.role === "user" && (
-                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground flex-none mt-0.5">
-                  <User className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground flex-none mt-0.5">
+                  <User className="h-4.5 w-4.5" />
                 </div>
               )}
             </div>
           ))
         )}
         {isLoading && (
-          <div className="flex items-center space-x-2 text-muted-foreground text-xs p-2">
+          <div className="flex items-center space-x-2 text-muted-foreground text-sm p-2">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span>Arkkitehti suunnittelee ja analysoi...</span>
           </div>
@@ -158,10 +158,10 @@ export function ChatSidebar({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Esim. 'Lisää Stripe-maksupalvelu'..."
-          className="flex-1 bg-muted/40 text-sm px-3 py-2 rounded-md border border-input focus:outline-none focus:ring-1 focus:ring-ring"
+          className="flex-1 bg-muted/40 text-base px-3.5 py-2.5 rounded-md border border-input focus:outline-none focus:ring-1 focus:ring-ring"
           disabled={isLoading}
         />
-        <Button type="submit" size="sm" disabled={isLoading || !input.trim()}>
+        <Button type="submit" size="default" disabled={isLoading || !input.trim()}>
           <Send className="h-4 w-4" />
         </Button>
       </form>

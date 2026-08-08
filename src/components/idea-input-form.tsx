@@ -62,7 +62,7 @@ export function IdeaInputForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-background p-6 rounded-xl border shadow-sm">
       <div className="space-y-2">
-        <label htmlFor="prompt-input" className="text-sm font-medium">
+        <label htmlFor="prompt-input" className="text-base font-semibold text-foreground">
           Kuvaile ohjelmistoideasi tai vaatimukset
         </label>
         <textarea
@@ -70,7 +70,7 @@ export function IdeaInputForm() {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="esim. 'Tarvitsen SaaS-verkkokauppa-alustan, jossa on Stripe-maksut, Next.js frontend, PostgreSQL-tietokanta ja sähköposti-ilmoitukset...'"
-          className="flex min-h-[120px] w-full rounded-md border border-input bg-muted/20 px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-[140px] w-full rounded-md border border-input bg-muted/20 px-4 py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 leading-relaxed"
           disabled={isPending}
         />
       </div>
@@ -78,7 +78,7 @@ export function IdeaInputForm() {
       {/* File Upload Area */}
       <div className="flex flex-col space-y-2">
         <div className="flex items-center space-x-3">
-          <label className="cursor-pointer inline-flex items-center space-x-2 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground px-3 py-2 rounded-md border transition-colors">
+          <label className="cursor-pointer inline-flex items-center space-x-2 text-sm font-medium bg-muted hover:bg-muted/80 text-foreground px-3.5 py-2.5 rounded-md border transition-colors">
             {isParsingFile ? (
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
             ) : (
@@ -95,22 +95,22 @@ export function IdeaInputForm() {
           </label>
 
           {file && (
-            <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3 py-1.5 rounded-md text-xs font-medium">
-              <FileText className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-3.5 py-2 rounded-md text-sm font-medium">
+              <FileText className="h-4 w-4" />
               <span className="truncate max-w-[200px]">{file.name}</span>
               <button
                 type="button"
                 onClick={handleRemoveFile}
                 className="hover:bg-primary/20 p-0.5 rounded text-primary"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
         </div>
 
         {parseError && (
-          <p className="text-xs text-destructive">{parseError}</p>
+          <p className="text-sm text-destructive font-medium">{parseError}</p>
         )}
       </div>
 

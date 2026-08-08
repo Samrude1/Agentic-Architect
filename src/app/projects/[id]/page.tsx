@@ -29,7 +29,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground font-medium">
               Tila: {project.status}
             </p>
           </div>
@@ -40,8 +40,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <Button
             render={<Link href={`/playground?projectId=${project.id}`} />}
             nativeButton={false}
-            size="sm"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            size="default"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
           >
             <Sparkles className="mr-1.5 h-4 w-4 text-purple-200" />
             Editoi Ajatushautomossa
@@ -52,8 +52,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </div>
 
       <div className="space-y-4 flex-none">
-        <h3 className="text-lg font-semibold">Liiketoimintavaatimus (Prompt)</h3>
-        <div className="rounded-md bg-muted/40 p-4 text-sm text-muted-foreground whitespace-pre-wrap">
+        <h3 className="text-xl font-bold">Liiketoimintavaatimus (Prompt)</h3>
+        <div className="rounded-md bg-muted/40 p-4 text-base text-foreground/90 whitespace-pre-wrap leading-relaxed">
           {project.prompt || "Ei annettu kuvausta."}
         </div>
       </div>
