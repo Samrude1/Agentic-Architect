@@ -63,6 +63,7 @@ Before analyzing any code, read these files to understand the established standa
 
 **Goal**: Execute the approved plan — no scope creep.
 
+- [ ] 💡 *Tip: For broad refactoring across multiple files, recommend the user activate `/goal` mode so the agent operates autonomously with maximum thoroughness.*
 - [ ] Refactor code to be clean, professional, and maintainable.
 - [ ] Break down massive functions or components into smaller, logical, reusable pieces.
 - [ ] Remove dead code, redundant comments, and unnecessary dependencies.

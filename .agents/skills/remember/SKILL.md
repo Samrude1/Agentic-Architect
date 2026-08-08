@@ -166,6 +166,7 @@ Read `memory.md` first. Then check for these specific context files if they exis
 - `.agents/AGENTS.md` — Core workflow rules
 - `.agents/context/*` — All architecture, schema, and UI registry documents
 - `docs/future-project-vision.md` — Future project vision and roadmap (if present)
+- `README.md` — Project README.md file if present
 - `task.md` — Antigravity task artifact (if present)
 - `walkthrough.md` — Antigravity walkthrough artifact (if present)
 
@@ -177,7 +178,7 @@ When restoring, never repeat or surface raw secrets from any source. If a secret
 
 ### Step 3 — Confirm what was restored
 
-Do not start building. Do not assume the developer wants to continue immediately. Summarise what was restored so the developer can verify Claude understood correctly.
+Do not start building. Do not assume the developer wants to continue immediately. Summarise what was restored so the developer can verify Claude understood correctly. If user answers 'yes' to the summary, then do nothing, just wait for user's input. 
 
 ```
 Memory restored. Here is where we are:
@@ -185,7 +186,7 @@ Memory restored. Here is where we are:
 **Last session:** [what was built]
 **Current state:** [what works right now]
 **Decisions in place:** [key decisions that are locked]
-**Next up:** [what the next session should start with]
+**Next up:** [what the next session should start with. But do nothing until the developer gives input]
 
 Is this correct? Say yes to continue, or correct anything
 that does not look right before we proceed.

@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "../../lib/prisma";
+import { prisma } from "@/lib/prisma";
+import { generateArchitectureDiagram } from "@/agents/architecture-agent";
 
 export async function getProjects() {
   return await prisma.project.findMany({
@@ -37,16 +38,36 @@ export async function updateProjectArchitecture(id: string, architecture: string
   return project;
 }
 
+export async function deleteProject(id: string) {
+  await prisma.project.delete({
+    where: { id },
+  });
+  revalidatePath("/");
+}
+
 export async function generateMockArchitecture(prompt: string | null) {
-  // Mock data for MVP
+  // Mock data for fallback / testing
   const nodes = [
-    { id: '1', type: 'input', data: { label: 'User Context' }, position: { x: 250, y: 25 } },
-    { id: '2', data: { label: 'API Gateway' }, position: { x: 250, y: 125 } },
-    { id: '3', data: { label: 'Database' }, position: { x: 250, y: 225 } },
+    { id: "1", type: "input", data: { label: "User Context" }, position: { x: 250, y: 50 } },
+    { id: "2", data: { label: "API Gateway" }, position: { x: 250, y: 200 } },
+    { id: "3", type: "output", data: { label: "Database" }, position: { x: 250, y: 350 } },
   ];
   const edges = [
-    { id: 'e1-2', source: '1', target: '2', animated: true },
-    { id: 'e2-3', source: '2', target: '3' },
+    { id: "e1-2", source: "1", target: "2", animated: true },
+    { id: "e2-3", source: "2", target: "3" },
   ];
   return { nodes, edges };
+}
+
+export async function generateRealArchitecture(prompt: string | null) {
+  if (!prompt || !prompt.trim()) {
+    return generateMockArchitecture(prompt);
+  }
+
+  try {
+    return await generateArchitectureDiagram(prompt);
+  } catch (error) {
+    console.error("Failed to generate AI architecture, falling back to mock:", error);
+    return generateMockArchitecture(prompt);
+  }
 }

@@ -106,6 +106,9 @@ Wait for the developer to:
 
 The developer owns the quality decision. You inform it.
 
+> [!TIP]
+> **Capturing Learnings**: If the review reveals recurring user preferences, team guidelines, or corrections that should apply to future tasks, suggest that the developer run `/learn` to persist this rule.
+
 ---
 
 ## Severity Guide

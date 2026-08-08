@@ -42,6 +42,7 @@ Before planning the feature, read ALL of these files — this is the full system
   - New UI component → plan via `/ui-component` sub-workflow
   - Background job → plan via `/background-task` sub-workflow
 - [ ] Surface key decisions that would change the implementation (data model, auth requirements, state management).
+- [ ] 💡 *Tip: If the feature requirement is complex or open-ended, suggest the user trigger `/grill-me` for a step-by-step interactive discovery interview.*
 - [ ] Create the `implementation_plan.md` artifact with:
   - What will be built
   - Which files will change
@@ -56,6 +57,7 @@ Before planning the feature, read ALL of these files — this is the full system
 
 **Goal**: Build the feature strictly following the approved plan — no scope creep.
 
+- [ ] 💡 *Tip: For non-trivial or complex features, recommend the user activate `/goal` mode so the agent executes autonomously with extreme thoroughness until fully complete.*
 - [ ] Follow the implementation order: **Database → API → UI** (each layer depends on the one below it).
 - [ ] For each sub-task, use the appropriate specialized workflow if needed.
 - [ ] If you discover a necessary change not in the plan: **stop, update the plan, and re-confirm** before proceeding.
@@ -85,6 +87,7 @@ Before planning the feature, read ALL of these files — this is the full system
 - [ ] **If the feature changes the database**: Confirm [`.agents/context/database-schema.md`](../context/database-schema.md) is up-to-date.
 - [ ] Save a `feature-specs/[N]-[feature-name].md` document for permanent record-keeping.
 - [ ] Run `/remember save` to preserve session knowledge.
+- [ ] 💡 *Tip: If the user shared new preferences, conventions, or feedback during the process, suggest running `/learn` to store it for future tasks.*
 - Ask the user: *"Feature complete. Do you want me to write tests to lock in this behavior, or move to the next feature?"*
 
 ---

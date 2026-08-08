@@ -14,7 +14,7 @@
 
 - `src/app` — Next.js App Router pages and layouts.
 - `src/components` — Reusable UI components, including React Flow nodes and edges.
-- `src/agents` — LangGraph agent definitions, tools, and prompts.
+- `src/agents` — AI agents (`architecture-agent.ts` for automated React Flow diagram generation from prompts).
 - `src/services/aws` — Integration with SQS and Lambda for background tasks.
 - `src/services/preview` — Sandpack/WebContainer integration logic.
 

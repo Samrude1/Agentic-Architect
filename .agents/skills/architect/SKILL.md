@@ -43,6 +43,9 @@ Now surface the decisions that would meaningfully change what gets built. Not ev
 
 A senior engineer knows the difference between a decision that matters and a detail that can be figured out during coding. Ask only what matters.
 
+> [!TIP]
+> **Proactive Grill-Me Option**: If the feature design is open-ended or underspecified, suggest that the developer type `/grill-me` to initiate a structured interactive interview session.
+
 For each decision:
 
 - Ask one question at a time
@@ -82,22 +85,33 @@ Create or update the Antigravity `implementation_plan.md` Artifact and set `Requ
 ```markdown
 # Implementation Plan — [Feature Name]
 
-### What we are building
 [One clear paragraph describing exactly what will be built]
 
-### Language we agreed on
-- [Term]: [agreed definition]
-- [Term]: [agreed definition]
+## User Review Required
+- **Language agreed on**:
+  - [Term]: [agreed definition]
+- **Decisions made**:
+  - [Decision]: [what was decided and reasoning]
+- **Assumptions**:
+  - [Anything assumed]
 
-### Decisions made
-- [Decision]: [what was decided and the reasoning]
-- [Decision]: [what was decided and the reasoning]
+## Open Questions
+- [Any remaining open questions if applicable]
 
-### Assumptions
-- [Anything you assumed that was not explicitly confirmed]
+## Proposed Changes
 
-### How to build it
-[A concise ordered list of implementation steps]
+### [Component / Layer Name]
+
+#### [NEW/MODIFY] [file basename](file:///absolute/path/to/file)
+- [Summary of changes in this file]
+
+## Verification Plan
+
+### Automated Tests
+- [Commands or automated tests to run]
+
+### Manual Verification
+- [Steps for manual verification]
 ```
 
 Wait for the developer to confirm the Artifact before anything gets built.

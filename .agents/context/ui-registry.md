@@ -5,17 +5,18 @@
 ### Colors
 - **Primary**: `bg-primary text-primary-foreground` (from shadcn default)
 - **Secondary**: `bg-secondary text-secondary-foreground` 
-- **Background**: `bg-muted/40` - App background (Page container)
+- **Background**: `bg-muted/30` / `bg-muted/40` - App background (Page container)
 - **Text**: `text-foreground` - Primary typography color
 - **Text Muted**: `text-muted-foreground` - Sub-text, captions, empty states
+- **AI Accent**: `text-purple-500` / `text-purple-400` - AI Sparkles & Co-Pilot indicators
 
 ### Typography
-- **Headings**: `text-3xl font-bold tracking-tight` (H1 Page Title), `text-xl font-semibold` (Card Title)
-- **Body**: `text-base`, `text-sm` (Secondary/muted info)
+- **Headings**: `text-4xl font-extrabold tracking-tight` (Hero H1), `text-3xl font-bold tracking-tight` (Page Title), `text-xl font-semibold` (Section/Card Title)
+- **Body**: `text-base`, `text-sm` (Secondary/muted info), `text-xs` (Badges, metadata)
 
 ### Spacing & Borders
-- **Border Radius**: `rounded-lg` (Empty states, large containers), `rounded-full` (Badges), `rounded-md` (Inputs, Buttons)
-- **Layout Spacing**: `p-8` (Page padding), `space-y-8` (Major vertical sections), `gap-4` (Grid layout gaps)
+- **Border Radius**: `rounded-xl` (Hero Forms), `rounded-lg` (Containers, Sidebar, Cards), `rounded-full` (Badges, Avatars), `rounded-md` (Inputs, Buttons)
+- **Layout Spacing**: `p-6` / `p-8` (Page padding), `space-y-4` (Form/Section spacing), `grid gap-4` (Workspace grid layout)
 
 ---
 
@@ -23,35 +24,84 @@
 
 ### Project Dashboard (Page)
 File: `src/app/page.tsx`
-Last updated: 2026-07-28
+Last updated: 2026-08-08
 
 | Property         | Class           |
 | ---------------- | --------------- |
-| Background       | `bg-muted/40`   |
-| Border           | `border border-dashed` (Empty state) |
-| Border radius    | `rounded-lg` (Empty state) |
-| Text — primary   | `text-3xl font-bold tracking-tight` (H1) |
-| Text — secondary | `text-sm text-muted-foreground` |
-| Spacing          | `p-8` (Container), `mx-auto max-w-5xl space-y-8` |
-| Hover state      | `hover:bg-accent/50 transition-colors` (Project Card) |
+| Background       | `bg-muted/30`   |
+| Border           | `border-t` (Saved projects section) |
+| Text — primary   | `text-4xl font-extrabold tracking-tight sm:text-5xl` (Hero H1) |
+| Text — secondary | `text-muted-foreground text-base sm:text-lg` |
+| Spacing          | `p-6 md:p-12`, `mx-auto max-w-4xl space-y-12` |
+| Accent usage     | `bg-primary/10 text-primary` (AI Pill Tag) |
 
-**Pattern notes:**
-- The page uses a max-width container (`max-w-5xl`) centered with `mx-auto`.
-- Empty states use dashed borders and centered muted text.
-- Interactive cards use subtle background transitions on hover (`hover:bg-accent/50`).
-- Badges use `bg-primary/10 text-primary` for subtle coloring.
+---
 
-### New Project Dialog
-File: `src/components/new-project-dialog.tsx`
-Last updated: 2026-07-28
+### Idea Input Form
+File: `src/components/idea-input-form.tsx`
+Last updated: 2026-08-08
 
 | Property         | Class           |
 | ---------------- | --------------- |
-| Border radius    | `rounded-md` (Inputs/Textareas) |
-| Spacing          | `grid gap-4 py-4`, `grid gap-2` (Form groups) |
-| Text — muted     | `text-muted-foreground` |
-| Shadow           | `shadow-sm` (Inputs) |
+| Background       | `bg-background` (Form container), `bg-muted/20` (Textarea) |
+| Border           | `border shadow-sm` (Container), `border border-input` (Textarea) |
+| Border radius    | `rounded-xl` (Form container), `rounded-md` (Textarea, Buttons) |
+| Text — primary   | `text-sm font-medium` (Label) |
+| Spacing          | `p-6 space-y-4` |
+| Accent usage     | `text-purple-400` (AI Sparkles icon), `bg-primary/10 text-primary` (Attached File Badge) |
 
-**Pattern notes:**
-- Dialogs use standard `sm:max-w-[425px]` sizing.
-- Form fields are wrapped in `grid gap-2` with `Label` above `Input`/Textarea.
+---
+
+### Chat Sidebar (Co-Pilot)
+File: `src/components/chat-sidebar.tsx`
+Last updated: 2026-08-08
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-background` (Container), `bg-muted/30` (Header), `bg-primary text-primary-foreground` (User Bubble), `bg-muted/60 text-foreground border` (Assistant Bubble) |
+| Border           | `border rounded-lg` (Container), `border-b` (Header), `border-t` (Input Footer) |
+| Border radius    | `rounded-lg` (Container, Bubbles), `rounded-full` (Avatars), `rounded-md` (Input) |
+| Text — primary   | `font-semibold text-sm` (Header Title) |
+| Text — secondary | `text-xs text-muted-foreground` |
+| Spacing          | `p-4 space-y-4` (Messages list), `p-3` (Input footer) |
+| Accent usage     | `text-primary` (Bot icon), `bg-primary/10 text-primary` (Realtime Badge) |
+
+---
+
+### Playground Workspace
+File: `src/components/playground-workspace.tsx`
+Last updated: 2026-08-08
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-muted/20` (Screen wrapper), `bg-background` (Header bar) |
+| Border           | `h-14 border-b px-6` (Header bar) |
+| Layout           | `h-screen flex flex-col`, `grid grid-cols-1 lg:grid-cols-12 gap-4 p-4` |
+| Text — title     | `font-bold text-base tracking-tight` |
+| Accent usage     | `text-purple-500` (Sparkles icon), `bg-muted font-mono` (Tag badge) |
+
+---
+
+### Delete Project Button
+File: `src/components/delete-project-button.tsx`
+Last updated: 2026-08-08
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-destructive/10` (Confirm banner), `variant="destructive"` (Confirm button) |
+| Border           | `border border-destructive/20` |
+| Text             | `text-destructive font-medium text-xs` |
+| Border radius    | `rounded-lg` |
+
+---
+
+### Architecture Canvas
+File: `src/components/architecture-canvas.tsx`
+Last updated: 2026-08-08
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-background` (Canvas container) |
+| Border           | `border rounded-md overflow-hidden` |
+| Spacing          | `flex flex-col h-full space-y-4` |
+| Accent usage     | `text-purple-500` (AI Generate icon) |

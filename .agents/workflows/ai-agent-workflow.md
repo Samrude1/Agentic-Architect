@@ -1,6 +1,6 @@
 ---
 slash_command: /ai-agent
-description: "Design and implement a new AI agent using LangGraph or CrewAI in the FastAPI backend."
+description: "Design and implement a new AI agent in the project's backend (e.g. Node.js or Python)."
 trigger_phrases:
   - "create AI agent"
   - "add AI capability"
@@ -13,8 +13,8 @@ when_not_to_use: "Use /api-development if you only need a simple endpoint that c
 
 # AI Agent Development Workflow
 
-> **Purpose**: Design and implement a new AI agent (LangGraph / CrewAI) in the FastAPI backend — from defining its goal and tools to ensuring the frontend can consume its structured output.
-> **Activates when**: User asks to "create AI agent", "add LangGraph agent", or "build agent".
+> **Purpose**: Design and implement a new AI agent in the project's current backend stack (e.g., Node.js/Express, FastAPI) — from defining its goal and tools to ensuring the frontend can consume its structured output. Adapts flexibly to whatever language (JS/TS, Python) the project is already using.
+> **Activates when**: User asks to "create AI agent", "add agent", or "build agent".
 > **Avoid when**: You only need a simple LLM call with no tool use or multi-step logic — use `/api-development` for a plain endpoint instead.
 
 ---
@@ -51,10 +51,10 @@ Before designing the agent, read these files:
 
 **Goal**: Build the agent matching the approved specification.
 
-- [ ] Implement the agent in the FastAPI backend (e.g., `app/agents/[agent_name].py`).
+- [ ] Implement the agent in the backend (e.g., `server/agent.ts` for Node, or `app/agents/[agent_name].py` for Python).
 - [ ] Write **clear and explicit tool schemas** — vague tool descriptions cause the LLM to call the wrong tool.
-- [ ] If the agent output must be parsed by the frontend, **force structured output** (JSON mode, Pydantic response model, or LangGraph output schema).
-- [ ] Implement the **FastAPI endpoint** that triggers the agent, applying auth and input validation (same standards as `/api-development`).
+- [ ] If the agent output must be parsed by the frontend, **force structured output** (JSON mode, Zod/Pydantic schemas, or native structured outputs).
+- [ ] Implement the **API endpoint** that triggers the agent, applying auth and input validation (same standards as `/api-development`).
 - [ ] Test the agent locally with real prompts — iterate on the system prompt and tool descriptions until behavior is correct.
 
 **Output**: Working agent endpoint, tested locally.
@@ -66,7 +66,7 @@ Before designing the agent, read these files:
 - [ ] Does the agent reliably achieve its defined goal across varied inputs?
 - [ ] Is the output schema stable? (Does the frontend receive the expected structure?)
 - [ ] Are tool schemas clear enough that the LLM always calls the right tool?
-- [ ] Is the FastAPI endpoint properly authenticated and validated?
+- [ ] Is the API endpoint properly authenticated and validated?
 
 Update [`.agents/context/architecture.md`](../context/architecture.md) to document the new agent capability.
 Run `/remember save` to preserve the session context.
@@ -80,6 +80,7 @@ Ask the user: *"The agent is working. Do you want me to build the frontend integ
 - ❌ **Never return unstructured text when the frontend needs to parse the output.** Force structured output from the start.
 - ❌ **Never skip local testing.** Agent behavior must be verified with real prompts before frontend integration begins.
 - ❌ **Never expose the agent endpoint without authentication.** AI agents are expensive to run — unauthenticated endpoints will be abused.
+- ❌ **Never force a specific backend language.** Always adapt to the project's existing stack (JS/TS, Python, etc.) seamlessly.
 
 ---
 

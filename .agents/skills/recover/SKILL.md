@@ -194,6 +194,7 @@ Next steps:
 3. Start a fresh session
 4. Begin with /remember restore if memory exists
 5. Approach [feature name] again with the reset note as context
+6. (Optional) Activate /goal mode in the new session for an autonomous, thorough rebuild.
 
 Do not continue in this session.
 ```
