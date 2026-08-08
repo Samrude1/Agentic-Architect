@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Sparkles, Save, Loader2, Check, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
-import { updateProjectArchitecture } from "@/app/actions/project";
+import { updateProjectArchitecture, generateRealArchitecture } from "@/app/actions/project";
 import { Node, Edge } from "@xyflow/react";
 
 interface PlaygroundWorkspaceProps {
@@ -31,6 +31,20 @@ export function PlaygroundWorkspace({
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Generate initial architecture diagram immediately if canvas is empty and prompt exists
+  useEffect(() => {
+    if (initialPrompt && initialNodes.length === 0) {
+      generateRealArchitecture(initialPrompt).then((data) => {
+        if (data.nodes && data.nodes.length > 0) {
+          setNodes(data.nodes);
+          setEdges(data.edges);
+        }
+      }).catch((err) => {
+        console.error("Failed to generate initial architecture diagram:", err);
+      });
+    }
+  }, [initialPrompt, initialNodes.length]);
 
   const handleArchitectureUpdate = useCallback(
     (data: { nodes: Node[]; edges: Edge[] }) => {

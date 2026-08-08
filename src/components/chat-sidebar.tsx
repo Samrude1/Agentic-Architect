@@ -26,12 +26,16 @@ export function ChatSidebar({
   const initialSentRef = useRef(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chatHelpers = (useChat as any)({
+  const { messages = [], append, status, isLoading: isChatLoading } = (useChat as any)({
     api: "/api/chat",
-  }) as any;
+  });
 
-  const messages = chatHelpers.messages || [];
-  const isLoading = chatHelpers.status === "streaming" || chatHelpers.status === "submitted" || chatHelpers.isLoading;
+  const isLoading = isChatLoading || status === "streaming" || status === "submitted";
+  const appendRef = useRef(append);
+
+  useEffect(() => {
+    appendRef.current = append;
+  });
 
   // Auto-send initial prompt on mount if there is no existing architecture
   useEffect(() => {
@@ -39,40 +43,37 @@ export function ChatSidebar({
       initialSentRef.current = true;
       const formattedContent = `Tässä on ohjelmistoideani / vaatimukseni:\n\n"${initialPrompt}"\n\nAnalysoi tämä, luo ensimmäinen versio arkkitehtuurikaaviosta kutsumalla update_architecture-työkalua ja kerro lyhyesti arkkitehtuurivalinnoistasi.`;
 
-      const timer = setTimeout(() => {
-        if (typeof chatHelpers.sendMessage === "function") {
-          chatHelpers.sendMessage({ role: "user", content: formattedContent });
-        } else if (typeof chatHelpers.append === "function") {
-          chatHelpers.append({ role: "user", content: formattedContent });
-        }
-      }, 150);
-
-      return () => clearTimeout(timer);
+      if (typeof appendRef.current === "function") {
+        appendRef.current({
+          role: "user",
+          content: formattedContent,
+        });
+      }
     }
-  }, [initialPrompt, hasExistingArchitecture, chatHelpers]);
+  }, [initialPrompt, hasExistingArchitecture]);
 
   // Handle external prompts (e.g. from Node Inspector or Project AI Check)
   useEffect(() => {
     if (externalPrompt && !isLoading) {
-      if (typeof chatHelpers.sendMessage === "function") {
-        chatHelpers.sendMessage({ role: "user", content: externalPrompt });
-      } else if (typeof chatHelpers.append === "function") {
-        chatHelpers.append({ role: "user", content: externalPrompt });
+      if (typeof appendRef.current === "function") {
+        appendRef.current({
+          role: "user",
+          content: externalPrompt,
+        });
       }
       onClearExternalPrompt?.();
     }
-  }, [externalPrompt, isLoading, chatHelpers, onClearExternalPrompt]);
+  }, [externalPrompt, isLoading, onClearExternalPrompt]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    if (typeof chatHelpers.sendMessage === "function") {
-      chatHelpers.sendMessage({ role: "user", content: input });
-    } else if (typeof chatHelpers.append === "function") {
-      chatHelpers.append({ role: "user", content: input });
-    } else if (typeof chatHelpers.handleSubmit === "function") {
-      chatHelpers.handleSubmit(e);
+    if (typeof appendRef.current === "function") {
+      appendRef.current({
+        role: "user",
+        content: input,
+      });
     }
     setInput("");
   };
@@ -84,18 +85,18 @@ export function ChatSidebar({
 
   // Sync tool calls to React Flow canvas
   useEffect(() => {
+    if (!messages || messages.length === 0) return;
     const lastMessage = messages[messages.length - 1];
     if (!lastMessage || lastMessage.role !== "assistant") return;
 
     const toolInvocations = lastMessage.toolInvocations;
     if (toolInvocations) {
       for (const invocation of toolInvocations) {
-        if (
-          invocation.toolName === "update_architecture" &&
-          "result" in invocation &&
-          invocation.result
-        ) {
-          onArchitectureUpdate(invocation.result);
+        if (invocation.toolName === "update_architecture") {
+          const graphData = invocation.result || invocation.args;
+          if (graphData && graphData.nodes && graphData.edges) {
+            onArchitectureUpdate(graphData);
+          }
         }
       }
     }
