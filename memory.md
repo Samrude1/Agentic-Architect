@@ -1,26 +1,25 @@
-# Memory — Live OpenRouter Integration & Smart Fallback Architecture
+# Memory — AI Node Descriptions & Instant Save Project Action
 
-Last updated: 2026-08-08 23:05:00
+Last updated: 2026-08-08 23:14:00
 
 ## What was built
 
-- **Live OpenRouter API Integration**: Verified `OPENROUTER_API_KEY` quota limits have been expanded. Tested live LLM generation (`openai/gpt-4o-mini`), returning 4-tiered React Flow diagrams (Nodes & Edges) dynamically.
-- **Smart Fallback Engine (`src/agents/architecture-agent.ts`)**: Retained the requirement-parsing fallback engine so the platform is 100% resilient against any future third-party API rate limits or downtime.
-- **Vibrant Visual Animations & Loading Feedback**: Canvas floating status overlay, glowing edge flows, pulsing bot indicators, and enlarged typography (Inter font).
+- **AI Node Descriptions**: Both the live OpenAI/OpenRouter agent (`architecture-agent.ts`), the chat route (`/api/chat/route.ts`), and the Smart Architect Engine now auto-generate clear Finnish descriptions for every node in `data.description`. When a node is clicked, Node Inspector's "Kuvaus & Rooli" field is pre-populated with AI explanations.
+- **Instant Save Project Action (`src/components/playground-workspace.tsx`)**: Activated the top header button to **"Tallenna Projekti"**. When clicked in a fresh Playground session, it invokes `createProjectWithArchitecture`, creates a new record in Prisma DB, updates the URL, shows "Tallennettu!", and enables live continuous auto-save.
 
 ## Decisions made
 
-- **Dual-Engine Architecture**: OpenRouter live streaming AI Co-Pilot as Primary, with Smart Prompt Architecture Engine as an instant fallback.
+- **Storage Format**: Saved as JSON graph structures (`{ nodes, edges }`) in Prisma DB (`Project.architecture` text column). Allows re-opening, live-editing, and future exporting.
 
 ## Current state
 
-- OpenRouter API test succeeded (`OPENROUTER SUCCESS`).
 - Platform compiles cleanly with `npm run build` (Turbopack + TypeScript).
-- All changes are pushed to GitHub (`main` branch).
+- Pushed to GitHub (`main` branch).
 
 ## Next session starts with
 
-- **Code Generation Phase (Data Gate 1)**: Building the "Save & Start Building" action that translates database nodes from the canvas into a validated Prisma database schema (`schema.prisma`).
+- **Architecture Export Capabilities**: Building export actions to download diagrams as PNG/SVG images, Markdown/Mermaid.js documentation, or raw JSON data.
+- **Code Generation Phase (Data Gate 1)**: Translating database nodes into validated Prisma schemas.
 
 ## Open questions
 

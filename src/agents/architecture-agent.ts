@@ -91,7 +91,7 @@ Return ONLY a JSON object with this structure:
     {
       "id": "1",
       "type": "input",
-      "data": { "label": "Next.js Web App", "tech": "React/Next.js" },
+      "data": { "label": "Next.js Web App", "tech": "React/Next.js", "description": "Käyttöliittymä tehtävien hallintaan ja selaamiseen" },
       "position": { "x": 250, "y": 50 }
     }
   ],

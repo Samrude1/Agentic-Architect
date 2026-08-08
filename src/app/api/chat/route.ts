@@ -12,7 +12,7 @@ const architectureSchema = z.object({
       type: z.string().optional(),
       data: z.object({
         label: z.string(),
-        description: z.string().optional(),
+        description: z.string().describe("Tarkka suomenkielinen kuvaus komponentin tehtävästä ja roolista arkkitehtuurissa"),
         tech: z.string().optional(),
       }),
       position: z.object({
@@ -65,7 +65,8 @@ Ohjeet:
    - Kerros 1 (API / Gateway / Auth, y = 200): REST API, GraphQL, Auth Service. (type: "default")
    - Kerros 2 (Palvelut / Taustalogiikka, y = 350): Order Service, Async Worker, AI Engine. (type: "default")
    - Kerros 3 (Tietokannat / Ulkoiset rajapinnat, y = 500): PostgreSQL, Redis, Stripe, S3. (type: "output")
-4. Sijoita saman kerroksen nodaalit vaakasuunnassa erilleen (esim. x = 160, 440, 720) niin että ne eivät mene päällekkäin.`;
+4. Sijoita saman kerroksen nodaalit vaakasuunnassa erilleen (esim. x = 160, 440, 720) niin että ne eivät mene päällekkäin.
+5. PAKOLLISTA: Generoi AINA jokaiselle nodaalille "description"-kenttään perusteellinen suomenkielinen kuvaus siitä, mitä kyseinen komponentti tekee (esim. "Käyttäjien todennus, JWT-autentikaatio ja salasanan bcrypt-tiivistys").`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateArchitectureTool: any = tool({
