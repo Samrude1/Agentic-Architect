@@ -16,16 +16,20 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 
 ### 1. 🧪 Interactive Playground Workspace & Node Inspector
 - **Text & Document Parsing (.pdf, .txt, .md)**: Input a freeform description or upload a specification document. The server automatically extracts plain text via `pdf-parse` integration.
-- **Visual Architecture Canvas**: 4-tiered structured React Flow diagram (Client → Gateway → Services → Database) with automatic layout positioning to prevent node overlap.
-- **Node Detail Inspector**: Click any node on the canvas to inspect, rename, edit technology tags, or update descriptions in real time.
+- **Visual Architecture Canvas**: 4-tiered structured React Flow diagram (Client → Gateway → Services → Database) with automatic layout positioning to prevent node overlap and animated signal pulse edge flows.
+- **Node Detail Inspector**: Click any node on the canvas to inspect, rename, edit technology tags, or view AI-generated descriptions in real time.
+- **Mandatory AI Node Descriptions**: AI automatically generates comprehensive Finnish descriptions for every node, pre-populating the Node Inspector.
 - **AI Node & Architecture Audit**: Trigger node-specific or project-wide AI checks ("AI Tarkista tämä node" & "AI Tarkista arkkitehtuuri") directly from the canvas workspace.
-- **Real-Time AI Co-Pilot**: Conversational interface (powered by Vercel AI SDK + OpenRouter API) where the AI answers questions and invokes the `update_architecture` tool call to live-update canvas nodes and edges.
+- **Real-Time AI Co-Pilot & Smart Fallback Engine**: Conversational interface powered by Vercel AI SDK + OpenRouter API, backed by an intelligent prompt-based fallback engine that ensures customized architecture diagrams are generated even under third-party API rate limits.
+- **Vibrant Visual Animations**: Floating high-tech AI status banners on the canvas, bouncing bot indicators, and pulsing progress overlays.
 
 ### 2. 🗂️ Project Management & Editing
+- **Instant "Tallenna Projekti" (Save Project)**: Save fresh Playground sessions into Prisma DB with a single click, allowing instant persistence and project listing on the dashboard.
 - **Project Deletion**: Remove unwanted test or draft projects with a single click from the project details view.
 - **Edit in Playground**: Re-open any saved project directly in the Playground workspace to reload its prompt and architecture canvas for further refinement and live database persistence.
 
-### 3. 🔒 Security & Performance
+### 3. 🔒 Accessibility & Performance
+- **Inter Typography Upgrade**: Accessible typography scale with a baseline minimum text size of 14px (`0.875rem`) using Google Inter font.
 - Type-safe Next.js App Router architecture, Server Actions, and strict Zod schemas.
 - API keys (`OPENROUTER_API_KEY`) are kept strictly server-side, ensuring complete security for production deployment.
 
