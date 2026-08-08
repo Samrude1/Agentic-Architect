@@ -1,38 +1,33 @@
-# Memory — Interactive Architecture Playground, AI Co-Pilot & English Docs
+# Memory — Node Detail Inspector & AI Architecture Audit
 
-Last updated: 2026-08-08 21:51:30
+Last updated: 2026-08-08 22:15:00
 
 ## What was built
 
-- Built the AI Architecture Agent (`src/agents/architecture-agent.ts`) powered by OpenRouter API + Zod schema parsing.
-- Built specification file parser Server Action (`src/app/actions/file-parser.ts`) supporting `.pdf`, `.txt`, and `.md` files via `pdf-parse`.
-- Built the Interactive Playground / Ajatushautomo workspace (`src/app/playground/page.tsx` & `src/components/playground-workspace.tsx`).
-- Integrated real-time Vercel AI SDK chat co-pilot (`src/app/api/chat/route.ts` & `src/components/chat-sidebar.tsx`) featuring `update_architecture` tool call that live-syncs AI suggestions to the React Flow canvas.
-- Added Project Deletion (`deleteProject` Server Action & `DeleteProjectButton` component with confirmation).
-- Added "Editoi Ajatushautomossa" functionality to load existing saved projects directly into the Playground with real-time database persistence.
-- Imprinted UI visual patterns into `.agents/context/ui-registry.md`.
-- Translated and rewritten `README.md` completely into professional English.
-- Updated `.agents/skills/remember/SKILL.md` to include reading `README.md` during context restoration.
+- **Node Detail Inspector (`src/components/node-inspector.tsx`)**: Built a sidebar panel allowing users to inspect, rename, edit technology tags, and modify descriptions of selected React Flow nodes.
+- **Node-Specific AI Audit ("AI Tarkista tämä node")**: Added a dedicated button inside Node Inspector that triggers targeted AI evaluation of the selected component in the chat co-pilot.
+- **Project-Wide AI Audit ("AI Tarkista arkkitehtuuri")**: Added a global header button that triggers full architecture verification across all nodes and edges.
+- **Interactive Node Selection (`src/components/architecture-canvas.tsx`)**: Updated React Flow canvas with `onNodeClick`, `onPaneClick`, and visual purple glow borders for selected nodes.
+- **Dynamic Layout (`src/components/playground-workspace.tsx`)**: Grid dynamically resizes when Node Inspector opens/closes while auto-persisting changes to Prisma DB.
+- **Documentation & UI Registry**: Updated `README.md` and `.agents/context/ui-registry.md` with new features and design tokens.
 
 ## Decisions made
 
-- Shifted early-stage UX to an unconstrained, interactive Playground mode where users can ideate and refine architecture with AI before committing to project creation/saving.
-- Kept OpenRouter API calls server-side using `OPENROUTER_API_KEY` in `.env` to protect secrets against client-side leakage.
+- **Inspector panel placement**: Positioned as a dedicated column between the canvas and the chat sidebar for seamless side-by-side editing and AI evaluation.
+- **Reactive external prompt pipeline**: `ChatSidebar` listens to `externalPrompt` state to allow UI buttons (Node Audit / Project Audit) to seamlessly submit chat prompts without user re-typing.
 
 ## Problems solved
 
-- **Base UI Button Accessibility Warning**: Added `nativeButton={false}` to the back navigation `<Button>` rendering a custom `<Link>` element in `src/app/projects/[id]/page.tsx`.
-- **React setState during render console error**: Wrapped parent component `notifyNodesChange` and `notifyEdgesChange` callbacks in `queueMicrotask()` in `src/components/architecture-canvas.tsx` to prevent triggering parent state updates synchronously inside React's state reducer functions.
-- **Vercel AI SDK v4 Tool Typing**: Resolved Vercel AI SDK tool payload typing for Turbopack.
+- **React Flow Node selection state**: Ensured `selectedNode` stays in sync even when the AI co-pilot updates the architecture graph live via tool calling (`update_architecture`).
 
 ## Current state
 
-- The entire platform compiles cleanly with `npm run build` (Turbopack + TypeScript).
-- Playground workspace, AI tool calls, file uploads, project deletion, project editing, and English documentation are fully working.
+- Platform compiles cleanly with `npm run build` (Turbopack + TypeScript).
+- Node Inspector, manual node editing, node-specific AI audit, project-wide AI audit, and DB persistence are fully functional.
 
 ## Next session starts with
 
-- Building out detailed component inspection modals (clicking on a node to view/edit component details) or introducing database schema code generation gates.
+- **Code Generation Phase (Data Gate 1)**: Building the "Save & Start Building" action that translates database nodes from the canvas into a validated Prisma database schema (`schema.prisma`) with code generation preview.
 
 ## Open questions
 

@@ -104,4 +104,19 @@ Last updated: 2026-08-08
 | Background       | `bg-background` (Canvas container) |
 | Border           | `border rounded-md overflow-hidden` |
 | Spacing          | `flex flex-col h-full space-y-4` |
+| Selection style  | `border: 2px solid #a855f7`, `boxShadow: 0 0 12px rgba(168, 85, 247, 0.4)` |
 | Accent usage     | `text-purple-500` (AI Generate icon) |
+
+---
+
+### Node Inspector
+File: `src/components/node-inspector.tsx`
+Last updated: 2026-08-08
+
+| Property         | Class           |
+| ---------------- | --------------- |
+| Background       | `bg-background` (Container), `bg-muted/40` (Header), `bg-muted/20` (Layer info box) |
+| Border           | `border rounded-lg shadow-sm`, `border-b` (Header) |
+| Text — title     | `font-semibold text-sm` |
+| Text — secondary | `text-xs text-muted-foreground` |
+| Accent usage     | `bg-purple-500/10 text-purple-600` (Inspector Icon), `border-purple-500/30 text-purple-600` (AI Audit Button) |

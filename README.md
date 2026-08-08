@@ -14,9 +14,11 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 
 ## ✨ Key Features & Current Status
 
-### 1. 🧪 Interactive Playground Workspace
+### 1. 🧪 Interactive Playground Workspace & Node Inspector
 - **Text & Document Parsing (.pdf, .txt, .md)**: Input a freeform description or upload a specification document. The server automatically extracts plain text via `pdf-parse` integration.
 - **Visual Architecture Canvas**: 4-tiered structured React Flow diagram (Client → Gateway → Services → Database) with automatic layout positioning to prevent node overlap.
+- **Node Detail Inspector**: Click any node on the canvas to inspect, rename, edit technology tags, or update descriptions in real time.
+- **AI Node & Architecture Audit**: Trigger node-specific or project-wide AI checks ("AI Tarkista tämä node" & "AI Tarkista arkkitehtuuri") directly from the canvas workspace.
 - **Real-Time AI Co-Pilot**: Conversational interface (powered by Vercel AI SDK + OpenRouter API) where the AI answers questions and invokes the `update_architecture` tool call to live-update canvas nodes and edges.
 
 ### 2. 🗂️ Project Management & Editing
@@ -44,6 +46,7 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 │   │   ├── chat-sidebar.tsx          # AI Co-Pilot chat interface
 │   │   ├── delete-project-button.tsx # Project deletion button with confirmation
 │   │   ├── idea-input-form.tsx       # Homepage input form & file dropzone
+│   │   ├── node-inspector.tsx        # Node Detail Inspector & manual editor
 │   │   └── playground-workspace.tsx  # Main Playground workspace container
 │   └── lib/                      # Prisma database instance
 ├── prisma/                       # Prisma SQLite/PostgreSQL schema & migrations
@@ -55,13 +58,11 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 
 ## 💡 Future Roadmap
 
-1. **🔍 Node Detail Inspector**
-   - Clickable canvas nodes that open a side panel to inspect or define database schema types, API endpoints (REST/GraphQL), or UI component props.
+1. **🚀 Code Generation Phase (Data Gate 1)**
+   - "Save & Start Building" integration: Transition from architecture design to the first quality gate where AI generates ready-to-use Prisma database schemas and project scaffolding based on inspected nodes.
 2. **📤 Architecture Export Capabilities**
    - Export canvas diagrams as image assets (PNG/SVG) or documentation formats (Markdown / Mermaid.js).
-3. **🚀 Code Generation Phase (Data Gate)**
-   - "Save & Start Building" integration: Transition from architecture design to the first quality gate where AI generates ready-to-use Prisma database schemas and project scaffolding.
-4. **📄 Multi-file Specification Upload**
+3. **📄 Multi-file Specification Upload**
    - Support uploading multiple specification documents simultaneously to feed complex project requirements into the AI Co-Pilot.
 
 ---

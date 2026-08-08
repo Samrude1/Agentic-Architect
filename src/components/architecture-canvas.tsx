@@ -23,8 +23,10 @@ interface ArchitectureCanvasProps {
   initialArchitecture?: string | null;
   nodes?: Node[];
   edges?: Edge[];
+  selectedNodeId?: string | null;
   onNodesChange?: (nodes: Node[]) => void;
   onEdgesChange?: (edges: Edge[]) => void;
+  onNodeSelect?: (node: Node | null) => void;
   hideHeader?: boolean;
 }
 
@@ -44,8 +46,10 @@ export function ArchitectureCanvas({
   initialArchitecture,
   nodes: controlledNodes,
   edges: controlledEdges,
+  selectedNodeId,
   onNodesChange: notifyNodesChange,
   onEdgesChange: notifyEdgesChange,
+  onNodeSelect,
   hideHeader = false,
 }: ArchitectureCanvasProps) {
   const parsed = useMemo(
@@ -70,6 +74,19 @@ export function ArchitectureCanvas({
       setInternalEdges(controlledEdges);
     }
   }, [controlledEdges]);
+
+  // Visually highlight selected node if selectedNodeId is passed
+  const styledNodes = useMemo(() => {
+    if (!selectedNodeId) return internalNodes;
+    return internalNodes.map((n) => ({
+      ...n,
+      style: {
+        ...n.style,
+        border: n.id === selectedNodeId ? "2px solid #a855f7" : undefined,
+        boxShadow: n.id === selectedNodeId ? "0 0 12px rgba(168, 85, 247, 0.4)" : undefined,
+      },
+    }));
+  }, [internalNodes, selectedNodeId]);
 
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -153,10 +170,12 @@ export function ArchitectureCanvas({
       )}
       <div className="flex-1 border rounded-md overflow-hidden bg-background">
         <ReactFlow
-          nodes={internalNodes}
+          nodes={styledNodes}
           onNodesChange={handleNodesChange}
           edges={internalEdges}
           onEdgesChange={handleEdgesChange}
+          onNodeClick={(_event, node) => onNodeSelect?.(node)}
+          onPaneClick={() => onNodeSelect?.(null)}
           fitView
         >
           <Background />

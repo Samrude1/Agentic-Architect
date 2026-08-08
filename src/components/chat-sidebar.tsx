@@ -8,10 +8,17 @@ import { Node, Edge } from "@xyflow/react";
 
 interface ChatSidebarProps {
   initialPrompt?: string;
+  externalPrompt?: string | null;
+  onClearExternalPrompt?: () => void;
   onArchitectureUpdate: (data: { nodes: Node[]; edges: Edge[] }) => void;
 }
 
-export function ChatSidebar({ initialPrompt, onArchitectureUpdate }: ChatSidebarProps) {
+export function ChatSidebar({
+  initialPrompt,
+  externalPrompt,
+  onClearExternalPrompt,
+  onArchitectureUpdate,
+}: ChatSidebarProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
@@ -31,6 +38,18 @@ export function ChatSidebar({ initialPrompt, onArchitectureUpdate }: ChatSidebar
 
   const messages = chatHelpers.messages || [];
   const isLoading = chatHelpers.status === "streaming" || chatHelpers.status === "submitted" || chatHelpers.isLoading;
+
+  // Handle external prompts (e.g. from Node Inspector or Project AI Check)
+  useEffect(() => {
+    if (externalPrompt && !isLoading) {
+      if (typeof chatHelpers.sendMessage === "function") {
+        chatHelpers.sendMessage({ role: "user", content: externalPrompt });
+      } else if (typeof chatHelpers.append === "function") {
+        chatHelpers.append({ role: "user", content: externalPrompt });
+      }
+      onClearExternalPrompt?.();
+    }
+  }, [externalPrompt, isLoading, chatHelpers, onClearExternalPrompt]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
