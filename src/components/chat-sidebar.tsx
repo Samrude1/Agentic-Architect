@@ -157,9 +157,15 @@ export function ChatSidebar({
           ))
         )}
         {isLoading && (
-          <div className="flex items-center space-x-2 text-muted-foreground text-sm p-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <span>Arkkitehti suunnittelee ja analysoi...</span>
+          <div className="flex items-center space-x-3 p-3.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-300 animate-pulse shadow-sm">
+            <div className="relative flex items-center justify-center">
+              <Bot className="h-5 w-5 text-purple-500 animate-bounce" />
+            </div>
+            <div className="flex-1 text-sm font-medium">
+              <span className="font-bold block text-base leading-tight">⚡ Tekoäly-arkkitehti työskentelee...</span>
+              <span className="text-xs text-muted-foreground">Lasketaan kerroksia & luodaan kaavioelementtejä...</span>
+            </div>
+            <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
           </div>
         )}
         <div ref={messagesEndRef} />
