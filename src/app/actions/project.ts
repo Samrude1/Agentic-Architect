@@ -23,6 +23,20 @@ export async function createProject(name: string, prompt: string) {
   return project;
 }
 
+export async function createProjectWithArchitecture(name: string, prompt: string, architecture: string) {
+  const project = await prisma.project.create({
+    data: {
+      name: name.trim() || "Uusi Arkkitehtuuriprojekti",
+      prompt,
+      architecture,
+      status: "PLANNING",
+    },
+  });
+
+  revalidatePath("/");
+  return project;
+}
+
 export async function getProjectById(id: string) {
   return await prisma.project.findUnique({
     where: { id },

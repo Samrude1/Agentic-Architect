@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
-import { updateProjectArchitecture, generateRealArchitecture } from "@/app/actions/project";
+import { useRouter } from "next/navigation";
+import { updateProjectArchitecture, generateRealArchitecture, createProjectWithArchitecture } from "@/app/actions/project";
 import { Node, Edge } from "@xyflow/react";
 
 interface PlaygroundWorkspaceProps {
@@ -25,6 +26,9 @@ export function PlaygroundWorkspace({
   initialNodes = [],
   initialEdges = [],
 }: PlaygroundWorkspaceProps) {
+  const router = useRouter();
+  const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(projectId);
+  const [currentProjectName, setCurrentProjectName] = useState<string | undefined>(projectName);
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -58,13 +62,13 @@ export function PlaygroundWorkspace({
       }
 
       // If tied to an existing project ID, auto-save updates to DB
-      if (projectId && data.nodes && data.edges) {
+      if (currentProjectId && data.nodes && data.edges) {
         startTransition(async () => {
-          await updateProjectArchitecture(projectId, JSON.stringify(data));
+          await updateProjectArchitecture(currentProjectId, JSON.stringify(data));
         });
       }
     },
-    [projectId, selectedNode]
+    [currentProjectId, selectedNode]
   );
 
   const handleSingleNodeUpdate = (updatedNode: Node) => {
@@ -72,18 +76,38 @@ export function PlaygroundWorkspace({
     setNodes(updatedNodes);
     setSelectedNode(updatedNode);
 
-    if (projectId) {
+    if (currentProjectId) {
       startTransition(async () => {
-        await updateProjectArchitecture(projectId, JSON.stringify({ nodes: updatedNodes, edges }));
+        await updateProjectArchitecture(currentProjectId, JSON.stringify({ nodes: updatedNodes, edges }));
       });
     }
   };
 
   const handleSaveToDb = () => {
-    if (!projectId) return;
+    if (!currentProjectId) return;
     startTransition(async () => {
-      await updateProjectArchitecture(projectId, JSON.stringify({ nodes, edges }));
+      await updateProjectArchitecture(currentProjectId, JSON.stringify({ nodes, edges }));
       setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
+    });
+  };
+
+  const handleCreateAndSaveProject = () => {
+    startTransition(async () => {
+      const generatedName = initialPrompt
+        ? initialPrompt.slice(0, 30).trim() + (initialPrompt.length > 30 ? "..." : "")
+        : "Uusi Arkkitehtuuriprojekti";
+
+      const newProject = await createProjectWithArchitecture(
+        generatedName,
+        initialPrompt,
+        JSON.stringify({ nodes, edges })
+      );
+
+      setCurrentProjectId(newProject.id);
+      setCurrentProjectName(newProject.name);
+      setSavedSuccess(true);
+      router.replace(`/playground?projectId=${newProject.id}`);
       setTimeout(() => setSavedSuccess(false), 2500);
     });
   };
@@ -99,13 +123,13 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
       {/* Top bar */}
       <header className="h-14 border-b bg-background px-6 flex items-center justify-between flex-none">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="icon-sm" render={<Link href={projectId ? `/projects/${projectId}` : "/"} />} nativeButton={false}>
+          <Button variant="ghost" size="icon-sm" render={<Link href={currentProjectId ? `/projects/${currentProjectId}` : "/"} />} nativeButton={false}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-purple-500" />
             <h1 className="font-bold text-lg tracking-tight">
-              {projectName ? `Ajatushautomo: ${projectName}` : "Arkkitehtuurin Hiekkalaatikko"}
+              {currentProjectName ? `Ajatushautomo: ${currentProjectName}` : "Arkkitehtuurin Hiekkalaatikko"}
             </h1>
           </div>
           <span className="text-sm bg-muted text-muted-foreground px-2.5 py-1 rounded font-mono font-medium">
@@ -125,7 +149,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
             AI Tarkista arkkitehtuuri
           </Button>
 
-          {projectId ? (
+          {currentProjectId ? (
             <Button onClick={handleSaveToDb} disabled={isPending} size="sm">
               {isPending ? (
                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -137,9 +161,15 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
               {savedSuccess ? "Tallennettu!" : "Tallenna muutokset"}
             </Button>
           ) : (
-            <Button variant="outline" size="sm" disabled title="Luo uusi projekti tallentaaksesi">
-              <Save className="mr-1.5 h-3.5 w-3.5" />
-              Tallenna & Aloita Rakentaminen (Tulossa)
+            <Button onClick={handleCreateAndSaveProject} disabled={isPending} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white font-medium">
+              {isPending ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : savedSuccess ? (
+                <Check className="mr-1.5 h-4 w-4 text-green-400" />
+              ) : (
+                <Save className="mr-1.5 h-4 w-4" />
+              )}
+              {savedSuccess ? "Tallennettu!" : "Tallenna Projekti"}
             </Button>
           )}
         </div>
