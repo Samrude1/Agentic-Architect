@@ -8,6 +8,7 @@ import { Node, Edge } from "@xyflow/react";
 
 interface ChatSidebarProps {
   initialPrompt?: string;
+  hasExistingArchitecture?: boolean;
   externalPrompt?: string | null;
   onClearExternalPrompt?: () => void;
   onArchitectureUpdate: (data: { nodes: Node[]; edges: Edge[] }) => void;
@@ -15,29 +16,40 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({
   initialPrompt,
+  hasExistingArchitecture = false,
   externalPrompt,
   onClearExternalPrompt,
   onArchitectureUpdate,
 }: ChatSidebarProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const initialSentRef = useRef(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chatHelpers = (useChat as any)({
     api: "/api/chat",
-    initialMessages: initialPrompt
-      ? [
-          {
-            id: "initial-prompt",
-            role: "user",
-            content: `Tässä on ohjelmistoideani / vaatimukseni:\n\n"${initialPrompt}"\n\nAnalysoi tämä, luo ensimmäinen versio arkkitehtuurikaaviosta kutsumalla update_architecture-työkalua ja kerro lyhyesti arkkitehtuurivalinnoistasi.`,
-          },
-        ]
-      : [],
   }) as any;
 
   const messages = chatHelpers.messages || [];
   const isLoading = chatHelpers.status === "streaming" || chatHelpers.status === "submitted" || chatHelpers.isLoading;
+
+  // Auto-send initial prompt on mount if there is no existing architecture
+  useEffect(() => {
+    if (initialPrompt && !hasExistingArchitecture && !initialSentRef.current) {
+      initialSentRef.current = true;
+      const formattedContent = `Tässä on ohjelmistoideani / vaatimukseni:\n\n"${initialPrompt}"\n\nAnalysoi tämä, luo ensimmäinen versio arkkitehtuurikaaviosta kutsumalla update_architecture-työkalua ja kerro lyhyesti arkkitehtuurivalinnoistasi.`;
+
+      const timer = setTimeout(() => {
+        if (typeof chatHelpers.sendMessage === "function") {
+          chatHelpers.sendMessage({ role: "user", content: formattedContent });
+        } else if (typeof chatHelpers.append === "function") {
+          chatHelpers.append({ role: "user", content: formattedContent });
+        }
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [initialPrompt, hasExistingArchitecture, chatHelpers]);
 
   // Handle external prompts (e.g. from Node Inspector or Project AI Check)
   useEffect(() => {

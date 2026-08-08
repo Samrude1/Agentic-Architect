@@ -178,6 +178,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
         >
           <ChatSidebar
             initialPrompt={initialPrompt}
+            hasExistingArchitecture={initialNodes.length > 0}
             externalPrompt={externalPrompt}
             onClearExternalPrompt={() => setExternalPrompt(null)}
             onArchitectureUpdate={handleArchitectureUpdate}
