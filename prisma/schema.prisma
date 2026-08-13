@@ -11,10 +11,13 @@ datasource db {
 }
 
 model Project {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  name      String
-  status    String   @default("PLANNING")
-  prompt    String?
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  name         String
+  status       String   @default("PLANNING")
+  prompt       String?
   architecture String?
+  prismaSchema String?
+  targetPath   String?
 }
+

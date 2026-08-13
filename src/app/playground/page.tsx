@@ -37,6 +37,9 @@ export default async function PlaygroundPage({ searchParams }: PlaygroundPagePro
       initialPrompt={project?.prompt || promptParam}
       initialNodes={initialNodes}
       initialEdges={initialEdges}
+      initialTargetPath={project?.targetPath || ""}
+      initialPrismaSchema={project?.prismaSchema || ""}
     />
   );
 }
+

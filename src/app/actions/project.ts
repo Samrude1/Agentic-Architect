@@ -52,6 +52,25 @@ export async function updateProjectArchitecture(id: string, architecture: string
   return project;
 }
 
+export async function updateProjectTargetPath(id: string, targetPath: string) {
+  const project = await prisma.project.update({
+    where: { id },
+    data: { targetPath },
+  });
+  revalidatePath(`/projects/${id}`);
+  return project;
+}
+
+export async function updateProjectPrismaSchema(id: string, prismaSchema: string) {
+  const project = await prisma.project.update({
+    where: { id },
+    data: { prismaSchema },
+  });
+  revalidatePath(`/projects/${id}`);
+  return project;
+}
+
+
 export async function deleteProject(id: string) {
   await prisma.project.delete({
     where: { id },

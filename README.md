@@ -23,12 +23,18 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 - **Real-Time AI Co-Pilot & Smart Fallback Engine**: Conversational interface powered by Vercel AI SDK + OpenRouter API, backed by an intelligent prompt-based fallback engine that ensures customized architecture diagrams are generated even under third-party API rate limits.
 - **Vibrant Visual Animations**: Floating high-tech AI status banners on the canvas, bouncing bot indicators, and pulsing progress overlays.
 
-### 2. 🗂️ Project Management & Editing
+### 2. 🗄️ Data Gate 1: Code & Database Schema Generation (Project Homebase)
+- **AI Prisma Schema Generator**: Seamlessly transition from visual architecture diagrams to the first quality gate where AI designs production-ready Prisma database schemas (`schema.prisma`) in standard English.
+- **Project Homebase Directory (`targetPath`)**: Define the local folder path on disk for your project's codebase (acting like a visual IDE).
+- **Direct Filesystem Persistence**: Write generated database schemas and project scaffolding directly to `{targetPath}/prisma/schema.prisma` with a single click.
+- **Syntax-Highlighted Code Viewer**: Built-in `CodeViewer` component with one-click code copy and live schema updates.
+
+### 3. 🗂️ Project Management & Editing
 - **Instant "Tallenna Projekti" (Save Project)**: Save fresh Playground sessions into Prisma DB with a single click, allowing instant persistence and project listing on the dashboard.
 - **Project Deletion**: Remove unwanted test or draft projects with a single click from the project details view.
 - **Edit in Playground**: Re-open any saved project directly in the Playground workspace to reload its prompt and architecture canvas for further refinement and live database persistence.
 
-### 3. 🔒 Accessibility & Performance
+### 4. 🔒 Accessibility & Performance
 - **Inter Typography Upgrade**: Accessible typography scale with a baseline minimum text size of 14px (`0.875rem`) using Google Inter font.
 - Type-safe Next.js App Router architecture, Server Actions, and strict Zod schemas.
 - API keys (`OPENROUTER_API_KEY`) are kept strictly server-side, ensuring complete security for production deployment.
@@ -41,13 +47,14 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 ├── src/
 │   ├── agents/                   # AI Agent engines (architecture-agent.ts)
 │   ├── app/                      # Next.js App Router pages & Server Actions
-│   │   ├── actions/              # Server Actions (file-parser.ts, project.ts)
+│   │   ├── actions/              # Server Actions (codegen.ts, file-parser.ts, project.ts)
 │   │   ├── api/chat/             # Vercel AI SDK Co-Pilot API route (tool calling)
 │   │   ├── playground/           # Interactive Playground page
 │   │   └── projects/[id]/        # Saved project detail view
 │   ├── components/               # UI components
 │   │   ├── architecture-canvas.tsx   # React Flow visual canvas
 │   │   ├── chat-sidebar.tsx          # AI Co-Pilot chat interface
+│   │   ├── code-viewer.tsx           # Syntax-highlighted code viewer & copy tool
 │   │   ├── delete-project-button.tsx # Project deletion button with confirmation
 │   │   ├── idea-input-form.tsx       # Homepage input form & file dropzone
 │   │   ├── node-inspector.tsx        # Node Detail Inspector & manual editor
@@ -62,10 +69,11 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 
 ## 💡 Future Roadmap
 
-1. **🚀 Code Generation Phase (Data Gate 1)**
-   - "Save & Start Building" integration: Transition from architecture design to the first quality gate where AI generates ready-to-use Prisma database schemas and project scaffolding based on inspected nodes.
+1. **🚀 Code Generation Phase (Data Gate 2: Backend API & Services)**
+   - Auto-generate Next.js API Routes and Server Actions matching service nodes.
 2. **📤 Architecture Export Capabilities**
    - Export canvas diagrams as image assets (PNG/SVG) or documentation formats (Markdown / Mermaid.js).
+
 3. **📄 Multi-file Specification Upload**
    - Support uploading multiple specification documents simultaneously to feed complex project requirements into the AI Co-Pilot.
 
