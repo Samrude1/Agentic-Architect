@@ -14,6 +14,7 @@ import {
   Folder,
   HardDrive,
   AlertCircle,
+  Server,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import {
 } from "@/app/actions/project";
 import {
   generatePrismaSchemaForProject,
+  generateApiRoutesForProject,
   writeProjectFileToDisk,
 } from "@/app/actions/codegen";
 import { Node, Edge } from "@xyflow/react";
@@ -43,6 +45,7 @@ interface PlaygroundWorkspaceProps {
   initialEdges?: Edge[];
   initialTargetPath?: string;
   initialPrismaSchema?: string;
+  initialApiCode?: string;
 }
 
 export function PlaygroundWorkspace({
@@ -53,6 +56,7 @@ export function PlaygroundWorkspace({
   initialEdges = [],
   initialTargetPath = "",
   initialPrismaSchema = "",
+  initialApiCode = "",
 }: PlaygroundWorkspaceProps) {
   const router = useRouter();
   const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(projectId);
@@ -64,11 +68,13 @@ export function PlaygroundWorkspace({
   const [isPending, startTransition] = useTransition();
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Data Gate 1 & Homebase State
-  const [activeTab, setActiveTab] = useState<"canvas" | "schema">("canvas");
+  // Data Gates & Homebase State
+  const [activeTab, setActiveTab] = useState<"canvas" | "schema" | "api">("canvas");
   const [targetPath, setTargetPath] = useState<string>(initialTargetPath);
   const [prismaSchema, setPrismaSchema] = useState<string>(initialPrismaSchema);
+  const [apiCode, setApiCode] = useState<string>(initialApiCode);
   const [isGeneratingSchema, setIsGeneratingSchema] = useState(false);
+  const [isGeneratingApi, setIsGeneratingApi] = useState(false);
   const [isWritingToDisk, setIsWritingToDisk] = useState(false);
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -209,6 +215,64 @@ export function PlaygroundWorkspace({
     }
   };
 
+  const handleGenerateApiRoutes = async () => {
+    setIsGeneratingApi(true);
+    try {
+      const res = await generateApiRoutesForProject(
+        currentProjectId || "",
+        initialPrompt,
+        JSON.stringify({ nodes, edges }),
+        prismaSchema
+      );
+      if (res.code) {
+        setApiCode(res.code);
+      }
+    } catch (err) {
+      console.error("Failed to generate API routes:", err);
+    } finally {
+      setIsGeneratingApi(false);
+    }
+  };
+
+  const handleWriteApiToDisk = async () => {
+    if (!currentProjectId) {
+      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
+      return;
+    }
+    if (!targetPath.trim()) {
+      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
+      return;
+    }
+    if (!apiCode.trim()) {
+      setDiskMessage({ type: "error", text: "Generoi taustajärjestelmän API-koodi ensin." });
+      return;
+    }
+
+    setIsWritingToDisk(true);
+    try {
+      await updateProjectTargetPath(currentProjectId, targetPath);
+
+      const result = await writeProjectFileToDisk(
+        currentProjectId,
+        "src/app/api/endpoints/route.ts",
+        apiCode
+      );
+      if (result.success) {
+        setDiskMessage({
+          type: "success",
+          text: `API-koodi kirjoitettu onnistuneesti! (${result.fullPath})`,
+        });
+      } else {
+        setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
+      }
+    } catch (err: any) {
+      setDiskMessage({ type: "error", text: err.message || "Tiedoston kirjoitus epäonnistui." });
+    } finally {
+      setIsWritingToDisk(false);
+      setTimeout(() => setDiskMessage(null), 5000);
+    }
+  };
+
   const handleProjectAICheck = () => {
     const prompt = `Suorita kokonaisvaltainen arkkitehtuuritarkistus (Audit) koko järjestelmälle (${nodes.length} komponenttia, ${edges.length} linkkiä).
 Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tietoturvapullonkaulat sekä puuttuvat kerrokset. Jos näet aiheelliseksi korjata kaaviota, kutsu update_architecture-työkalua ja selitä suosituksesi.`;
@@ -257,7 +321,18 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
               }`}
             >
               <Database className="h-3.5 w-3.5 text-purple-500" />
-              <span>Tietokanta & Koodi (Gate 1)</span>
+              <span>Tietokantamalli (Gate 1)</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("api")}
+              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
+                activeTab === "api"
+                  ? "bg-background text-foreground shadow-sm font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Server className="h-3.5 w-3.5 text-purple-500" />
+              <span>API & Actions (Gate 2)</span>
             </button>
           </div>
         </div>
@@ -371,84 +446,21 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
               </div>
             </div>
 
-            {/* Code Generator & Viewer Card */}
-            <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
-              <div className="flex items-center justify-between flex-none">
-                <div>
-                  <h3 className="font-bold text-base flex items-center space-x-2">
-                    <Database className="h-5 w-5 text-purple-500" />
-                    <span>Data Gate 1: Prisma Database Schema</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Generoi tuotantovalmis Prisma-tietokantamalli kaaviossa määriteltyjen komponenttien pohjalta (Standard English).
-                  </p>
-                </div>
+            {/* Code Generator & Viewer Card - Gate 1 or Gate 2 */}
+            {activeTab === "schema" ? (
+              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
+                <div className="flex items-center justify-between flex-none">
+                  <div>
+                    <h3 className="font-bold text-base flex items-center space-x-2">
+                      <Database className="h-5 w-5 text-purple-500" />
+                      <span>Data Gate 1: Prisma Database Schema</span>
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Generoi tuotantovalmis Prisma-tietokantamalli kaaviossa määriteltyjen komponenttien pohjalta (Standard English).
+                    </p>
+                  </div>
 
-                <div className="flex items-center space-x-2">
-                  <Button
-                    onClick={handleGenerateSchema}
-                    disabled={isGeneratingSchema}
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                  >
-                    {isGeneratingSchema ? (
-                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="mr-1.5 h-4 w-4" />
-                    )}
-                    {prismaSchema ? "Päivitä kaavio AI:lla" : "Generoi tietokantamalli AI:lla"}
-                  </Button>
-
-                  {prismaSchema && (
-                    <Button
-                      onClick={handleWriteToDisk}
-                      disabled={isWritingToDisk}
-                      variant="outline"
-                      size="sm"
-                      className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
-                    >
-                      {isWritingToDisk ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : (
-                        <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
-                      )}
-                      Kirjoita levyarvoon (prisma/schema.prisma)
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Status/Error Messages */}
-              {diskMessage && (
-                <div
-                  className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
-                    diskMessage.type === "success"
-                      ? "bg-green-500/10 text-green-600 border border-green-500/30"
-                      : "bg-destructive/10 text-destructive border border-destructive/30"
-                  }`}
-                >
-                  {diskMessage.type === "success" ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                  )}
-                  <span>{diskMessage.text}</span>
-                </div>
-              )}
-
-              {/* Code Display */}
-              <div className="flex-1 min-h-0">
-                {prismaSchema ? (
-                  <CodeViewer code={prismaSchema} filename="prisma/schema.prisma" />
-                ) : (
-                  <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
-                    <Database className="h-10 w-10 text-muted-foreground/50" />
-                    <div>
-                      <h4 className="font-semibold text-sm">Ei vielä generoitua tietokantamallia</h4>
-                      <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                        Paina *"Generoi tietokantamalli AI:lla"* painiketta luodaksesi arkkitehtuurikaaviosi pohjalta tuotantovalmiin Prisma-skeeman.
-                      </p>
-                    </div>
+                  <div className="flex items-center space-x-2">
                     <Button
                       onClick={handleGenerateSchema}
                       disabled={isGeneratingSchema}
@@ -460,12 +472,180 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                       ) : (
                         <Sparkles className="mr-1.5 h-4 w-4" />
                       )}
-                      Generoi tietokantamalli AI:lla
+                      {prismaSchema ? "Päivitä kaavio AI:lla" : "Generoi tietokantamalli AI:lla"}
                     </Button>
+
+                    {prismaSchema && (
+                      <Button
+                        onClick={handleWriteToDisk}
+                        disabled={isWritingToDisk}
+                        variant="outline"
+                        size="sm"
+                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
+                      >
+                        {isWritingToDisk ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
+                        )}
+                        Kirjoita levyarvoon (prisma/schema.prisma)
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status/Error Messages */}
+                {diskMessage && (
+                  <div
+                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
+                      diskMessage.type === "success"
+                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
+                        : "bg-destructive/10 text-destructive border border-destructive/30"
+                    }`}
+                  >
+                    {diskMessage.type === "success" ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                    )}
+                    <span>{diskMessage.text}</span>
                   </div>
                 )}
+
+                {/* Code Display */}
+                <div className="flex-1 min-h-0">
+                  {prismaSchema ? (
+                    <CodeViewer
+                      code={prismaSchema}
+                      filename="prisma/schema.prisma"
+                      badge="Data Gate 1 • English"
+                    />
+                  ) : (
+                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
+                      <Database className="h-10 w-10 text-muted-foreground/50" />
+                      <div>
+                        <h4 className="font-semibold text-sm">Ei vielä generoitua tietokantamallia</h4>
+                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+                          Paina *"Generoi tietokantamalli AI:lla"* painiketta luodaksesi arkkitehtuurikaaviosi pohjalta tuotantovalmiin Prisma-skeeman.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleGenerateSchema}
+                        disabled={isGeneratingSchema}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                      >
+                        {isGeneratingSchema ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="mr-1.5 h-4 w-4" />
+                        )}
+                        Generoi tietokantamalli AI:lla
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
+                <div className="flex items-center justify-between flex-none">
+                  <div>
+                    <h3 className="font-bold text-base flex items-center space-x-2">
+                      <Server className="h-5 w-5 text-purple-500" />
+                      <span>Data Gate 2: API Endpoints & Server Actions</span>
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Generoi tuotantovalmiit Next.js Route Handlerit ja Server Actionit Zod-syötevalidoinnilla (Standard English).
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      onClick={handleGenerateApiRoutes}
+                      disabled={isGeneratingApi}
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                    >
+                      {isGeneratingApi ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="mr-1.5 h-4 w-4" />
+                      )}
+                      {apiCode ? "Päivitä API-koodi AI:lla" : "Generoi API-koodi AI:lla"}
+                    </Button>
+
+                    {apiCode && (
+                      <Button
+                        onClick={handleWriteApiToDisk}
+                        disabled={isWritingToDisk}
+                        variant="outline"
+                        size="sm"
+                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
+                      >
+                        {isWritingToDisk ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
+                        )}
+                        Kirjoita levylle (src/app/api/endpoints/route.ts)
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status/Error Messages */}
+                {diskMessage && (
+                  <div
+                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
+                      diskMessage.type === "success"
+                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
+                        : "bg-destructive/10 text-destructive border border-destructive/30"
+                    }`}
+                  >
+                    {diskMessage.type === "success" ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                    )}
+                    <span>{diskMessage.text}</span>
+                  </div>
+                )}
+
+                {/* Code Display */}
+                <div className="flex-1 min-h-0">
+                  {apiCode ? (
+                    <CodeViewer
+                      code={apiCode}
+                      filename="src/app/api/endpoints/route.ts"
+                      badge="Data Gate 2 • English"
+                    />
+                  ) : (
+                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
+                      <Server className="h-10 w-10 text-muted-foreground/50" />
+                      <div>
+                        <h4 className="font-semibold text-sm">Ei vielä generoituja API-rajapintoja</h4>
+                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+                          Paina *"Generoi API-koodi AI:lla"* painiketta luodaksesi arkkitehtuurikaaviosi (Layer 1 Gateway & Layer 2 Services) ja tietomallin pohjalta tuotantovalmiit rajapintareitit.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={handleGenerateApiRoutes}
+                        disabled={isGeneratingApi}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                      >
+                        {isGeneratingApi ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="mr-1.5 h-4 w-4" />
+                        )}
+                        Generoi API-koodi AI:lla
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

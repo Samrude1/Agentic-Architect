@@ -1,7 +1,6 @@
 "use server";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse");
+import { PDFParse } from "pdf-parse";
 
 export async function parseUploadedFile(formData: FormData): Promise<{ text: string; fileName: string }> {
   const file = formData.get("file") as File | null;
@@ -16,8 +15,10 @@ export async function parseUploadedFile(formData: FormData): Promise<{ text: str
 
   if (extension === "pdf") {
     try {
-      const parsed = await pdfParse(buffer);
-      return { text: parsed.text, fileName };
+      const parser = new PDFParse({ data: buffer });
+      const result = await parser.getText();
+      await parser.destroy();
+      return { text: result.text || "", fileName };
     } catch (error) {
       console.error("PDF parsing error:", error);
       throw new Error("PDF-tiedoston lukeminen epäonnistui.");

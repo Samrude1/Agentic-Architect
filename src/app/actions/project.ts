@@ -70,6 +70,15 @@ export async function updateProjectPrismaSchema(id: string, prismaSchema: string
   return project;
 }
 
+export async function updateProjectApiCode(id: string, apiCode: string) {
+  const project = await prisma.project.update({
+    where: { id },
+    data: { apiCode },
+  });
+  revalidatePath(`/projects/${id}`);
+  return project;
+}
+
 
 export async function deleteProject(id: string) {
   await prisma.project.delete({

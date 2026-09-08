@@ -8,11 +8,13 @@ interface CodeViewerProps {
   code: string;
   filename?: string;
   language?: string;
+  badge?: string;
 }
 
 export function CodeViewer({
   code,
   filename = "prisma/schema.prisma",
+  badge = "Data Gate 1 • English",
 }: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
 
@@ -34,7 +36,7 @@ export function CodeViewer({
           <FileCode className="h-4 w-4 text-purple-400" />
           <span className="font-medium text-slate-200">{filename}</span>
           <span className="bg-purple-500/20 text-purple-300 text-[10px] px-2 py-0.5 rounded font-sans">
-            Data Gate 1 • English
+            {badge}
           </span>
         </div>
 

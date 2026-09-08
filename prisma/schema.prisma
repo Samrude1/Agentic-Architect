@@ -18,6 +18,7 @@ model Project {
   prompt       String?
   architecture String?
   prismaSchema String?
+  apiCode      String?
   targetPath   String?
 }
 
