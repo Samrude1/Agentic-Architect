@@ -2,6 +2,27 @@
 
 Chronological record of architectural decisions, completed sprints, and development milestones.
 
+### 2026-09-09 — Quality Suite, Safety Confirmation Gates & Smart Tech Stack Inference
+- **Quality & Security Suite UI (`app-security`, `app-review`, `app-perf`)**:
+  - Implemented `runSecurityAudit` and `runOptimizationAudit` in [src/app/actions/audit.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts) with OWASP Top 10 checks, Zod validation detection, and database indexing/caching analysis.
+  - Built interactive [src/components/audit-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/audit-modal.tsx) scorecard with health scores (0-100), letter grades (A-F), filtered cards, and plain-language recommendations.
+  - Added `Security Check` and `Optimize Code` action buttons directly to the workspace toolbar.
+- **Safety Confirmation Gates ("Oletko varma?")**:
+  - Built [src/components/confirm-action-dialog.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/confirm-action-dialog.tsx) to prevent accidental clicks on heavy AI generation or disk writes.
+  - Wrapped Security Audits, Optimization Audits, Prisma/API re-generation, and filesystem write operations in confirmation modals.
+- **Smart Tech Stack & .env Guidance**:
+  - Implemented `inferTechStackAndEnv` and `writeEnvExampleToDisk` in [src/app/actions/tech-stack.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/tech-stack.ts).
+  - Categorizes projects into 🟢 Lightweight (games/calculators -> no DB/API keys needed), 🟡 Standard (SQLite), and 🟣 Heavy SaaS (PostgreSQL, Stripe, Resend, OpenRouter).
+  - Built [src/components/env-dialog.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/env-dialog.tsx) and added "Avaimet & .env" button to the workspace header.
+  - Added smart guidance in Data Gate 1 for lightweight apps recommending LocalStorage/in-memory state.
+- **Bug Fix & Next.js Server Action Compliance**:
+  - Made `generateSmartEnglishApiCode` in [src/app/actions/codegen.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/codegen.ts) an `async` function to satisfy Next.js `"use server"` export requirements.
+- **Automated Verification**:
+  - Added unit test suites [tests/unit/audit-actions.test.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/tests/unit/audit-actions.test.ts) and [tests/unit/tech-stack.test.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/tests/unit/tech-stack.test.ts).
+  - Vitest test suite passing: **28 tests passed (0 failures)**.
+  - Next.js production build passing: `npm run build` (0 errors).
+  - Completely refreshed [README.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/README.md).
+
 ---
 
 ### 2026-09-08 — Data Gate 2: Backend API Routes & Server Actions Implementation (Step 3)

@@ -182,7 +182,7 @@ Generate complete, production-ready backend code containing Route Handlers, Zod 
   }
 
   if (!generatedCode) {
-    generatedCode = generateSmartEnglishApiCode(prompt, nodesSummary, prismaSchema);
+    generatedCode = await generateSmartEnglishApiCode(prompt, nodesSummary, prismaSchema);
   }
 
   // Update in DB if projectId exists
@@ -316,11 +316,11 @@ model Order {
 }`;
 }
 
-export function generateSmartEnglishApiCode(
+export async function generateSmartEnglishApiCode(
   prompt: string,
   nodesSummary: string,
   prismaSchema?: string | null
-): string {
+): Promise<string> {
   const p = prompt.toLowerCase();
   const hasTasks = p.includes("todo") || p.includes("task") || p.includes("tehtäv");
   const hasOrders = p.includes("order") || p.includes("payment") || p.includes("maksu") || p.includes("tilaus");

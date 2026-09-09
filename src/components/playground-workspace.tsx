@@ -15,6 +15,8 @@ import {
   HardDrive,
   AlertCircle,
   Server,
+  Zap,
+  Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +25,11 @@ import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
 import { CodeViewer } from "@/components/code-viewer";
+import { ConfirmActionDialog } from "@/components/confirm-action-dialog";
+import { AuditModal } from "@/components/audit-modal";
+import { EnvDialog } from "@/components/env-dialog";
+import { runSecurityAudit, runOptimizationAudit, AuditReport } from "@/app/actions/audit";
+import { inferTechStackAndEnv, TechStackProfile } from "@/app/actions/tech-stack";
 import { useRouter } from "next/navigation";
 import {
   updateProjectArchitecture,
@@ -78,6 +85,32 @@ export function PlaygroundWorkspace({
   const [isWritingToDisk, setIsWritingToDisk] = useState(false);
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Quality & Security Audit Suite States
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+
+  // Tech Stack & .env Inference States
+  const [techProfile, setTechProfile] = useState<TechStackProfile | null>(null);
+  const [isEnvDialogOpen, setIsEnvDialogOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    variant?: "default" | "destructive" | "warning" | "purple";
+    icon?: React.ReactNode;
+    isLoading?: boolean;
+    consequences?: string[];
+    onConfirm: () => Promise<void> | void;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+  });
+
   // Generate initial architecture diagram immediately if canvas is empty and prompt exists
   useEffect(() => {
     if (initialPrompt && initialNodes.length === 0) {
@@ -91,6 +124,13 @@ export function PlaygroundWorkspace({
         .catch((err) => {
           console.error("Failed to generate initial architecture diagram:", err);
         });
+    }
+
+    // Infer tech stack complexity and .env requirements
+    if (initialPrompt) {
+      inferTechStackAndEnv(initialPrompt)
+        .then((profile) => setTechProfile(profile))
+        .catch((err) => console.error("Failed to infer tech stack profile:", err));
     }
   }, [initialPrompt, initialNodes.length]);
 
@@ -279,6 +319,160 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
     setExternalPrompt(prompt);
   };
 
+  // Safe action triggers requiring user confirmation
+  const triggerSecurityCheck = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Haluatko suorittaa tietoturvatarkastuksen?",
+      description:
+        "Tämä toiminto suorittaa automatisoidun OWASP-tietoturva-analyysin nykyiselle arkkitehtuurille, tietokantamallille ja taustajärjestelmän API-koodille.",
+      confirmLabel: "Kyllä, tarkista tietoturva",
+      variant: "purple",
+      icon: <ShieldCheck className="h-5 w-5" />,
+      consequences: [
+        "Analysoi autentikaation, syötevalidoinnit ja tietoturvariskit",
+        "Ei tee muutoksia koodiisi eikä kirjoita tiedostoja levylle ilman lupaasi",
+      ],
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const report = await runSecurityAudit(
+            currentProjectId,
+            JSON.stringify({ nodes, edges }),
+            prismaSchema,
+            apiCode
+          );
+          setAuditReport(report);
+          setConfirmDialog((prev) => ({ ...prev, open: false, isLoading: false }));
+          setIsAuditModalOpen(true);
+        } catch (err) {
+          console.error("Security audit failed:", err);
+          setConfirmDialog((prev) => ({ ...prev, isLoading: false }));
+        }
+      },
+    });
+  };
+
+  const triggerOptimizationCheck = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Haluatko suorittaa koodin & suorituskyvyn optimoinnin?",
+      description:
+        "Tämä toiminto etsii arkkitehtuurin ja koodin suorituskykypullonkaulat, tarkastaa tietokantaindeksit ja välimuististrategiat.",
+      confirmLabel: "Kyllä, optimoi ja tarkista",
+      variant: "warning",
+      icon: <Zap className="h-5 w-5" />,
+      consequences: [
+        "Tarkistaa tietokantamallien indeksit ja N+1 -kyselyriskit",
+        "Etsii suorituskyky- ja välimuistiparannuksia taustajärjestelmään",
+        "Antaa selkeät parannusehdotukset ilman suoria koodimuutoksia",
+      ],
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, isLoading: true }));
+        try {
+          const report = await runOptimizationAudit(
+            currentProjectId,
+            JSON.stringify({ nodes, edges }),
+            prismaSchema,
+            apiCode
+          );
+          setAuditReport(report);
+          setConfirmDialog((prev) => ({ ...prev, open: false, isLoading: false }));
+          setIsAuditModalOpen(true);
+        } catch (err) {
+          console.error("Optimization audit failed:", err);
+          setConfirmDialog((prev) => ({ ...prev, isLoading: false }));
+        }
+      },
+    });
+  };
+
+  const triggerGenerateSchemaConfirmation = () => {
+    if (prismaSchema.trim()) {
+      setConfirmDialog({
+        open: true,
+        title: "Generoidaanko tietokantamalli uudelleen?",
+        description:
+          "Projektilla on jo generoitu Prisma-skeema. Uudelleengenerointi korvaa nykyisen luonnoksen tekoälyn luomalla uudella versiolla.",
+        confirmLabel: "Kyllä, generoi uudelleen",
+        variant: "warning",
+        icon: <Database className="h-5 w-5" />,
+        consequences: [
+          "Nykyinen näytöllä oleva Prisma-skeemaluonnos korvataan uudella",
+          "Levyllä olevat tiedostot eivät muutu ennen kuin painat 'Kirjoita levylle'",
+        ],
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+          await handleGenerateSchema();
+        },
+      });
+    } else {
+      handleGenerateSchema();
+    }
+  };
+
+  const triggerGenerateApiConfirmation = () => {
+    if (apiCode.trim()) {
+      setConfirmDialog({
+        open: true,
+        title: "Generoidaanko API-koodi uudelleen?",
+        description:
+          "Projektilla on jo generoitu taustajärjestelmän API-koodi. Uudelleengenerointi korvaa nykyisen koodiluonnoksen.",
+        confirmLabel: "Kyllä, generoi uudelleen",
+        variant: "warning",
+        icon: <Server className="h-5 w-5" />,
+        consequences: [
+          "Nykyinen näytöllä oleva API-koodiluonnos korvataan uudella",
+          "Levyllä olevat tiedostot eivät muutu ennen kuin painat 'Kirjoita levylle'",
+        ],
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+          await handleGenerateApiRoutes();
+        },
+      });
+    } else {
+      handleGenerateApiRoutes();
+    }
+  };
+
+  const triggerWritePrismaToDiskConfirmation = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Kirjoitetaanko tietokantamalli levylle?",
+      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'prisma/schema.prisma' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
+      confirmLabel: "Kyllä, kirjoita tiedosto",
+      variant: "purple",
+      icon: <HardDrive className="h-5 w-5" />,
+      consequences: [
+        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
+        "Varmista, että olet tallentanut mahdolliset aiemmat muutokset",
+      ],
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+        await handleWriteToDisk();
+      },
+    });
+  };
+
+  const triggerWriteApiToDiskConfirmation = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Kirjoitetaanko API-koodi levylle?",
+      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'src/app/api/endpoints/route.ts' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
+      confirmLabel: "Kyllä, kirjoita tiedosto",
+      variant: "purple",
+      icon: <HardDrive className="h-5 w-5" />,
+      consequences: [
+        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
+        "Luo tarvittavat hakemistot automaattisesti",
+      ],
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+        await handleWriteApiToDisk();
+      },
+    });
+  };
+
   return (
     <div className="h-screen flex flex-col bg-muted/20">
       {/* Top bar */}
@@ -338,15 +532,36 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Project-wide AI Audit Button */}
+          {/* Quality & Security Suite Buttons */}
           <Button
-            onClick={handleProjectAICheck}
+            onClick={triggerSecurityCheck}
             variant="outline"
             size="sm"
             className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
           >
             <ShieldCheck className="mr-1.5 h-4 w-4 text-purple-500" />
-            AI Tarkista arkkitehtuuri
+            Security Check
+          </Button>
+
+          <Button
+            onClick={triggerOptimizationCheck}
+            variant="outline"
+            size="sm"
+            className="border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-medium"
+          >
+            <Zap className="mr-1.5 h-4 w-4 text-amber-500" />
+            Optimize Code
+          </Button>
+
+          {/* Tech Stack & .env guidance button */}
+          <Button
+            onClick={() => setIsEnvDialogOpen(true)}
+            variant="outline"
+            size="sm"
+            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
+          >
+            <Key className="mr-1.5 h-4 w-4 text-purple-500" />
+            {techProfile?.tierLabel ? `${techProfile.tierLabel.split(" ")[0]} Avaimet & .env` : "Avaimet & .env"}
           </Button>
 
           {currentProjectId ? (
@@ -462,7 +677,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
 
                   <div className="flex items-center space-x-2">
                     <Button
-                      onClick={handleGenerateSchema}
+                      onClick={triggerGenerateSchemaConfirmation}
                       disabled={isGeneratingSchema}
                       size="sm"
                       className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
@@ -477,7 +692,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
 
                     {prismaSchema && (
                       <Button
-                        onClick={handleWriteToDisk}
+                        onClick={triggerWritePrismaToDiskConfirmation}
                         disabled={isWritingToDisk}
                         variant="outline"
                         size="sm"
@@ -493,6 +708,21 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                     )}
                   </div>
                 </div>
+
+                {/* Lightweight App Database Notice */}
+                {techProfile && !techProfile.database.needed && (
+                  <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs flex items-start space-x-2.5 flex-none">
+                    <Sparkles className="h-4 w-4 text-emerald-500 flex-none mt-0.5" />
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        Kevyt sovellus ({techProfile.tierLabel}): Erillistä palvelintietokantaa ei tarvita!
+                      </span>
+                      <p className="text-foreground/80 leading-relaxed">
+                        {techProfile.database.reason} Voit käyttää suoraan selaimen LocalStoragea tai siirtyä käyttöliittymäkehitykseen. Voit kuitenkin generoida Prisma-skeeman alla olevasta napista, jos haluat myöhemmin laajentaa sovellusta.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Status/Error Messages */}
                 {diskMessage && (
@@ -530,7 +760,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                         </p>
                       </div>
                       <Button
-                        onClick={handleGenerateSchema}
+                        onClick={triggerGenerateSchemaConfirmation}
                         disabled={isGeneratingSchema}
                         size="sm"
                         className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
@@ -561,7 +791,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
 
                   <div className="flex items-center space-x-2">
                     <Button
-                      onClick={handleGenerateApiRoutes}
+                      onClick={triggerGenerateApiConfirmation}
                       disabled={isGeneratingApi}
                       size="sm"
                       className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
@@ -576,7 +806,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
 
                     {apiCode && (
                       <Button
-                        onClick={handleWriteApiToDisk}
+                        onClick={triggerWriteApiToDiskConfirmation}
                         disabled={isWritingToDisk}
                         variant="outline"
                         size="sm"
@@ -629,7 +859,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                         </p>
                       </div>
                       <Button
-                        onClick={handleGenerateApiRoutes}
+                        onClick={triggerGenerateApiConfirmation}
                         disabled={isGeneratingApi}
                         size="sm"
                         className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
@@ -668,6 +898,37 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
           />
         </div>
       </div>
+
+      {/* Confirmation Dialog ("Oletko varma?") */}
+      <ConfirmActionDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel={confirmDialog.confirmLabel}
+        cancelLabel={confirmDialog.cancelLabel}
+        variant={confirmDialog.variant}
+        icon={confirmDialog.icon}
+        isLoading={confirmDialog.isLoading || isAuditing}
+        consequences={confirmDialog.consequences}
+        onConfirm={confirmDialog.onConfirm}
+      />
+
+      {/* Visual Audit Report Scorecard Modal */}
+      <AuditModal
+        report={auditReport}
+        open={isAuditModalOpen}
+        onOpenChange={setIsAuditModalOpen}
+      />
+
+      {/* Tech Stack & .env.local.example Dialog */}
+      <EnvDialog
+        open={isEnvDialogOpen}
+        onOpenChange={setIsEnvDialogOpen}
+        profile={techProfile}
+        projectId={currentProjectId}
+        targetPath={targetPath}
+      />
     </div>
   );
 }

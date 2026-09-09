@@ -72,8 +72,8 @@ describe("Data Gate 2: generateApiRoutesForProject", () => {
     );
   });
 
-  it("tailors entities for order/payment domains", () => {
-    const code = generateSmartEnglishApiCode("E-commerce store with stripe payment and orders", "");
+  it("tailors entities for order/payment domains", async () => {
+    const code = await generateSmartEnglishApiCode("E-commerce store with stripe payment and orders", "");
     expect(code).toContain("CreateOrderSchema");
     expect(code).toContain("amount: z.number().positive");
     expect(code).toContain("/api/orders");
