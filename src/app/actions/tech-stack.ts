@@ -130,7 +130,7 @@ function inferFallbackTechStack(prompt: string, architectureJson?: string): Tech
     envVars.push({
       key: "NEXTAUTH_SECRET",
       description: "Istuntotokeneiden ja evästeiden salausavain",
-      sampleValue: "vaihda-tahan-satunnainen-pitka-merkkijono-32-merkkia",
+      sampleValue: "your-random-32-char-secret-key",
       whereToGet: "Luo satunnainen avain komennolla `openssl rand -base64 32`.",
       required: true,
     });
@@ -147,7 +147,7 @@ function inferFallbackTechStack(prompt: string, architectureJson?: string): Tech
     envVars.push({
       key: "OPENROUTER_API_KEY",
       description: "OpenRouter- tai OpenAI-yhteysavain tekoälymallien kutsumiseen",
-      sampleValue: "sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      sampleValue: "your-openrouter-api-key-here",
       whereToGet: "Hanki avain osoitteesta openrouter.ai/keys tai platform.openai.com.",
       required: true,
     });
@@ -157,14 +157,14 @@ function inferFallbackTechStack(prompt: string, architectureJson?: string): Tech
     envVars.push({
       key: "STRIPE_SECRET_KEY",
       description: "Stripe-maksupalvelun salainen API-avain",
-      sampleValue: "sk_test_51xxxxxxxxxxxxxxxxxxxxxxxxxx",
+      sampleValue: "your-stripe-secret-key-here",
       whereToGet: "Luo maksuton kehitystili ja kopioi avain osoitteesta dashboard.stripe.com/apikeys.",
       required: true,
     });
     envVars.push({
       key: "STRIPE_WEBHOOK_SECRET",
       description: "Maksutapahtumien webhook-allekirjoituksen varmenne",
-      sampleValue: "whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      sampleValue: "your-stripe-webhook-secret-here",
       whereToGet: "Saat tämän Stripe CLI -työkalulla tai Stripe Dashboardin Webhooks-osiosta.",
       required: false,
     });
@@ -174,7 +174,7 @@ function inferFallbackTechStack(prompt: string, architectureJson?: string): Tech
     envVars.push({
       key: "RESEND_API_KEY",
       description: "Resend-sähköpostipalvelun API-avain transaktiosähköposteille",
-      sampleValue: "re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      sampleValue: "your-resend-api-key-here",
       whereToGet: "Luo ilmainen tunnus osoitteessa resend.com ja luo API-avain.",
       required: true,
     });
