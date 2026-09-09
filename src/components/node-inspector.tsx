@@ -26,6 +26,7 @@ export function NodeInspector({
 
   useEffect(() => {
     if (selectedNode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLabel((selectedNode.data?.label as string) || "");
       setTech((selectedNode.data?.tech as string) || "");
       setDescription((selectedNode.data?.description as string) || "");

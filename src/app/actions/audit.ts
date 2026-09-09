@@ -20,6 +20,17 @@ export interface AuditReport {
   timestamp: string;
 }
 
+interface AuditNode {
+  id: string;
+  data?: { label?: string; tech?: string; description?: string };
+}
+
+interface AuditEdge {
+  source: string;
+  target: string;
+  label?: string;
+}
+
 function calculateGrade(score: number): "A" | "B" | "C" | "D" | "F" {
   if (score >= 90) return "A";
   if (score >= 80) return "B";
@@ -247,8 +258,8 @@ export async function runSecurityAudit(
   prismaSchema?: string,
   apiCode?: string
 ): Promise<AuditReport> {
-  let nodes: any[] = [];
-  let edges: any[] = [];
+  let nodes: AuditNode[] = [];
+  let edges: AuditEdge[] = [];
 
   if (architectureJson) {
     try {
@@ -336,8 +347,8 @@ export async function runOptimizationAudit(
   prismaSchema?: string,
   apiCode?: string
 ): Promise<AuditReport> {
-  let nodes: any[] = [];
-  let edges: any[] = [];
+  let nodes: AuditNode[] = [];
+  let edges: AuditEdge[] = [];
 
   if (architectureJson) {
     try {

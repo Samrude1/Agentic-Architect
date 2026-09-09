@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   const apiKey = process.env.OPENROUTER_API_KEY;
 
   const lastUserMessage = messages && messages.length > 0
-    ? messages.filter((m: any) => m.role === "user").pop()?.content || ""
+    ? messages.filter((m: { role?: string; content?: string }) => m.role === "user").pop()?.content || ""
     : "";
 
   if (!apiKey || apiKey.includes("your-openrouter-key")) {

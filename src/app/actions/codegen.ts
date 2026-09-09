@@ -227,15 +227,15 @@ export async function writeProjectFileToDisk(
     await fs.promises.writeFile(fullPath, content, "utf-8");
 
     return { success: true, fullPath };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Tiedoston kirjoittaminen levylle epäonnistui.";
     console.error("Error writing project file to disk:", error);
-    return { success: false, error: error.message || "Tiedoston kirjoittaminen levylle epäonnistui." };
+    return { success: false, error: errorMsg };
   }
 }
 
-function generateSmartEnglishPrismaSchema(prompt: string, nodesSummary: string): string {
+function generateSmartEnglishPrismaSchema(prompt: string, _nodesSummary?: string): string {
   const p = prompt.toLowerCase();
-  const hasAuth = p.includes("user") || p.includes("auth") || p.includes("login") || p.includes("käyttäjä") || p.includes("tilit");
   const hasTasks = p.includes("todo") || p.includes("task") || p.includes("tehtäv");
   const hasOrders = p.includes("order") || p.includes("payment") || p.includes("maksu") || p.includes("tilaus");
 
@@ -318,8 +318,8 @@ model Order {
 
 export async function generateSmartEnglishApiCode(
   prompt: string,
-  nodesSummary: string,
-  prismaSchema?: string | null
+  _nodesSummary?: string,
+  _prismaSchema?: string | null
 ): Promise<string> {
   const p = prompt.toLowerCase();
   const hasTasks = p.includes("todo") || p.includes("task") || p.includes("tehtäv");

@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
@@ -86,7 +85,6 @@ export function PlaygroundWorkspace({
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Quality & Security Audit Suite States
-  const [isAuditing, setIsAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
 
@@ -247,8 +245,9 @@ export function PlaygroundWorkspace({
       } else {
         setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
       }
-    } catch (err: any) {
-      setDiskMessage({ type: "error", text: err.message || "Tiedoston kirjoitus epäonnistui." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
+      setDiskMessage({ type: "error", text: msg });
     } finally {
       setIsWritingToDisk(false);
       setTimeout(() => setDiskMessage(null), 5000);
@@ -305,18 +304,13 @@ export function PlaygroundWorkspace({
       } else {
         setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
       }
-    } catch (err: any) {
-      setDiskMessage({ type: "error", text: err.message || "Tiedoston kirjoitus epäonnistui." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
+      setDiskMessage({ type: "error", text: msg });
     } finally {
       setIsWritingToDisk(false);
       setTimeout(() => setDiskMessage(null), 5000);
     }
-  };
-
-  const handleProjectAICheck = () => {
-    const prompt = `Suorita kokonaisvaltainen arkkitehtuuritarkistus (Audit) koko järjestelmälle (${nodes.length} komponenttia, ${edges.length} linkkiä).
-Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tietoturvapullonkaulat sekä puuttuvat kerrokset. Jos näet aiheelliseksi korjata kaaviota, kutsu update_architecture-työkalua ja selitä suosituksesi.`;
-    setExternalPrompt(prompt);
   };
 
   // Safe action triggers requiring user confirmation
@@ -756,7 +750,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                       <div>
                         <h4 className="font-semibold text-sm">Ei vielä generoitua tietokantamallia</h4>
                         <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                          Paina *"Generoi tietokantamalli AI:lla"* painiketta luodaksesi arkkitehtuurikaaviosi pohjalta tuotantovalmiin Prisma-skeeman.
+                          Paina &quot;Generoi tietokantamalli AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi pohjalta tuotantovalmiin Prisma-skeeman.
                         </p>
                       </div>
                       <Button
@@ -855,7 +849,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
                       <div>
                         <h4 className="font-semibold text-sm">Ei vielä generoituja API-rajapintoja</h4>
                         <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                          Paina *"Generoi API-koodi AI:lla"* painiketta luodaksesi arkkitehtuurikaaviosi (Layer 1 Gateway & Layer 2 Services) ja tietomallin pohjalta tuotantovalmiit rajapintareitit.
+                          Paina &quot;Generoi API-koodi AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi (Layer 1 Gateway & Layer 2 Services) ja tietomallin pohjalta tuotantovalmiit rajapintareitit.
                         </p>
                       </div>
                       <Button
@@ -909,7 +903,7 @@ Tarkasta komponenttien väliset riippuvuudet, mahdolliset suorituskyky- tai tiet
         cancelLabel={confirmDialog.cancelLabel}
         variant={confirmDialog.variant}
         icon={confirmDialog.icon}
-        isLoading={confirmDialog.isLoading || isAuditing}
+        isLoading={confirmDialog.isLoading}
         consequences={confirmDialog.consequences}
         onConfirm={confirmDialog.onConfirm}
       />

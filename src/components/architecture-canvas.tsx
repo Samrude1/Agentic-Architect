@@ -65,12 +65,14 @@ export function ArchitectureCanvas({
   // Synchronize when controlled nodes/edges change externally (e.g., from AI chat tool call)
   useEffect(() => {
     if (controlledNodes) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInternalNodes(controlledNodes);
     }
   }, [controlledNodes]);
 
   useEffect(() => {
     if (controlledEdges) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInternalEdges(controlledEdges);
     }
   }, [controlledEdges]);

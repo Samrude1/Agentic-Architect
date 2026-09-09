@@ -28,7 +28,7 @@ export interface TechStackProfile {
 /**
  * Deterministic, intelligent rule engine for technology stack and environment variable inference.
  */
-function inferFallbackTechStack(prompt: string, architectureJson?: string): TechStackProfile {
+function inferFallbackTechStack(prompt: string, _architectureJson?: string): TechStackProfile {
   const p = prompt.toLowerCase();
 
   // Keyword categorization

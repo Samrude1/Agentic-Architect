@@ -21,7 +21,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { AuditReport, AuditFinding } from "@/app/actions/audit";
+import { AuditReport } from "@/app/actions/audit";
 
 interface AuditModalProps {
   report: AuditReport | null;

@@ -122,7 +122,7 @@ export function ChatSidebar({
             Anna ohjelmistoideasi tai kysy tekoälyltä ehdotuksia arkkitehtuurin hiomiseen.
           </div>
         ) : (
-          messages.map((message: any) => (
+          messages.map((message: { id: string; role: string; content: string; toolInvocations?: Array<{ toolCallId: string }> }) => (
             <div
               key={message.id}
               className={`flex items-start space-x-2 ${
@@ -142,7 +142,7 @@ export function ChatSidebar({
                 }`}
               >
                 {message.content}
-                {message.toolInvocations?.map((tool: any) => (
+                {message.toolInvocations?.map((tool: { toolCallId: string }) => (
                   <div key={tool.toolCallId} className="mt-2 text-sm text-muted-foreground italic border-t pt-1.5">
                     ⚡ Arkkitehtuurikaaviota päivitetty
                   </div>

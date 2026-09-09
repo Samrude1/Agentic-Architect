@@ -175,7 +175,7 @@ export function generateSmartPromptArchitecture(prompt: string): ArchitectureGra
   });
 
   // --- Layer 1: API / Gateway / Auth (y = 200) ---
-  let hasAuth = p.includes("käyttäjä") || p.includes("kirjautu") || p.includes("auth") || p.includes("salasana") || p.includes("tilit");
+  const hasAuth = p.includes("käyttäjä") || p.includes("kirjautu") || p.includes("auth") || p.includes("salasana") || p.includes("tilit");
   
   if (hasAuth) {
     nodes.push({
@@ -345,7 +345,7 @@ function autoLayoutNodes(nodes: ArchitectureNode[]): ArchitectureNode[] {
   const layerCounts: Record<number, number> = {};
 
   return nodes.map((node) => {
-    let y = node.position?.y ?? 100;
+    const y = node.position?.y ?? 100;
     let tier = 0;
     if (y > 425 || node.type === "output") tier = 3;
     else if (y > 275) tier = 2;

@@ -87,7 +87,7 @@ export async function deleteProject(id: string) {
   revalidatePath("/");
 }
 
-export async function generateMockArchitecture(prompt: string | null) {
+export async function generateMockArchitecture(_prompt?: string | null) {
   // Mock data for fallback / testing
   const nodes = [
     { id: "1", type: "input", data: { label: "User Context" }, position: { x: 250, y: 50 } },

@@ -15,8 +15,6 @@ import {
   Check,
   Copy,
   HardDrive,
-  ExternalLink,
-  Layers,
   Sparkles,
   Info,
   CheckCircle2,
@@ -82,8 +80,9 @@ export function EnvDialog({
       } else {
         setWriteMessage({ type: "error", text: result.error || "Kirjoitus epäonnistui." });
       }
-    } catch (err: any) {
-      setWriteMessage({ type: "error", text: err.message || "Tuntematon virhe levylle kirjoitettaessa." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tuntematon virhe levylle kirjoitettaessa.";
+      setWriteMessage({ type: "error", text: msg });
     } finally {
       setIsWriting(false);
       setTimeout(() => setWriteMessage(null), 5000);
@@ -182,7 +181,7 @@ export function EnvDialog({
                       </div>
                       <p className="text-muted-foreground">{ev.description}</p>
                       <div className="p-2 rounded-lg bg-background border border-border/40 font-mono text-[11px] text-purple-400">
-                        {ev.key}="{ev.sampleValue}"
+                        {ev.key}=&quot;{ev.sampleValue}&quot;
                       </div>
                       <div className="text-[11px] text-muted-foreground/90 flex items-center space-x-1 pt-0.5">
                         <Info className="h-3 w-3 text-purple-400 flex-none" />
