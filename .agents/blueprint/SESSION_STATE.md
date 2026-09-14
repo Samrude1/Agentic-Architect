@@ -5,42 +5,48 @@ This file tracks the current state, active context, and primary handoff files fo
 ---
 
 ## 📅 Session Snapshot
-- **Timestamp**: 2026-09-09T14:18:00+03:00
-- **Active Task**: Quality & Security Suite (Security Check, Optimize Code), Safety Gates, Smart Tech Stack & .env Guidance, Secret Scanning Sanitization
-- **Codebase Stability**: 🟩 Verified Stable (28 Vitest tests passing, `npx tsc --noEmit` passed with 0 errors, Next.js production build `next build` passed with 0 errors)
+- **Timestamp**: 2026-09-14T22:20:00+03:00
+- **Active Task**: Session Concluded — Canvas Export Suite, Data Gate 3 UI Generator, Next.js 16.3.5 Security Hardening, `/app-review` Quality Gate, and Documentation Complete
+- **Codebase Stability**: 🟩 Verified Production Ready (34 Vitest tests passing across 9 test files, `npx tsc --noEmit` 0 errors, `npm run lint` 0 errors/warnings, Next.js 16.3.5 Turbopack production build `npm run build` compiled in 16.2s)
 
 ---
 
 ## 🚀 Key Achievements Completed
-0. **GitHub Secret Scanning Remediation**:
-   - Sanitized sample placeholder keys in [src/app/actions/tech-stack.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/tech-stack.ts) (`whsec_` and `sk_test_` placeholders) to prevent GitHub's automated secret scanner from generating false positive alerts.
-1. **Quality & Security Suite UI (`app-security`, `app-review`, `app-perf`)**:
-   - Built `runSecurityAudit` and `runOptimizationAudit` in [src/app/actions/audit.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts).
-   - Created [src/components/audit-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/audit-modal.tsx) presenting a visual audit scorecard with health score (0-100), letter grade (A-F), filtered finding cards (Critical, Warning, Success), and actionable recommendations in plain language.
-   - Added `Security Check` and `Optimize Code` action buttons directly to the Playground workspace header toolbar.
-2. **Safety Gates: "Oletko varma?" Confirmation Dialogs**:
-   - Created [src/components/confirm-action-dialog.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/confirm-action-dialog.tsx) to prevent accidental clicks on heavy operations or file overwrites.
-   - Protected: Security Check, Optimize Code, Re-generating Prisma schema, Writing Prisma schema to disk, Re-generating API routes, Writing API routes to disk, and Writing `.env.local.example` to disk.
-3. **Smart Tech Stack & .env Guidance**:
-   - Built `inferTechStackAndEnv` and `writeEnvExampleToDisk` in [src/app/actions/tech-stack.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/tech-stack.ts).
-   - Classifies applications into 🟢 Lightweight (games, calculators -> no database or external API keys needed), 🟡 Standard (SQLite), and 🟣 Heavy SaaS (PostgreSQL, Stripe, Resend, OpenRouter).
-   - Created [src/components/env-dialog.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/env-dialog.tsx) and added "Avaimet & .env" button to the workspace header.
-   - Added smart notice in Data Gate 1 for lightweight apps explaining that LocalStorage/in-memory state suffices.
-4. **Server Action Asynchronicity Fix**:
-   - Made `generateSmartEnglishApiCode` in [src/app/actions/codegen.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/codegen.ts) an `async` function to strictly comply with Next.js `"use server"` requirements.
-5. **Documentation & Testing**:
-   - Added comprehensive Vitest tests in [tests/unit/audit-actions.test.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/tests/unit/audit-actions.test.ts) and [tests/unit/tech-stack.test.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/tests/unit/tech-stack.test.ts) (now 28 passing tests total).
-   - Completely updated [README.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/README.md).
+1. **Multi-Format Canvas Diagram Export Suite (`mermaid-export.ts`, `export-modal.tsx`)**:
+   - Built pure deterministic converter [src/lib/mermaid-export.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/mermaid-export.ts) with tier subgraph grouping (Client, Gateway, Services, Data), node sanitization, directional edge formatting, and custom styling classes.
+   - Built [src/components/export-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/export-modal.tsx) supporting:
+     - **PNG Export**: High-resolution 2x retina raster image with dark background.
+     - **SVG Export**: Scalable vector graphics export.
+     - **Mermaid.js**: Live syntax preview, one-click copy, and file download as `.mmd` or `.md`.
+   - Added `Vie Kaavio` button directly into the Playground workspace header.
+2. **Data Gate 3: UI Component Generator & Design System (`codegen.ts`)**:
+   - Added `generateUiComponentsForProject` and `generateSmartEnglishUiCode` in [src/app/actions/codegen.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/codegen.ts).
+   - Generates production-ready, self-contained React 19 + TypeScript + Tailwind CSS feature dashboards with live metric scorecards, search filters, interactive status toggles, and modal creation dialogs.
+   - Added `uiCode` persistence field in SQLite schema via Prisma and `updateProjectUiCode` action.
+   - Added Data Gate 3 tab in [src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx) with live `CodeViewer` and disk writer with confirmation dialogs.
+3. **Security Hardening (`/app-security`)**:
+   - Upgraded Next.js to `16.3.5` resolving critical SSRF/RCE CVEs.
+   - Upgraded Prisma Client and CLI to `7.10.0`.
+   - Injected comprehensive HTTP security headers in [next.config.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/next.config.ts) (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
+   - Documented full OWASP audit in [.agents/blueprint/SECURITY_AUDIT.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/SECURITY_AUDIT.md).
+4. **Code Quality & Review Gate (`/app-review`)**:
+   - Verified 100% clean passes: 34 Vitest unit tests passing, `tsc --noEmit` 0 errors, `npm run lint` 0 warnings, Turbopack build 0 errors.
+   - Updated [.agents/blueprint/CODE_REVIEW.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/CODE_REVIEW.md) and [.agents/blueprint/PROJECT_STATUS.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/PROJECT_STATUS.md).
+5. **Documentation & Bilingual Architecture**:
+   - Updated [README.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/README.md) with bilingual convention (Finnish UI copy / English engineering code & docs) and full pipeline Mermaid flowchart.
 
 ---
 
 ## 🎯 Next Immediate Task for Fresh Session
-- **Step 4**: Canvas diagram export features (PNG/SVG & Mermaid.js) or Data Gate 3 (UI Component Generator & Design System).
+- **Optional Modularization & Enhancements**:
+  - Modularize `playground-workspace.tsx` (1,172 lines) by extracting tabs (`Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`) into `src/components/workspace/`.
+  - Multi-file specification upload / drag-and-drop enhancements.
 
 ---
 
 ## 📚 Key Files to Read (Resume Handoff)
 1. [.agents/blueprint/PROJECT_STATUS.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/PROJECT_STATUS.md)
-2. [src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx)
-3. [src/app/actions/tech-stack.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/tech-stack.ts)
-4. [src/components/env-dialog.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/env-dialog.tsx)
+2. [README.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/README.md)
+3. [src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx)
+4. [.agents/blueprint/CODE_REVIEW.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/CODE_REVIEW.md)
+

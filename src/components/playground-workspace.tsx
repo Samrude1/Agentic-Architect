@@ -17,6 +17,7 @@ import {
   Server,
   Zap,
   Key,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import { CodeViewer } from "@/components/code-viewer";
 import { ConfirmActionDialog } from "@/components/confirm-action-dialog";
 import { AuditModal } from "@/components/audit-modal";
 import { EnvDialog } from "@/components/env-dialog";
+import { ExportModal } from "@/components/export-modal";
 import { runSecurityAudit, runOptimizationAudit, AuditReport } from "@/app/actions/audit";
 import { inferTechStackAndEnv, TechStackProfile } from "@/app/actions/tech-stack";
 import { useRouter } from "next/navigation";
@@ -39,6 +41,7 @@ import {
 import {
   generatePrismaSchemaForProject,
   generateApiRoutesForProject,
+  generateUiComponentsForProject,
   writeProjectFileToDisk,
 } from "@/app/actions/codegen";
 import { Node, Edge } from "@xyflow/react";
@@ -52,6 +55,7 @@ interface PlaygroundWorkspaceProps {
   initialTargetPath?: string;
   initialPrismaSchema?: string;
   initialApiCode?: string;
+  initialUiCode?: string;
 }
 
 export function PlaygroundWorkspace({
@@ -63,6 +67,7 @@ export function PlaygroundWorkspace({
   initialTargetPath = "",
   initialPrismaSchema = "",
   initialApiCode = "",
+  initialUiCode = "",
 }: PlaygroundWorkspaceProps) {
   const router = useRouter();
   const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(projectId);
@@ -75,14 +80,19 @@ export function PlaygroundWorkspace({
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Data Gates & Homebase State
-  const [activeTab, setActiveTab] = useState<"canvas" | "schema" | "api">("canvas");
+  const [activeTab, setActiveTab] = useState<"canvas" | "schema" | "api" | "ui">("canvas");
   const [targetPath, setTargetPath] = useState<string>(initialTargetPath);
   const [prismaSchema, setPrismaSchema] = useState<string>(initialPrismaSchema);
   const [apiCode, setApiCode] = useState<string>(initialApiCode);
+  const [uiCode, setUiCode] = useState<string>(initialUiCode);
   const [isGeneratingSchema, setIsGeneratingSchema] = useState(false);
   const [isGeneratingApi, setIsGeneratingApi] = useState(false);
+  const [isGeneratingUi, setIsGeneratingUi] = useState(false);
   const [isWritingToDisk, setIsWritingToDisk] = useState(false);
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Export Diagram Modal State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Quality & Security Audit Suite States
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
@@ -313,6 +323,66 @@ export function PlaygroundWorkspace({
     }
   };
 
+  const handleGenerateUiComponents = async () => {
+    setIsGeneratingUi(true);
+    try {
+      const res = await generateUiComponentsForProject(
+        currentProjectId || "",
+        initialPrompt,
+        JSON.stringify({ nodes, edges }),
+        prismaSchema,
+        apiCode
+      );
+      if (res.code) {
+        setUiCode(res.code);
+      }
+    } catch (err) {
+      console.error("Failed to generate UI components:", err);
+    } finally {
+      setIsGeneratingUi(false);
+    }
+  };
+
+  const handleWriteUiToDisk = async () => {
+    if (!currentProjectId) {
+      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
+      return;
+    }
+    if (!targetPath.trim()) {
+      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
+      return;
+    }
+    if (!uiCode.trim()) {
+      setDiskMessage({ type: "error", text: "Generoi käyttöliittymäkomponentit ensin." });
+      return;
+    }
+
+    setIsWritingToDisk(true);
+    try {
+      await updateProjectTargetPath(currentProjectId, targetPath);
+
+      const result = await writeProjectFileToDisk(
+        currentProjectId,
+        "src/components/features/dashboard.tsx",
+        uiCode
+      );
+      if (result.success) {
+        setDiskMessage({
+          type: "success",
+          text: `UI-komponentti kirjoitettu onnistuneesti! (${result.fullPath})`,
+        });
+      } else {
+        setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
+      setDiskMessage({ type: "error", text: msg });
+    } finally {
+      setIsWritingToDisk(false);
+      setTimeout(() => setDiskMessage(null), 5000);
+    }
+  };
+
   // Safe action triggers requiring user confirmation
   const triggerSecurityCheck = () => {
     setConfirmDialog({
@@ -467,6 +537,49 @@ export function PlaygroundWorkspace({
     });
   };
 
+  const triggerGenerateUiConfirmation = () => {
+    if (uiCode.trim()) {
+      setConfirmDialog({
+        open: true,
+        title: "Generoidaanko UI-komponentit uudelleen?",
+        description:
+          "Projektilla on jo generoitu käyttöliittymäkomponenttiluonnos. Uudelleengenerointi korvaa nykyisen koodin tekoälyn luomalla uudella versiolla.",
+        confirmLabel: "Kyllä, generoi uudelleen",
+        variant: "warning",
+        icon: <LayoutGrid className="h-5 w-5" />,
+        consequences: [
+          "Nykyinen näytöllä oleva UI-koodiluonnos korvataan uudella",
+          "Levyllä olevat tiedostot eivät muutu ennen kuin painat 'Kirjoita levylle'",
+        ],
+        onConfirm: async () => {
+          setConfirmDialog((prev) => ({ ...prev, open: false }));
+          await handleGenerateUiComponents();
+        },
+      });
+    } else {
+      handleGenerateUiComponents();
+    }
+  };
+
+  const triggerWriteUiToDiskConfirmation = () => {
+    setConfirmDialog({
+      open: true,
+      title: "Kirjoitetaanko UI-komponentti levylle?",
+      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'src/components/features/dashboard.tsx' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
+      confirmLabel: "Kyllä, kirjoita tiedosto",
+      variant: "purple",
+      icon: <HardDrive className="h-5 w-5" />,
+      consequences: [
+        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
+        "Luo tarvittavat hakemistot automaattisesti",
+      ],
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+        await handleWriteUiToDisk();
+      },
+    });
+  };
+
   return (
     <div className="h-screen flex flex-col bg-muted/20">
       {/* Top bar */}
@@ -522,10 +635,32 @@ export function PlaygroundWorkspace({
               <Server className="h-3.5 w-3.5 text-purple-500" />
               <span>API & Actions (Gate 2)</span>
             </button>
+            <button
+              onClick={() => setActiveTab("ui")}
+              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
+                activeTab === "ui"
+                  ? "bg-background text-foreground shadow-sm font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5 text-purple-500" />
+              <span>UI-Komponentit (Gate 3)</span>
+            </button>
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Canvas Export Dialog Button */}
+          <Button
+            onClick={() => setIsExportModalOpen(true)}
+            variant="outline"
+            size="sm"
+            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
+          >
+            <Download className="mr-1.5 h-4 w-4 text-purple-500" />
+            Vie Kaavio
+          </Button>
+
           {/* Quality & Security Suite Buttons */}
           <Button
             onClick={triggerSecurityCheck}
@@ -770,7 +905,7 @@ export function PlaygroundWorkspace({
                   )}
                 </div>
               </div>
-            ) : (
+            ) : activeTab === "api" ? (
               <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
                 <div className="flex items-center justify-between flex-none">
                   <div>
@@ -869,6 +1004,105 @@ export function PlaygroundWorkspace({
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
+                <div className="flex items-center justify-between flex-none">
+                  <div>
+                    <h3 className="font-bold text-base flex items-center space-x-2">
+                      <LayoutGrid className="h-5 w-5 text-purple-500" />
+                      <span>Data Gate 3: UI Components & Frontend Views</span>
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Generoi tuotantovalmiit React 19 + Tailwind CSS -käyttöliittymäkomponentit ja tilanhallinnan arkkitehtuurikaaviosi pohjalta (Standard English).
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      onClick={triggerGenerateUiConfirmation}
+                      disabled={isGeneratingUi}
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                    >
+                      {isGeneratingUi ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="mr-1.5 h-4 w-4" />
+                      )}
+                      {uiCode ? "Päivitä UI-koodi AI:lla" : "Generoi UI AI:lla"}
+                    </Button>
+
+                    {uiCode && (
+                      <Button
+                        onClick={triggerWriteUiToDiskConfirmation}
+                        disabled={isWritingToDisk}
+                        variant="outline"
+                        size="sm"
+                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
+                      >
+                        {isWritingToDisk ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
+                        )}
+                        Kirjoita levylle (src/components/features/dashboard.tsx)
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status/Error Messages */}
+                {diskMessage && (
+                  <div
+                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
+                      diskMessage.type === "success"
+                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
+                        : "bg-destructive/10 text-destructive border border-destructive/30"
+                    }`}
+                  >
+                    {diskMessage.type === "success" ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                    )}
+                    <span>{diskMessage.text}</span>
+                  </div>
+                )}
+
+                {/* Code Display */}
+                <div className="flex-1 min-h-0">
+                  {uiCode ? (
+                    <CodeViewer
+                      code={uiCode}
+                      filename="src/components/features/dashboard.tsx"
+                      badge="Data Gate 3 • English"
+                    />
+                  ) : (
+                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
+                      <LayoutGrid className="h-10 w-10 text-muted-foreground/50" />
+                      <div>
+                        <h4 className="font-semibold text-sm">Ei vielä generoituja käyttöliittymäkomponentteja</h4>
+                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+                          Paina &quot;Generoi UI AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi ja tietomallisi pohjalta tuotantovalmiin React 19 + Tailwind CSS -näkymän.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={triggerGenerateUiConfirmation}
+                        disabled={isGeneratingUi}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                      >
+                        {isGeneratingUi ? (
+                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="mr-1.5 h-4 w-4" />
+                        )}
+                        Generoi UI AI:lla
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -922,6 +1156,15 @@ export function PlaygroundWorkspace({
         profile={techProfile}
         projectId={currentProjectId}
         targetPath={targetPath}
+      />
+
+      {/* Canvas Export Modal (PNG, SVG, Mermaid.js) */}
+      <ExportModal
+        open={isExportModalOpen}
+        onOpenChange={setIsExportModalOpen}
+        nodes={nodes}
+        edges={edges}
+        projectName={currentProjectName}
       />
     </div>
   );

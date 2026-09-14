@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -18,7 +15,7 @@ model Project {
   prompt       String?
   architecture String?
   prismaSchema String?
-  apiCode      String?
   targetPath   String?
+  apiCode      String?
+  uiCode       String?
 }
-

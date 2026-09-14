@@ -8,12 +8,28 @@
 
 Agentic Architect is a platform designed for technical founders, software architects, and non-AI engineers to iterate on system designs interactively. It bridges the gap between high-level business requirements (or uploaded specification documents) and technical implementation by combining human oversight with autonomous AI agents.
 
+### 🌐 Bilingual Design Convention
+- **Finnish User Experience**: The application frontend, playground workspace, confirmation dialogs, and interactive scorecard modals are crafted in fluent **Finnish** for an intuitive, human-centered developer experience.
+- **English Engineering Standards**: All AI-generated code (Prisma schemas, Next.js API route handlers, React 19 UI components), architecture exports (Mermaid diagrams), test suites, and documentation are strictly in **Standard English** for global compatibility, production readiness, and seamless Git collaboration.
+
+```mermaid
+flowchart LR
+    A["📄 Input Spec\n(.pdf, .txt, .md)"] --> B["🎨 Visual Canvas\n(React Flow 4-Tier)"]
+    B --> C["💾 Gate 1: DB Schema\n(Prisma / SQLite)"]
+    C --> D["🛡️ Gate 2: Backend APIs\n(Route Handlers + Zod)"]
+    D --> E["💻 Gate 3: UI Dashboard\n(React 19 + Tailwind CSS)"]
+    B --> F["📐 Multi-Format Export\n(PNG 2x, SVG, Mermaid.js)"]
+```
+
 Users can input a project description or upload specification files (`.pdf`, `.txt`, `.md`). The system generates an interactive **Visual Architecture Canvas** (using React Flow) representing UI components, APIs, backend services, and database layers. The user and AI Co-Pilot work together in a real-time **Playground** workspace with staged quality gates:
 1. **Visual Canvas**: Interactive 4-tier system modeling and AI audits.
 2. **Data Gate 1**: Automated Prisma database schema generation (`schema.prisma`).
 3. **Data Gate 2**: Automated Next.js App Router Route Handlers (`route.ts`) and Server Actions with Zod validation.
-4. **Quality & Security Suite**: 1-click OWASP Security Audits, Code Optimization, and interactive scorecard reporting.
-5. **Smart Tech Stack & .env Inference**: Intelligent complexity detection (Lightweight vs. Standard vs. Heavy SaaS) and automated `.env.local.example` guidance.
+4. **Data Gate 3**: Automated React 19 + Tailwind CSS feature UI components (`dashboard.tsx`) with reactive state.
+5. **Diagram Export Suite**: 1-click PNG (2x retina), SVG vector, and Mermaid.js markdown export.
+6. **Quality & Security Suite**: 1-click OWASP Security Audits, Code Optimization, and interactive scorecard reporting.
+7. **Smart Tech Stack & .env Inference**: Intelligent complexity detection (Lightweight vs. Standard vs. Heavy SaaS) and automated `.env.local.example` guidance.
+8. **Next.js 16.3.5 Security Hardened**: Comprehensive HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy) and strict path containment guards.
 
 ---
 
@@ -55,8 +71,18 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 - **Uniform Response Envelopes**: Consistent API response contract: `ApiResponse<T>` (`{ success: true, data }` or `{ success: false, error: { code, message, details } }`).
 - **One-Click Local Disk Writer**: Safely write generated API code directly to `{targetPath}/src/app/api/endpoints/route.ts`.
 
-### 7. 🧪 Automated Testing & Security (Vitest + jsdom)
-- **Comprehensive Test Suite**: 28 automated unit and integration tests passing with 0 failures across 7 test suites (`npm test`).
+### 7. 🎨 Data Gate 3: UI Components & Feature Views
+- **AI React 19 UI Component Generator**: Generates complete, self-contained, copy-pasteable React 19 + Tailwind CSS feature dashboards (`dashboard.tsx`) matching the architecture and data models.
+- **Interactive State & Metrics**: Features live metric scorecards (total records, active, completed, throughput rate), search bar, status tabs, creation form modals, and interactive item cards.
+- **One-Click Local Disk Writer**: Safely write generated UI code directly to `{targetPath}/src/components/features/dashboard.tsx` with safety confirmation guards.
+
+### 8. 📐 Multi-Format Canvas Diagram Export Suite
+- **Mermaid.js Flowchart Generator**: Converts React Flow canvas nodes into standard `flowchart TD` markdown partitioned into 4 architectural subgraphs (Client, Gateway, Services, Data) with sanitized labels and custom CSS styling.
+- **One-Click Copy & Download**: Copy Mermaid markdown to clipboard or download as `.mmd` or `.md` files for GitHub README, Notion, or Obsidian.
+- **Retina PNG & Vector SVG Export**: High-resolution 2x retina raster image and scalable vector graphics download via `html-to-image`.
+
+### 9. 🧪 Automated Testing & Security (Vitest + jsdom)
+- **Comprehensive Test Suite**: 34 automated unit and integration tests passing with 0 failures across 9 test suites (`npm test`).
 - **Security & Path Bounds Verification**: Intercepts directory traversal attacks (`../../etc/passwd`, `..\..\windows\...`) to protect filesystem writes.
 - **Isolated Secrets**: API keys isolated in `.env.local`, with clean `.env.example` templates committed.
 
@@ -70,7 +96,7 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 │   ├── app/                      # Next.js App Router pages & Server Actions
 │   │   ├── actions/              # Server Actions (audit.ts, codegen.ts, file-parser.ts, project.ts, tech-stack.ts)
 │   │   ├── api/chat/             # Vercel AI SDK Co-Pilot API route (streaming)
-│   │   ├── playground/           # Interactive Playground page (Canvas, Gate 1, Gate 2)
+│   │   ├── playground/           # Interactive Playground page (Canvas, Gate 1, Gate 2, Gate 3)
 │   │   └── projects/[id]/        # Saved project detail view
 │   ├── components/               # UI components
 │   │   ├── architecture-canvas.tsx   # React Flow visual canvas
@@ -80,13 +106,14 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 │   │   ├── confirm-action-dialog.tsx # "Oletko varma?" confirmation gate
 │   │   ├── delete-project-button.tsx # Project deletion button with confirmation
 │   │   ├── env-dialog.tsx            # Tech stack & .env.local.example modal
+│   │   ├── export-modal.tsx          # Multi-format export dialog (PNG, SVG, Mermaid.js)
 │   │   ├── idea-input-form.tsx       # Homepage input form & file dropzone
 │   │   ├── node-inspector.tsx        # Node Detail Inspector & manual editor
-│   │   └── playground-workspace.tsx  # Main Playground workspace container
-│   └── lib/                      # Prisma database client & utilities
+│   │   └── playground-workspace.tsx  # Main Playground workspace container (Gates 1-3 & Export)
+│   └── lib/                      # Prisma DB client, mermaid-export.ts & utilities
 ├── tests/                        # Vitest automated unit & integration test suite
 │   ├── setup.ts                  # Global test setup (Next.js mocks, jsdom)
-│   └── unit/                     # Unit test suites (security, parser, agent, codegen, audit, tech-stack)
+│   └── unit/                     # 9 Unit test suites (security, parser, agent, codegen, ui, mermaid, audits, tech-stack)
 ├── prisma/                       # Prisma SQLite schema & migrations
 ├── docs/                         # Project vision documentation
 ├── .agents/                      # Solo Dev Kit blueprint & cognitive memory

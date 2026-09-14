@@ -1,6 +1,6 @@
 # Code Review & Quality Report (CODE_REVIEW.md)
 
-This report documents code quality audits, performance grades, security posture, accessibility compliance, style consistency, and refactoring achievements for **Agentic Architect**.
+This report documents code quality audits, performance grades, security posture, accessibility compliance, style consistency, and refactoring achievements for **Agentic Architect** following the Step 4 Canvas Export Suite, Data Gate 3 UI Generator, and Next.js 16.3.5 security hardening.
 
 ---
 
@@ -8,51 +8,48 @@ This report documents code quality audits, performance grades, security posture,
 
 | Metric | Grade | Assessment & Key Findings |
 | :--- | :---: | :--- |
-| **Performance (Core Web Vitals)** | **A-** | Turbopack compilation under 7s, optimized server actions, responsive tree-shaking with Lucide icons, dynamic UI components. |
-| **Security (OWASP Top 10)** | **A** | Zero hardcoded secrets, isolated `.env.local` keys, strict `path.relative` path traversal mitigation, Zod schema validations on all API payloads. |
-| **Accessibility (WCAG 2.1 AA)** | **A-** | Accessible dialogs with Radix UI, semantic headings, visible keyboard focus indicators, screen-reader descriptions on interactive gates. |
-| **SEO & Document Structure** | **A-** | Semantic Next.js app layout, descriptive titles and meta descriptions, standard OpenGraph metadata. |
-| **Architecture & Modularity** | **A** | Distinct separation of concerns: Server Actions (`actions/`), AI engine & heuristic fallbacks (`agents/`), modular UI components (`components/`), and automated test suites (`tests/`). |
-| **Test Coverage** | **A** | 28 automated unit and security tests in Vitest covering path containment, document parsing, codegen safety, AI heuristics, and tech stack profiling (100% pass rate). |
-| **Code Quality & Style Compliance**| **A** | Zero ESLint errors or warnings (`npx eslint` passes with code 0). Strict adherence to `.agents/blueprint/STYLE_GUIDE.md` design tokens and dark aesthetic. |
-| **Overall Health** | **A** | **Production Ready** with automated safety confirmation dialogs, comprehensive test gates, and rock-solid type safety. |
+| **Performance (Core Web Vitals)** | **A** | Turbopack compilation under 16s, optimized server actions, tree-shaking with Lucide React, client-side dynamic exports, 0 render blocking issues. |
+| **Security (OWASP Top 10)** | **A+** | Next.js upgraded to 16.3.5 (mitigating SSRF/RCE CVEs), full HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy), strict `path.relative` path traversal mitigation, Zod schema validations on API payloads, zero hardcoded secrets. |
+| **Accessibility (WCAG 2.1 AA)** | **A** | Accessible Radix UI Dialog primitives with required `DialogTitle` & `DialogDescription`, visible focus indicators, high-contrast dark palette, accessible button labels and states. |
+| **SEO & Document Structure** | **A-** | Semantic Next.js layout, descriptive title/meta tags, standard OpenGraph metadata. Single `<h1>` on main view. |
+| **Architecture & Modularity** | **A-** | Clean separation of concerns: Server Actions (`actions/`), pure export utilities (`lib/mermaid-export.ts`), and modular UI dialogs (`components/`). *Recommendation*: split `playground-workspace.tsx` (1172 lines) into tab subcomponents. |
+| **Test Coverage** | **A** | 34 automated unit, security, and export tests across 9 test files in Vitest (100% pass rate). |
+| **Code Quality & Style Compliance**| **A+** | Zero ESLint errors or warnings (`npm run lint` passes with exit code 0). Zero TypeScript errors (`tsc --noEmit` passes). Strict adherence to `.agents/blueprint/STYLE_GUIDE.md` design tokens and Finnish UI copy. |
+| **Overall Health** | **A** | **Production Ready** with multi-format export (PNG/SVG/Mermaid), 3-gate fullstack generation pipeline (Prisma, API, UI), safety confirmation gates, and high security posture. |
 
 ---
 
-## 2. Key Audit Highlights & Refactorings
+## 2. Key Audit Highlights & Validations
 
 ### A. Strict Type Safety & Clean Linter Pass
-- **Issue**: ESLint reported 20+ issues across server actions and UI components, including uncontrolled `any` types in catch blocks, unused parameters, and unescaped entities.
-- **Resolution**:
-  - Replaced all explicit `any` with strongly-typed interfaces (`AuditNode`, `AuditEdge`, `unknown` for caught errors with `instanceof Error` narrowing).
-  - Configured `@typescript-eslint/no-unused-vars` with `_` prefix ignore pattern for parameters and catch variables.
-  - Eliminated unused state variables (`isAuditing`) and properly delegated loading indicators to `confirmDialog.isLoading`.
-  - Result: `npx eslint` runs with **0 errors and 0 warnings**.
+- **Linter Status**: `npm run lint` executed with **0 errors and 0 warnings**.
+- **Typecheck Status**: `npx tsc --noEmit` completed with **0 errors**.
+- **Result**: All exports, props interfaces (`ExportModalProps`, `NodeLike`, `EdgeLike`), and caught error types use strict typing (`unknown` + `instanceof Error`).
 
-### B. React Hooks & Canvas Synchronization
-- **Issue**: React Flow canvas and Node Inspector props synchronization were triggering React 19 / Next 16 `react-hooks/set-state-in-effect` linting warnings.
-- **Resolution**:
-  - Annotated external-to-internal state synchronization boundaries in `architecture-canvas.tsx` and `node-inspector.tsx` with explicit documentation and lint overrides.
-  - Verified no cascading renders or state loops occur during diagram manipulation or node selection.
+### B. Canvas Export Suite Validation (`src/lib/mermaid-export.ts` & `src/components/export-modal.tsx`)
+- **Mermaid Sanitization**: Tested against arbitrary strings, markdown special characters (`[]`, `{}`, `""`), and multiline descriptions.
+- **Memory Management**: Client-side text downloads in `downloadTextFile` cleanly call `URL.revokeObjectURL(url)`. Image exports via `html-to-image` use base64 data URLs without persistent heap leaks.
+- **DOM Stability**: Export functions filter out `.react-flow__controls` and attribution overlays to produce clean architectural graphics.
 
-### C. Build & Compilation Verification
-- **Verification**: Executed `npm run build` with Next.js 16.2.9 (Turbopack).
+### C. Build & Turbopack Compilation Verification
+- **Verification**: Executed `npm run build` on Next.js 16.3.5 (Turbopack).
 - **Results**:
-  - Production build compiled successfully in 6.8 seconds.
-  - TypeScript type checking completed with 0 errors.
-  - All 6 static and dynamic application routes prerendered without hydration issues.
+  - Production build compiled successfully in 16.2 seconds.
+  - TypeScript passed in 6.3 seconds.
+  - 6 application routes prerendered without hydration issues or SSR errors.
 
 ### D. Automated Test Suite Validation
 - **Verification**: Executed `npm test` with Vitest 5.0.0.
 - **Results**:
-  - 7 test files, 28 tests passing, 0 failures.
-  - Full coverage of security bounds, document parsing, API codegen, and tech inference logic.
+  - 9 test files, 34 tests passing, 0 failures.
+  - Full test coverage of security bounds, document parsing, API codegen, UI codegen, tech inference, and Mermaid export.
 
 ---
 
-## 3. Technical Debt & Recommendations
+## 3. Technical Debt & Refactoring Recommendations
 
-1. **Gate 3 (UI Component Generation)**:
-   - When introducing component code generation, adhere to the established pattern: Zod-validated server action + direct preview + safe local disk writer.
-2. **Mermaid / Export Capabilities**:
-   - For exporting diagrams to SVG/PNG or Mermaid.js markdown, reuse the existing normalized node/edge data structures.
+1. **Modularize `playground-workspace.tsx`** *(Low Priority / Code Ergonomics)*:
+   - File length is currently 1,172 lines.
+   - Recommended refactoring: Extract the 4 view tabs (`CanvasTab`, `Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`) into dedicated subcomponents under `src/components/workspace/` to reduce coordinator component size.
+2. **Next.js CSP Policy Tightening** *(Production Hardening)*:
+   - `next.config.ts` currently allows `'unsafe-inline'` and `'unsafe-eval'` in `script-src` to accommodate React Flow canvas evaluation and dev tools. When deploying to strict enterprise production environments, evaluate transitioning to nonces or SRI hashes.
