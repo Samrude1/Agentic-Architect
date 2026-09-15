@@ -140,3 +140,14 @@ Chronological record of architectural decisions, completed sprints, and developm
   - Production build successful via Next.js Turbopack (`npm run build`).
   - Updated `CODE_REVIEW.md`, `PROJECT_STATUS.md`, and `README.md` with bilingual architecture convention and pipeline diagram.
 
+---
+
+### 2026-09-15 — Full Studio Documentation Suite (`/app-docs`)
+- **Full Studio Documentation Suite Generated**:
+  - `README.md`: Upgraded to Standard Readme specification with badges, key features, tech stack matrix, prerequisites, quickstart, environment variables, scripts table, and architecture overview.
+  - `CHANGELOG.md`: Established Keep a Changelog + SemVer standard; grouped 20 git commits into MVP release tag `[1.0.0]`.
+  - `RUNBOOK.md`: Built production operations runbook covering health checks, instant rollback protocols, SQLite disaster recovery, and secret key rotation.
+  - `API.md`: Documented `/api/chat` streaming HTTP endpoint (tool calling schema, Smart Fallback) and all 6 Server Actions.
+  - `docs/adr/0001-core-technology-stack-selection.md`: Initial Architectural Decision Record (MADR format) capturing core stack decisions and trade-offs.
+
+

@@ -1,179 +1,165 @@
-# 🧠 Agentic Architect
+# Agentic Architect
 
-**An AI-driven fullstack development platform that translates business requirements and specifications into interactive visual architecture diagrams, production-ready code, and automated quality assurance.**
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/Samrude1/Agentic-Architect)
+[![Version](https://img.shields.io/badge/version-1.0.0--MVP-blueviolet.svg)](https://github.com/Samrude1/Agentic-Architect/releases)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-34%20Passing-brightgreen.svg)](./tests/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
----
-
-## 🚀 Overview
-
-Agentic Architect is a platform designed for technical founders, software architects, and non-AI engineers to iterate on system designs interactively. It bridges the gap between high-level business requirements (or uploaded specification documents) and technical implementation by combining human oversight with autonomous AI agents.
-
-### 🌐 Bilingual Design Convention
-- **Finnish User Experience**: The application frontend, playground workspace, confirmation dialogs, and interactive scorecard modals are crafted in fluent **Finnish** for an intuitive, human-centered developer experience.
-- **English Engineering Standards**: All AI-generated code (Prisma schemas, Next.js API route handlers, React 19 UI components), architecture exports (Mermaid diagrams), test suites, and documentation are strictly in **Standard English** for global compatibility, production readiness, and seamless Git collaboration.
-
-```mermaid
-flowchart LR
-    A["📄 Input Spec\n(.pdf, .txt, .md)"] --> B["🎨 Visual Canvas\n(React Flow 4-Tier)"]
-    B --> C["💾 Gate 1: DB Schema\n(Prisma / SQLite)"]
-    C --> D["🛡️ Gate 2: Backend APIs\n(Route Handlers + Zod)"]
-    D --> E["💻 Gate 3: UI Dashboard\n(React 19 + Tailwind CSS)"]
-    B --> F["📐 Multi-Format Export\n(PNG 2x, SVG, Mermaid.js)"]
-```
-
-Users can input a project description or upload specification files (`.pdf`, `.txt`, `.md`). The system generates an interactive **Visual Architecture Canvas** (using React Flow) representing UI components, APIs, backend services, and database layers. The user and AI Co-Pilot work together in a real-time **Playground** workspace with staged quality gates:
-1. **Visual Canvas**: Interactive 4-tier system modeling and AI audits.
-2. **Data Gate 1**: Automated Prisma database schema generation (`schema.prisma`).
-3. **Data Gate 2**: Automated Next.js App Router Route Handlers (`route.ts`) and Server Actions with Zod validation.
-4. **Data Gate 3**: Automated React 19 + Tailwind CSS feature UI components (`dashboard.tsx`) with reactive state.
-5. **Diagram Export Suite**: 1-click PNG (2x retina), SVG vector, and Mermaid.js markdown export.
-6. **Quality & Security Suite**: 1-click OWASP Security Audits, Code Optimization, and interactive scorecard reporting.
-7. **Smart Tech Stack & .env Inference**: Intelligent complexity detection (Lightweight vs. Standard vs. Heavy SaaS) and automated `.env.local.example` guidance.
-8. **Next.js 16.3.5 Security Hardened**: Comprehensive HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy) and strict path containment guards.
-9. **Modular Workspace Subcomponents**: Clean separation of Data Gate interfaces (`Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`, `HomebasePathCard`) under `src/components/workspace/` for optimal maintainability.
+> An AI-powered fullstack architecture visualizer and code generation engine for technical founders, software architects, and solo developers — transforming plain-language requirements into interactive 4-tier system diagrams, Prisma schemas, API handlers, and React UI components.
 
 ---
 
-## ✨ Key Features & Current Status
+## 📸 Preview
 
-### 1. 🧪 Interactive Playground Workspace & Node Inspector
-- **Text & Document Parsing (.pdf, .txt, .md)**: Input a freeform description or upload a specification document. The server automatically parses content with native `pdf-parse` v2 support.
-- **Visual Architecture Canvas**: 4-tiered structured React Flow diagram (Client → Gateway → Services → Database) with automatic layout positioning to prevent node overlap and animated signal pulse edge flows.
-- **Node Detail Inspector**: Click any node on the canvas to inspect, rename, edit technology tags, or view AI-generated descriptions in real time.
-- **Mandatory AI Node Descriptions**: AI automatically generates comprehensive descriptions for every node, pre-populating the Node Inspector.
-- **Real-Time AI Co-Pilot & Smart Fallback Engine**: Conversational interface powered by Vercel AI SDK + OpenRouter API, backed by an intelligent prompt-based fallback engine that ensures customized architecture diagrams are generated even under third-party API rate limits.
-
-### 2. 🛡️ Quality Suite: Security Check & Code Optimization
-- **1-Click Security Audit (`app-security`)**: Inspects the entire architecture, database schema, and API routes against OWASP Top 10 guidelines (authentication, Zod schema validation, database connection isolation, secret management).
-- **1-Click Code Optimization (`app-perf` / `app-review`)**: Analyzes database indexing (`@@index`), N+1 query risks, structural error handling, and Next.js caching strategies.
-- **Visual Audit Scorecard Modal**: Displays an overall health score (0-100), letter grade (A-F), filtered finding cards (Critical, Warning, Success), and actionable recommendations in plain language.
-- **Copy Report**: Easily copy the full audit report to the clipboard for documentation or sharing.
-
-### 3. 🧠 Smart Tech Stack Inference & .env Guidance
-- **Lean Architecture Sizing**: Automatically classifies projects into:
-  - **🟢 Lightweight (Client-side)**: Calculators, games, converters, landing pages. Informs the user that no server database or external API keys are needed!
-  - **🟡 Standard Fullstack**: Todo apps, blogs, internal tools. Recommends zero-config SQLite (`file:./dev.db`).
-  - **🟣 Heavy SaaS & AI (Enterprise)**: Subscriptions, payments, AI, emails. Recommends PostgreSQL / Supabase, Redis, and guides external service setup.
-- **Automated `.env.local.example` Generator**: Produces a ready-to-use commented template with sample values and direct instructions on where to acquire necessary API keys (Stripe, Resend, OpenRouter).
-- **One-Click Disk Writer**: Write `.env.local.example` directly to the project folder with safety checks.
-
-### 4. 🛑 Safety First: "Oletko varma?" Confirmation Gates
-- **Accidental Click Prevention**: Heavy actions (re-generating code, running audits, writing files to disk) require explicit confirmation via `ConfirmActionDialog`.
-- **Transparent Consequences**: The confirmation modal clearly explains what will happen, ensuring users never accidentally overwrite work.
-
-### 5. 🗄️ Data Gate 1: Prisma Database Schema Generation
-- **AI Prisma Schema Generator**: Seamlessly transition from visual architecture diagrams to the first quality gate where AI designs production-ready Prisma database schemas (`schema.prisma`) in standard English.
-- **Smart Database Advice**: For lightweight tools, Gate 1 displays an encouraging notice explaining that local state or LocalStorage suffices, saving unnecessary complexity.
-- **Direct Filesystem Persistence**: Write generated database schemas directly to `{targetPath}/prisma/schema.prisma` with a single click and strict path traversal bounds validation.
-
-### 6. ⚡ Data Gate 2: Backend API Routes & Server Actions
-- **AI Backend Code Generator**: Translates Layer 1 (API / Gateway / Auth) and Layer 2 (Services / Workers) into production-ready Next.js App Router Route Handlers (`GET` and `POST`) and Server Actions.
-- **Strict Zod Input Validation**: Every mutation endpoint and action is typed and guarded by Zod validation schemas.
-- **Uniform Response Envelopes**: Consistent API response contract: `ApiResponse<T>` (`{ success: true, data }` or `{ success: false, error: { code, message, details } }`).
-- **One-Click Local Disk Writer**: Safely write generated API code directly to `{targetPath}/src/app/api/endpoints/route.ts`.
-
-### 7. 🎨 Data Gate 3: UI Components & Feature Views
-- **AI React 19 UI Component Generator**: Generates complete, self-contained, copy-pasteable React 19 + Tailwind CSS feature dashboards (`dashboard.tsx`) matching the architecture and data models.
-- **Interactive State & Metrics**: Features live metric scorecards (total records, active, completed, throughput rate), search bar, status tabs, creation form modals, and interactive item cards.
-- **One-Click Local Disk Writer**: Safely write generated UI code directly to `{targetPath}/src/components/features/dashboard.tsx` with safety confirmation guards.
-
-### 8. 📐 Multi-Format Canvas Diagram Export Suite
-- **Mermaid.js Flowchart Generator**: Converts React Flow canvas nodes into standard `flowchart TD` markdown partitioned into 4 architectural subgraphs (Client, Gateway, Services, Data) with sanitized labels and custom CSS styling.
-- **One-Click Copy & Download**: Copy Mermaid markdown to clipboard or download as `.mmd` or `.md` files for GitHub README, Notion, or Obsidian.
-- **Retina PNG & Vector SVG Export**: High-resolution 2x retina raster image and scalable vector graphics download via `html-to-image`.
-
-### 9. 🧪 Automated Testing & Security (Vitest + jsdom)
-- **Comprehensive Test Suite**: 34 automated unit and integration tests passing with 0 failures across 9 test suites (`npm test`).
-- **Security & Path Bounds Verification**: Intercepts directory traversal attacks (`../../etc/passwd`, `..\..\windows\...`) to protect filesystem writes.
-- **Isolated Secrets**: API keys isolated in `.env.local`, with clean `.env.example` templates committed.
+> Open the playground, paste a product requirement, and watch the AI Co-Pilot generate a live visual architecture diagram in real time. Click any node to inspect, edit, and audit it with AI.
 
 ---
 
-## 📁 Project Structure
+## ✨ Key Features
 
-```
-├── src/
-│   ├── agents/                   # AI Agent engines (architecture-agent.ts)
-│   ├── app/                      # Next.js App Router pages & Server Actions
-│   │   ├── actions/              # Server Actions (audit.ts, codegen.ts, file-parser.ts, project.ts, tech-stack.ts)
-│   │   ├── api/chat/             # Vercel AI SDK Co-Pilot API route (streaming)
-│   │   ├── playground/           # Interactive Playground page (Canvas, Gate 1, Gate 2, Gate 3)
-│   │   └── projects/[id]/        # Saved project detail view
-│   ├── components/               # UI components
-│   │   ├── architecture-canvas.tsx   # React Flow visual canvas
-│   │   ├── audit-modal.tsx           # Quality & Security scorecard modal
-│   │   ├── chat-sidebar.tsx          # AI Co-Pilot chat interface
-│   │   ├── code-viewer.tsx           # Syntax-highlighted code viewer & copy tool
-│   │   ├── confirm-action-dialog.tsx # "Oletko varma?" confirmation gate
-│   │   ├── delete-project-button.tsx # Project deletion button with confirmation
-│   │   ├── env-dialog.tsx            # Tech stack & .env.local.example modal
-│   │   ├── export-modal.tsx          # Multi-format export dialog (PNG, SVG, Mermaid.js)
-│   │   ├── idea-input-form.tsx       # Homepage input form & file dropzone
-│   │   ├── node-inspector.tsx        # Node Detail Inspector & manual editor
-│   │   ├── playground-workspace.tsx  # Main Playground workspace container
-│   │   └── workspace/                # Modular Data Gate & Homebase subcomponents
-│   │       ├── homebase-path-card.tsx    # Project homebase directory setting card
-│   │       ├── gate1-schema-tab.tsx      # Data Gate 1 Prisma DB schema generator view
-│   │       ├── gate2-api-tab.tsx         # Data Gate 2 Next.js API route handlers generator view
-│   │       └── gate3-ui-tab.tsx          # Data Gate 3 React 19 UI component generator view
-│   └── lib/                      # Prisma DB client, mermaid-export.ts & utilities
-├── tests/                        # Vitest automated unit & integration test suite
-│   ├── setup.ts                  # Global test setup (Next.js mocks, jsdom)
-│   └── unit/                     # 9 Unit test suites (security, parser, agent, codegen, ui, mermaid, audits, tech-stack)
-├── prisma/                       # Prisma SQLite schema & migrations
-├── docs/                         # Project vision documentation
-├── .agents/                      # Solo Dev Kit blueprint & cognitive memory
-│   ├── blueprint/                # PRD, Architecture, Security Audit, Status, Dev Log, Session State
-│   ├── rules/                    # Engineering standards & guidelines
-│   └── skills/                   # Specialized agent workflow skills
-└── vitest.config.mts             # Vitest test runner configuration
-```
+- **🧠 AI Architecture Generation**: Paste a prompt or drop a spec document (`.pdf`, `.txt`, `.md`) and the AI agent automatically generates a structured 4-tier architecture diagram with layered nodes and annotated edges.
+- **🎨 Interactive Visual Canvas**: Explore your architecture on a React Flow canvas with animated signal edges, auto-layout across Client → API Gateway → Services → Data tiers, and one-click node inspection.
+- **🔍 Node Inspector & AI Audit**: Click any canvas node to edit its title, tech tags, and read AI-generated Finnish/English descriptions. Trigger per-node or full-system AI architecture audits.
+- **💬 Co-Pilot AI Chat**: An embedded streaming chat assistant (powered by Vercel AI SDK + OpenRouter) lets you iterate on the architecture in natural language — _"Add a Redis cache layer"_ and the canvas updates live.
+- **🗄️ Data Gate 1 — Prisma Schema Generator**: Converts the visual architecture graph into a syntactically valid `schema.prisma` file and writes it directly to your local project folder.
+- **🔌 Data Gate 2 — API Code Generator**: Generates production-ready Next.js Route Handlers and Server Actions with Zod validation schemas, directly scaffolded to your target path.
+- **🖼️ Data Gate 3 — UI Component Generator**: Produces React 19 + Tailwind CSS feature components with live state, search filtering, and modal forms, ready to write to disk.
+- **📤 Multi-Format Diagram Export**: One-click export of the canvas to PNG (2× retina), SVG vector, and Mermaid.js markdown (`.mmd` / `.md`).
+- **🔒 Quality Suite**: Built-in one-click OWASP Security Check and Code Optimization audit with an interactive scorecard modal.
+- **💾 Project Persistence**: Save, load, and manage architecture sessions in a local SQLite database. Resume any project from the dashboard.
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Tech Stack
 
-### Prerequisites
+| Domain | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | Next.js 16 (App Router) | SSR, routing, Server Actions, API routes |
+| **UI Library** | React 19 | Component model, Concurrent Mode |
+| **Styling** | Tailwind CSS v4 | Utility-first dark-mode design system |
+| **Canvas** | `@xyflow/react` v12 | Interactive visual architecture diagram engine |
+| **AI / LLM** | Vercel AI SDK v7 + OpenRouter | Streaming chat co-pilot, structured tool calling |
+| **Database ORM** | Prisma v7 + libSQL (SQLite) | Local project persistence schema |
+| **Validation** | Zod v4 | End-to-end type-safe payload validation |
+| **PDF Parsing** | `pdf-parse` v2 | Spec document ingestion from `.pdf` files |
+| **Testing** | Vitest v5 + Testing Library | 34 unit & security tests |
+| **Language** | TypeScript (strict) | Full type safety across frontend and backend |
 
-Ensure you have Node.js (v18+) and npm installed on your machine.
+---
 
-### Installation
+## 📋 Prerequisites
 
-1. Clone the repository:
+Ensure the following are installed on your local machine:
+
+- **Node.js**: `v20.x` or higher
+- **npm**: `v10+`
+- **OpenRouter API Key**: Required for live AI features. Get one free at [openrouter.ai](https://openrouter.ai/) (GPT-4o-mini model used by default).
+
+---
+
+## 🚀 Quick Start
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/Samrude1/Agentic-Architect.git
    cd Agentic-Architect
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
-   npm install --legacy-peer-deps
+   npm install
    ```
 
-3. Setup environment variables:
-   Copy `.env.example` to `.env.local` and add your OpenRouter API key:
+3. **Configure environment variables:**
    ```bash
    cp .env.example .env.local
    ```
-   Edit `.env.local`:
-   ```env
-   DATABASE_URL="file:./dev.db"
-   OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
-   ```
+   Update the values according to the [Environment Variables](#-environment-variables) section below.
 
-4. Push database schema:
+4. **Initialize the database:**
    ```bash
-   npx prisma db push
+   npx prisma migrate dev
    ```
 
-5. Run automated tests:
-   ```bash
-   npm test
-   ```
-
-6. Run the development server:
+5. **Start the local development server:**
    ```bash
    npm run dev
    ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to launch Agentic Architect!
+---
+
+## 🔐 Environment Variables
+
+| Variable | Required | Default | Description |
+| :--- | :---: | :--- | :--- |
+| `DATABASE_URL` | ✅ Yes | `file:./dev.db` | SQLite database file path via Prisma libSQL adapter |
+| `OPENROUTER_API_KEY` | ✅ Yes | — | OpenRouter API key for AI features. Get at [openrouter.ai/keys](https://openrouter.ai/keys). Without this key, the app runs in **Smart Fallback mode** (pre-built diagrams, no live AI). |
+
+> **Security Note**: Never commit `.env.local` to version control. It is listed in `.gitignore` by default.
+
+---
+
+## 📜 Available Scripts
+
+| Script | Command | Description |
+| :--- | :--- | :--- |
+| `dev` | `npm run dev` | Starts Next.js dev server with hot reload on `localhost:3000` |
+| `build` | `npm run build` | Produces optimized production build |
+| `start` | `npm run start` | Runs the production server locally |
+| `lint` | `npm run lint` | Runs ESLint static analysis across the codebase |
+| `test` | `npm run test` | Runs Vitest unit & security test suite (34 tests) |
+| `test:watch` | `npm run test:watch` | Runs Vitest in interactive watch mode |
+
+---
+
+## 🏛️ System Architecture
+
+The application follows a clean 4-tier architecture:
+
+```
+User / Architect
+    │
+    ├── File Parser Action (pdf-parse)      ← Spec Document Ingestion
+    ├── React Flow Architecture Canvas      ← Visual Diagram Engine
+    ├── Node Detail Inspector & Editor      ← Live Node State Management
+    ├── Chat Sidebar (Vercel AI SDK)        ← Co-Pilot Streaming
+    │       └── /api/chat Route
+    │               └── Architecture Agent Engine (OpenRouter)
+    ├── Codegen Server Actions
+    │       ├── AI Prisma Schema Generator  ← Data Gate 1
+    │       ├── API Route Handler Generator ← Data Gate 2
+    │       ├── UI Component Generator      ← Data Gate 3
+    │       └── Local File System Writer
+    └── Project Management Actions
+            └── SQLite Database (Prisma ORM)
+```
+
+For full details, refer to [.agents/blueprint/ARCHITECTURE.md](.agents/blueprint/ARCHITECTURE.md) and the [Architectural Decision Records](docs/adr/).
+
+---
+
+## 🚨 Operations & Troubleshooting
+
+For deployment runbooks, emergency rollback procedures, and secret rotation steps, refer to [RUNBOOK.md](RUNBOOK.md).
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Multi-file document dropzone support
+- [ ] Automated Cypress E2E test coverage
+- [ ] Team collaboration (shared project links)
+- [ ] Cloud deployment target (Vercel / Railway)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+*Built with ❤️ as a solo developer productivity tool. Designed to save architects hours of boilerplate planning and scaffold work.*
