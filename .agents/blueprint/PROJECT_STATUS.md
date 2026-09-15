@@ -7,7 +7,7 @@ This document tracks verified implementation progress, active feature matrix, te
 ## 1. Executive Status
 - **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Smart Tech Stack & .env Inference, Confirmation Dialogs & Automated Testing Suite (34 Vitest tests) Complete
 - **Estimated Completion**: 100% (Production Ready)
-- **Last Updated**: 2026-09-14
+- **Last Updated**: 2026-09-15
 - **Key Focus**:
   - Interactive Visual Canvas with tier layout & edge animation.
   - Node Inspector with live audit & AI descriptions.
@@ -43,6 +43,7 @@ This document tracks verified implementation progress, active feature matrix, te
 | **Project CRUD** | `project.ts`, `delete-project-button.tsx` | 🟩 Complete | Save/load/delete projects in SQLite DB |
 | **Security & Paths** | `.env.local`, `codegen.ts` | 🟩 Complete | API key isolated in `.env.local`, strict path bounds validation |
 | **Automated Testing** | Vitest (`tests/unit/`) | 🟩 Complete | 34 unit & security tests passing across 9 test files |
+| **Workspace Modularization** | `workspace/*.tsx` | 🟩 Complete | Gate1/Gate2/Gate3 tab components & HomebasePathCard extracted |
 
 *Status Legend: 🟩 Complete | 🟨 In Progress | 🟥 Defect / Missing | ⬜ Planned*
 
@@ -59,9 +60,7 @@ This document tracks verified implementation progress, active feature matrix, te
 
 ## 4. Technical Debt & Maintenance Tracking
 
-1. **`playground-workspace.tsx` Modularization** (P3 - Low):
-   - Current line count is 1,172 lines.
-   - Logic is robust and fully working, but extracting tab components (`Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`) will improve long-term developer ergonomics.
+1. ~~**`playground-workspace.tsx` Modularization** (P3 - Low)~~: 🟩 Resolved (2026-09-15). Extracted `Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`, and `HomebasePathCard` into `src/components/workspace/`.
 2. **Next.js CSP Production Hardening** (P3 - Low):
    - Review `'unsafe-inline'` and `'unsafe-eval'` script policies in `next.config.ts` if strict enterprise CSP reporting is required.
 3. **Prisma CLI Sub-dependency CVEs** (Tracked / Non-blocking):

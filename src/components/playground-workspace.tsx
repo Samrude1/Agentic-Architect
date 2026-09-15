@@ -11,24 +11,24 @@ import {
   ShieldCheck,
   Database,
   LayoutGrid,
-  Folder,
   HardDrive,
-  AlertCircle,
   Server,
   Zap,
   Key,
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
-import { CodeViewer } from "@/components/code-viewer";
 import { ConfirmActionDialog } from "@/components/confirm-action-dialog";
 import { AuditModal } from "@/components/audit-modal";
 import { EnvDialog } from "@/components/env-dialog";
 import { ExportModal } from "@/components/export-modal";
+import { HomebasePathCard } from "@/components/workspace/homebase-path-card";
+import { Gate1SchemaTab } from "@/components/workspace/gate1-schema-tab";
+import { Gate2ApiTab } from "@/components/workspace/gate2-api-tab";
+import { Gate3UiTab } from "@/components/workspace/gate3-ui-tab";
 import { runSecurityAudit, runOptimizationAudit, AuditReport } from "@/app/actions/audit";
 import { inferTechStackAndEnv, TechStackProfile } from "@/app/actions/tech-stack";
 import { useRouter } from "next/navigation";
@@ -768,341 +768,41 @@ export function PlaygroundWorkspace({
         ) : (
           <div className="lg:col-span-8 h-full flex flex-col space-y-4 min-h-0">
             {/* Project Homebase Folder Directory Settings Card */}
-            <div className="bg-background rounded-lg border p-4 shadow-sm space-y-3 flex-none">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Folder className="h-5 w-5 text-purple-500" />
-                  <h3 className="font-semibold text-sm">Projektin Kotikansio (Project Homebase Directory)</h3>
-                </div>
-                <span className="text-xs text-muted-foreground">Koodikannan juuripolku levyllä</span>
-              </div>
+            <HomebasePathCard
+              targetPath={targetPath}
+              setTargetPath={setTargetPath}
+              onSaveTargetPath={handleSaveTargetPath}
+            />
 
-              <div className="flex items-center space-x-2">
-                <Input
-                  value={targetPath}
-                  onChange={(e) => setTargetPath(e.target.value)}
-                  placeholder="Esim. C:\Users\samru\DEVELOPER\PROJECTS\my-app"
-                  className="font-mono text-xs"
-                />
-                <Button variant="outline" size="sm" onClick={handleSaveTargetPath}>
-                  Aseta polku
-                </Button>
-              </div>
-            </div>
-
-            {/* Code Generator & Viewer Card - Gate 1 or Gate 2 */}
+            {/* Code Generator & Viewer Card - Gate 1, Gate 2, or Gate 3 */}
             {activeTab === "schema" ? (
-              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
-                <div className="flex items-center justify-between flex-none">
-                  <div>
-                    <h3 className="font-bold text-base flex items-center space-x-2">
-                      <Database className="h-5 w-5 text-purple-500" />
-                      <span>Data Gate 1: Prisma Database Schema</span>
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Generoi tuotantovalmis Prisma-tietokantamalli kaaviossa määriteltyjen komponenttien pohjalta (Standard English).
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      onClick={triggerGenerateSchemaConfirmation}
-                      disabled={isGeneratingSchema}
-                      size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                    >
-                      {isGeneratingSchema ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="mr-1.5 h-4 w-4" />
-                      )}
-                      {prismaSchema ? "Päivitä kaavio AI:lla" : "Generoi tietokantamalli AI:lla"}
-                    </Button>
-
-                    {prismaSchema && (
-                      <Button
-                        onClick={triggerWritePrismaToDiskConfirmation}
-                        disabled={isWritingToDisk}
-                        variant="outline"
-                        size="sm"
-                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
-                      >
-                        {isWritingToDisk ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
-                        )}
-                        Kirjoita levyarvoon (prisma/schema.prisma)
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Lightweight App Database Notice */}
-                {techProfile && !techProfile.database.needed && (
-                  <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs flex items-start space-x-2.5 flex-none">
-                    <Sparkles className="h-4 w-4 text-emerald-500 flex-none mt-0.5" />
-                    <div className="space-y-0.5">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                        Kevyt sovellus ({techProfile.tierLabel}): Erillistä palvelintietokantaa ei tarvita!
-                      </span>
-                      <p className="text-foreground/80 leading-relaxed">
-                        {techProfile.database.reason} Voit käyttää suoraan selaimen LocalStoragea tai siirtyä käyttöliittymäkehitykseen. Voit kuitenkin generoida Prisma-skeeman alla olevasta napista, jos haluat myöhemmin laajentaa sovellusta.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Status/Error Messages */}
-                {diskMessage && (
-                  <div
-                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
-                      diskMessage.type === "success"
-                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
-                        : "bg-destructive/10 text-destructive border border-destructive/30"
-                    }`}
-                  >
-                    {diskMessage.type === "success" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-destructive" />
-                    )}
-                    <span>{diskMessage.text}</span>
-                  </div>
-                )}
-
-                {/* Code Display */}
-                <div className="flex-1 min-h-0">
-                  {prismaSchema ? (
-                    <CodeViewer
-                      code={prismaSchema}
-                      filename="prisma/schema.prisma"
-                      badge="Data Gate 1 • English"
-                    />
-                  ) : (
-                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
-                      <Database className="h-10 w-10 text-muted-foreground/50" />
-                      <div>
-                        <h4 className="font-semibold text-sm">Ei vielä generoitua tietokantamallia</h4>
-                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                          Paina &quot;Generoi tietokantamalli AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi pohjalta tuotantovalmiin Prisma-skeeman.
-                        </p>
-                      </div>
-                      <Button
-                        onClick={triggerGenerateSchemaConfirmation}
-                        disabled={isGeneratingSchema}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                      >
-                        {isGeneratingSchema ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="mr-1.5 h-4 w-4" />
-                        )}
-                        Generoi tietokantamalli AI:lla
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <Gate1SchemaTab
+                prismaSchema={prismaSchema}
+                isGeneratingSchema={isGeneratingSchema}
+                isWritingToDisk={isWritingToDisk}
+                diskMessage={diskMessage}
+                techProfile={techProfile}
+                onGenerateSchema={triggerGenerateSchemaConfirmation}
+                onWriteToDisk={triggerWritePrismaToDiskConfirmation}
+              />
             ) : activeTab === "api" ? (
-              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
-                <div className="flex items-center justify-between flex-none">
-                  <div>
-                    <h3 className="font-bold text-base flex items-center space-x-2">
-                      <Server className="h-5 w-5 text-purple-500" />
-                      <span>Data Gate 2: API Endpoints & Server Actions</span>
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Generoi tuotantovalmiit Next.js Route Handlerit ja Server Actionit Zod-syötevalidoinnilla (Standard English).
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      onClick={triggerGenerateApiConfirmation}
-                      disabled={isGeneratingApi}
-                      size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                    >
-                      {isGeneratingApi ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="mr-1.5 h-4 w-4" />
-                      )}
-                      {apiCode ? "Päivitä API-koodi AI:lla" : "Generoi API-koodi AI:lla"}
-                    </Button>
-
-                    {apiCode && (
-                      <Button
-                        onClick={triggerWriteApiToDiskConfirmation}
-                        disabled={isWritingToDisk}
-                        variant="outline"
-                        size="sm"
-                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
-                      >
-                        {isWritingToDisk ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
-                        )}
-                        Kirjoita levylle (src/app/api/endpoints/route.ts)
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Status/Error Messages */}
-                {diskMessage && (
-                  <div
-                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
-                      diskMessage.type === "success"
-                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
-                        : "bg-destructive/10 text-destructive border border-destructive/30"
-                    }`}
-                  >
-                    {diskMessage.type === "success" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-destructive" />
-                    )}
-                    <span>{diskMessage.text}</span>
-                  </div>
-                )}
-
-                {/* Code Display */}
-                <div className="flex-1 min-h-0">
-                  {apiCode ? (
-                    <CodeViewer
-                      code={apiCode}
-                      filename="src/app/api/endpoints/route.ts"
-                      badge="Data Gate 2 • English"
-                    />
-                  ) : (
-                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
-                      <Server className="h-10 w-10 text-muted-foreground/50" />
-                      <div>
-                        <h4 className="font-semibold text-sm">Ei vielä generoituja API-rajapintoja</h4>
-                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                          Paina &quot;Generoi API-koodi AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi (Layer 1 Gateway & Layer 2 Services) ja tietomallin pohjalta tuotantovalmiit rajapintareitit.
-                        </p>
-                      </div>
-                      <Button
-                        onClick={triggerGenerateApiConfirmation}
-                        disabled={isGeneratingApi}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                      >
-                        {isGeneratingApi ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="mr-1.5 h-4 w-4" />
-                        )}
-                        Generoi API-koodi AI:lla
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <Gate2ApiTab
+                apiCode={apiCode}
+                isGeneratingApi={isGeneratingApi}
+                isWritingToDisk={isWritingToDisk}
+                diskMessage={diskMessage}
+                onGenerateApi={triggerGenerateApiConfirmation}
+                onWriteToDisk={triggerWriteApiToDiskConfirmation}
+              />
             ) : (
-              <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
-                <div className="flex items-center justify-between flex-none">
-                  <div>
-                    <h3 className="font-bold text-base flex items-center space-x-2">
-                      <LayoutGrid className="h-5 w-5 text-purple-500" />
-                      <span>Data Gate 3: UI Components & Frontend Views</span>
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Generoi tuotantovalmiit React 19 + Tailwind CSS -käyttöliittymäkomponentit ja tilanhallinnan arkkitehtuurikaaviosi pohjalta (Standard English).
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      onClick={triggerGenerateUiConfirmation}
-                      disabled={isGeneratingUi}
-                      size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                    >
-                      {isGeneratingUi ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="mr-1.5 h-4 w-4" />
-                      )}
-                      {uiCode ? "Päivitä UI-koodi AI:lla" : "Generoi UI AI:lla"}
-                    </Button>
-
-                    {uiCode && (
-                      <Button
-                        onClick={triggerWriteUiToDiskConfirmation}
-                        disabled={isWritingToDisk}
-                        variant="outline"
-                        size="sm"
-                        className="border-green-500/40 text-green-600 hover:bg-green-500/10 font-medium"
-                      >
-                        {isWritingToDisk ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <HardDrive className="mr-1.5 h-4 w-4 text-green-500" />
-                        )}
-                        Kirjoita levylle (src/components/features/dashboard.tsx)
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Status/Error Messages */}
-                {diskMessage && (
-                  <div
-                    className={`p-3 rounded-md text-xs font-medium flex items-center space-x-2 ${
-                      diskMessage.type === "success"
-                        ? "bg-green-500/10 text-green-600 border border-green-500/30"
-                        : "bg-destructive/10 text-destructive border border-destructive/30"
-                    }`}
-                  >
-                    {diskMessage.type === "success" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-destructive" />
-                    )}
-                    <span>{diskMessage.text}</span>
-                  </div>
-                )}
-
-                {/* Code Display */}
-                <div className="flex-1 min-h-0">
-                  {uiCode ? (
-                    <CodeViewer
-                      code={uiCode}
-                      filename="src/components/features/dashboard.tsx"
-                      badge="Data Gate 3 • English"
-                    />
-                  ) : (
-                    <div className="h-full border border-dashed rounded-lg flex flex-col items-center justify-center p-8 text-center bg-muted/20 space-y-3">
-                      <LayoutGrid className="h-10 w-10 text-muted-foreground/50" />
-                      <div>
-                        <h4 className="font-semibold text-sm">Ei vielä generoituja käyttöliittymäkomponentteja</h4>
-                        <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                          Paina &quot;Generoi UI AI:lla&quot; -painiketta luodaksesi arkkitehtuurikaaviosi ja tietomallisi pohjalta tuotantovalmiin React 19 + Tailwind CSS -näkymän.
-                        </p>
-                      </div>
-                      <Button
-                        onClick={triggerGenerateUiConfirmation}
-                        disabled={isGeneratingUi}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-                      >
-                        {isGeneratingUi ? (
-                          <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="mr-1.5 h-4 w-4" />
-                        )}
-                        Generoi UI AI:lla
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <Gate3UiTab
+                uiCode={uiCode}
+                isGeneratingUi={isGeneratingUi}
+                isWritingToDisk={isWritingToDisk}
+                diskMessage={diskMessage}
+                onGenerateUi={triggerGenerateUiConfirmation}
+                onWriteToDisk={triggerWriteUiToDiskConfirmation}
+              />
             )}
           </div>
         )}

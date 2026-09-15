@@ -30,6 +30,7 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 6. **Quality & Security Suite**: 1-click OWASP Security Audits, Code Optimization, and interactive scorecard reporting.
 7. **Smart Tech Stack & .env Inference**: Intelligent complexity detection (Lightweight vs. Standard vs. Heavy SaaS) and automated `.env.local.example` guidance.
 8. **Next.js 16.3.5 Security Hardened**: Comprehensive HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy) and strict path containment guards.
+9. **Modular Workspace Subcomponents**: Clean separation of Data Gate interfaces (`Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`, `HomebasePathCard`) under `src/components/workspace/` for optimal maintainability.
 
 ---
 
@@ -109,7 +110,12 @@ Users can input a project description or upload specification files (`.pdf`, `.t
 │   │   ├── export-modal.tsx          # Multi-format export dialog (PNG, SVG, Mermaid.js)
 │   │   ├── idea-input-form.tsx       # Homepage input form & file dropzone
 │   │   ├── node-inspector.tsx        # Node Detail Inspector & manual editor
-│   │   └── playground-workspace.tsx  # Main Playground workspace container (Gates 1-3 & Export)
+│   │   ├── playground-workspace.tsx  # Main Playground workspace container
+│   │   └── workspace/                # Modular Data Gate & Homebase subcomponents
+│   │       ├── homebase-path-card.tsx    # Project homebase directory setting card
+│   │       ├── gate1-schema-tab.tsx      # Data Gate 1 Prisma DB schema generator view
+│   │       ├── gate2-api-tab.tsx         # Data Gate 2 Next.js API route handlers generator view
+│   │       └── gate3-ui-tab.tsx          # Data Gate 3 React 19 UI component generator view
 │   └── lib/                      # Prisma DB client, mermaid-export.ts & utilities
 ├── tests/                        # Vitest automated unit & integration test suite
 │   ├── setup.ts                  # Global test setup (Next.js mocks, jsdom)
