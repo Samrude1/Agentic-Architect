@@ -27,6 +27,7 @@ Last updated: 2026-08-13 18:52:00
 
 - **Full Backend API & Component Scaffold Generation**: Extending `codegen.ts` to generate Next.js Route Handlers (`src/app/api/`) and React UI components based on the generated Prisma schema and architecture nodes.
 - **Diagram Export Enhancements**: Adding export features for PNG/SVG diagrams and Mermaid markdown documentation.
+- **Enterprise AI Observability (Langfuse)**: *Strategic addition.* Integrate Langfuse tracing to Vercel AI SDK streams to measure token costs, latency, and create structured evals for generated architecture quality. This shifts the project from "local MVP" to "production-ready AI platform".
 
 ## Open questions
 

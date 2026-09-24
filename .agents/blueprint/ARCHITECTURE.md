@@ -8,21 +8,21 @@ This document defines the system structure, data flow, agent engine, and module 
 
 ```mermaid
 graph TD
-    User([User / Architect]) --> UI[Next.js App Router Frontend]
-    UI --> Upload[File Parser Action - pdf-parse]
-    UI --> Canvas[React Flow Architecture Canvas @xyflow/react]
-    UI --> Inspector[Node Detail Inspector & Editor]
-    UI --> Chat[Chat Sidebar - Vercel AI SDK]
+    User(["User / Architect"]) --> UI["Next.js App Router Frontend"]
+    UI --> Upload["File Parser Action - pdf-parse"]
+    UI --> Canvas["React Flow Architecture Canvas (xyflow)"]
+    UI --> Inspector["Node Detail Inspector & Editor"]
+    UI --> Chat["Chat Sidebar - Vercel AI SDK"]
 
-    Chat --> Route[/api/chat Route]
-    Route --> AIEngine[Architecture Agent Engine - OpenRouter API]
+    Chat --> Route["API Route: /api/chat"]
+    Route --> AIEngine["Architecture Agent Engine - OpenRouter API"]
 
-    UI --> CodeGen[Codegen Server Actions]
-    CodeGen --> SchemaGen[AI Prisma Schema Generator]
-    CodeGen --> DiskWriter[Local File System Writer]
+    UI --> CodeGen["Codegen Server Actions"]
+    CodeGen --> SchemaGen["AI Prisma Schema Generator"]
+    CodeGen --> DiskWriter["Local File System Writer"]
 
-    UI --> ProjectActions[Project Management Actions]
-    ProjectActions --> DB[(SQLite Database via Prisma ORM)]
+    UI --> ProjectActions["Project Management Actions"]
+    ProjectActions --> DB[("SQLite Database via Prisma ORM")]
 ```
 
 ---
