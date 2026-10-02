@@ -16,6 +16,10 @@ import {
   Zap,
   Key,
   Download,
+  CheckCircle2,
+  Circle,
+  Bot,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
@@ -88,6 +92,11 @@ export function PlaygroundWorkspace({
   const [isGeneratingSchema, setIsGeneratingSchema] = useState(false);
   const [isGeneratingApi, setIsGeneratingApi] = useState(false);
   const [isGeneratingUi, setIsGeneratingUi] = useState(false);
+  const [isGeneratingArch, setIsGeneratingArch] = useState(false);
+  const [archGenStep, setArchGenStep] = useState<number>(0);
+  const [showArchCompleteBanner, setShowArchCompleteBanner] = useState<boolean>(
+    initialNodes.length > 0 && !initialPrismaSchema
+  );
   const [isWritingToDisk, setIsWritingToDisk] = useState(false);
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -122,15 +131,27 @@ export function PlaygroundWorkspace({
   // Generate initial architecture diagram immediately if canvas is empty and prompt exists
   useEffect(() => {
     if (initialPrompt && initialNodes.length === 0) {
+      setIsGeneratingArch(true);
+      setArchGenStep(1);
+
+      const t1 = setTimeout(() => setArchGenStep(2), 700);
+      const t2 = setTimeout(() => setArchGenStep(3), 1400);
+
       generateRealArchitecture(initialPrompt)
         .then((data) => {
           if (data.nodes && data.nodes.length > 0) {
             setNodes(data.nodes);
             setEdges(data.edges);
+            setShowArchCompleteBanner(true);
           }
         })
         .catch((err) => {
           console.error("Failed to generate initial architecture diagram:", err);
+        })
+        .finally(() => {
+          setIsGeneratingArch(false);
+          clearTimeout(t1);
+          clearTimeout(t2);
         });
     }
 
@@ -583,25 +604,29 @@ export function PlaygroundWorkspace({
   return (
     <div className="h-screen flex flex-col bg-muted/20">
       {/* Top bar */}
-      <header className="h-14 border-b bg-background px-6 flex items-center justify-between flex-none">
-        <div className="flex items-center space-x-3">
+      <header className="h-14 border-b bg-background px-4 lg:px-6 flex items-center justify-between flex-none gap-3 overflow-hidden">
+        <div className="flex items-center space-x-3 min-w-0 shrink">
           <Button
             variant="ghost"
             size="icon-sm"
             render={<Link href={currentProjectId ? `/projects/${currentProjectId}` : "/"} />}
             nativeButton={false}
+            className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
-            <h1 className="font-bold text-lg tracking-tight">
+          <div className="flex items-center space-x-2 min-w-0">
+            <Sparkles className="h-5 w-5 text-purple-500 shrink-0" />
+            <h1
+              className="font-bold text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px] lg:max-w-[380px]"
+              title={currentProjectName ? `Ajatushautomo: ${currentProjectName}` : "Arkkitehtuurin Hiekkalaatikko"}
+            >
               {currentProjectName ? `Ajatushautomo: ${currentProjectName}` : "Arkkitehtuurin Hiekkalaatikko"}
             </h1>
           </div>
 
           {/* View Mode Toggle Tabs */}
-          <div className="ml-4 flex items-center bg-muted/50 p-1 rounded-lg border border-border/50 text-xs font-medium">
+          <div className="hidden sm:flex ml-2 lg:ml-4 items-center bg-muted/50 p-1 rounded-lg border border-border/50 text-xs font-medium shrink-0">
             <button
               onClick={() => setActiveTab("canvas")}
               className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
@@ -649,7 +674,7 @@ export function PlaygroundWorkspace({
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 shrink-0">
           {/* Canvas Export Dialog Button */}
           <Button
             onClick={() => setIsExportModalOpen(true)}
@@ -730,10 +755,51 @@ export function PlaygroundWorkspace({
         {activeTab === "canvas" ? (
           <>
             <div
-              className={`h-full flex flex-col transition-all duration-300 ${
+              className={`h-full flex flex-col transition-all duration-300 relative ${
                 selectedNode ? "lg:col-span-6" : "lg:col-span-8"
               }`}
             >
+              {/* Completion Banner */}
+              {showArchCompleteBanner && nodes.length > 0 && (
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-purple-500/10 via-background to-emerald-500/10 border border-purple-500/30 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold flex-none">
+                      <Check className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground flex items-center gap-1.5">
+                        <span>Arkkitehtuurikaavio valmis!</span>
+                        <span className="text-xs font-normal text-muted-foreground">({nodes.length} komponenttia, {edges.length} yhteyttä)</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Järjestelmäkerrokset ja rajapinnat mallinnettu. Voit tutkia solmuja tai siirtyä seuraavaan vaiheeseen.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setActiveTab("schema");
+                        setShowArchCompleteBanner(false);
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs h-8 shadow-sm"
+                    >
+                      <Database className="mr-1.5 h-3.5 w-3.5" />
+                      Luo Tietokantamalli (Gate 1) &rarr;
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => setShowArchCompleteBanner(false)}
+                      className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted"
+                      title="Sulje ilmoitus"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-base font-semibold text-foreground">Visuaalinen Kaavio</h2>
                 <span className="text-sm text-muted-foreground font-medium">
@@ -741,7 +807,7 @@ export function PlaygroundWorkspace({
                   {selectedNode ? "• Valittuna: " + ((selectedNode.data?.label as string) || selectedNode.id) : ""}
                 </span>
               </div>
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 relative">
                 <ArchitectureCanvas
                   nodes={nodes}
                   edges={edges}
@@ -751,6 +817,62 @@ export function PlaygroundWorkspace({
                   onNodeSelect={setSelectedNode}
                   hideHeader={true}
                 />
+
+                {/* Animated Agent Working HUD Overlay */}
+                {isGeneratingArch && (
+                  <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 transition-all duration-300 rounded-lg">
+                    <div className="max-w-md w-full bg-card border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                          <Bot className="h-5 w-5 animate-pulse" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base text-foreground">Tekoäly-arkkitehti työskentelee</h3>
+                          <p className="text-xs text-muted-foreground">Muodostetaan 4-tasoista järjestelmärakennetta...</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-1">
+                        <div className="flex items-center space-x-3 text-xs">
+                          {archGenStep > 1 ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-none" />
+                          ) : archGenStep === 1 ? (
+                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
+                          )}
+                          <span className={archGenStep === 1 ? "font-semibold text-foreground" : "text-muted-foreground"}>
+                            1. Puretaan vaatimusmäärittely ja tunnistetaan integraatiot
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 text-xs">
+                          {archGenStep > 2 ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-none" />
+                          ) : archGenStep === 2 ? (
+                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
+                          )}
+                          <span className={archGenStep === 2 ? "font-semibold text-foreground" : "text-muted-foreground"}>
+                            2. Muotoillaan 4-kerroksinen arkkitehtuuri (Client, API, Services, DB)
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 text-xs">
+                          {archGenStep >= 3 ? (
+                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
+                          )}
+                          <span className={archGenStep === 3 ? "font-semibold text-foreground" : "text-muted-foreground"}>
+                            3. Sijoitetaan solmut ja kytketään tietovirrat
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

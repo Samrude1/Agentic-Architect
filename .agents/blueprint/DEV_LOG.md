@@ -150,4 +150,28 @@ Chronological record of architectural decisions, completed sprints, and developm
   - `API.md`: Documented `/api/chat` streaming HTTP endpoint (tool calling schema, Smart Fallback) and all 6 Server Actions.
   - `docs/adr/0001-core-technology-stack-selection.md`: Initial Architectural Decision Record (MADR format) capturing core stack decisions and trade-offs.
 
+---
+
+### 2026-10-02 — PulseDesk MVP Validation & Co-Pilot Streaming Upgrades (`/app-memory`)
+- **PulseDesk Real-World SaaS Test Run**:
+  - Synthesized and saved B2B SaaS feedback platform ("PulseDesk") with 8 architecture components across 4 layers into SQLite (`dev.db`, ID: `6259c627-86f4-436f-b933-a71ad811f04d`).
+- **AI SDK 4/7 Real-Time Streaming Fixes**:
+  - Fixed `/api/chat/route.ts` to output `toUIMessageStreamResponse()` instead of deprecated `toDataStreamResponse()`.
+  - Implemented automatic normalization converting `@ai-sdk/react` 4.0 `UIMessage` `parts` into standard CoreMessage `content`, eliminating `AI_TypeValidationError`.
+  - Updated smart fallback to emit valid Server-Sent Events matching `uiMessageChunkSchema`.
+- **Arkkitehti Co-Pilot Interaction & UX Upgrades**:
+  - Replaced dead `append` call in `ChatSidebar.tsx` with modern `chat.sendMessage({ text })` method and added safe universal fallback.
+  - Added text extraction helper supporting both modern `parts` array and legacy `content`.
+  - Built welcoming empty-state card featuring a 1-click `[⚡ Käynnistä Co-Pilot -analyysi]` trigger and 3 pre-built architecture quick-prompt chips.
+  - Added dynamic 3-phase live progress HUD (`1/3 Puretaan vaatimusmäärittelyä...`, `2/3 Lasketaan integraatioita...`, `3/3 Viimeistellään suosituksia...`).
+  - Added `✓ Analyysi valmis • Co-Pilot aktiivinen` completion state indicator on completed assistant messages.
+- **Canvas & Header Polish**:
+  - Fixed header layout bug where long project titles wrapped into 3 lines and collided with tab buttons on smaller screens; added truncation, `max-w`, `min-w-0`, and `shrink-0` bounds.
+  - Added floating, dismissible Completion Banner (*"Arkkitehtuurikaavio valmis! (8 komponenttia, 7 yhteyttä)"*) with direct CTA to `[Luo Tietokantamalli (Gate 1) →]`.
+  - Added animated Agent Working HUD overlay with real-time step checkmarks during architecture graph synthesis.
+- **Quality Gates**:
+  - 34 Vitest unit tests passing across 9 test files (`npx vitest run`).
+  - Clean TypeScript check: `npx tsc --noEmit` (0 errors).
+
+
 

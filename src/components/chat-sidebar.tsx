@@ -23,44 +23,66 @@ export function ChatSidebar({
 }: ChatSidebarProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const [loadingStep, setLoadingStep] = useState(1);
   const initialSentRef = useRef(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { messages = [], append, status, isLoading: isChatLoading } = (useChat as any)({
+  const chat = (useChat as any)({
     api: "/api/chat",
   });
 
-  const isLoading = isChatLoading || status === "streaming" || status === "submitted";
-  const appendRef = useRef(append);
+  const messages = chat.messages || [];
+  const status = chat.status;
+  const isLoading = status === "streaming" || status === "submitted" || !!chat.isLoading;
 
+  // Cycle loading step description during AI processing
   useEffect(() => {
-    appendRef.current = append;
-  });
+    if (!isLoading) {
+      setLoadingStep(1);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => (prev % 3) + 1);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
+  // Safe universal sender supporting both modern AI SDK 4/7 (sendMessage) and legacy (append)
+  const sendPromptText = (promptText: string) => {
+    const text = promptText?.trim();
+    if (!text) return;
+
+    if (typeof chat.sendMessage === "function") {
+      chat.sendMessage({ text });
+    } else if (typeof chat.append === "function") {
+      chat.append({
+        role: "user",
+        content: text,
+      });
+    }
+  };
+
+  const handleStartInitialAnalysis = () => {
+    const promptToSend =
+      initialPrompt && initialPrompt.trim()
+        ? `Tässä on ohjelmistoideani / vaatimukseni:\n\n"${initialPrompt}"\n\nAnalysoi tämä, arvioi järjestelmän kerrokset ja anna tiivis suomenkielinen arkkitehtuurikatsaus sekä suositellut jatkoaskeleet.`
+        : "Analysoi nykyisen arkkitehtuurikaavion rakenne, arvioi kerrosjako ja anna tiivis suomenkielinen katsaus sekä suositellut jatkoaskeleet.";
+    sendPromptText(promptToSend);
+  };
 
   // Auto-send initial prompt on mount if there is no existing architecture
   useEffect(() => {
     if (initialPrompt && !hasExistingArchitecture && !initialSentRef.current) {
       initialSentRef.current = true;
       const formattedContent = `Tässä on ohjelmistoideani / vaatimukseni:\n\n"${initialPrompt}"\n\nAnalysoi tämä, luo ensimmäinen versio arkkitehtuurikaaviosta kutsumalla update_architecture-työkalua ja kerro lyhyesti arkkitehtuurivalinnoistasi.`;
-
-      if (typeof appendRef.current === "function") {
-        appendRef.current({
-          role: "user",
-          content: formattedContent,
-        });
-      }
+      sendPromptText(formattedContent);
     }
   }, [initialPrompt, hasExistingArchitecture]);
 
   // Handle external prompts (e.g. from Node Inspector or Project AI Check)
   useEffect(() => {
     if (externalPrompt && !isLoading) {
-      if (typeof appendRef.current === "function") {
-        appendRef.current({
-          role: "user",
-          content: externalPrompt,
-        });
-      }
+      sendPromptText(externalPrompt);
       onClearExternalPrompt?.();
     }
   }, [externalPrompt, isLoading, onClearExternalPrompt]);
@@ -68,13 +90,7 @@ export function ChatSidebar({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    if (typeof appendRef.current === "function") {
-      appendRef.current({
-        role: "user",
-        content: input,
-      });
-    }
+    sendPromptText(input);
     setInput("");
   };
 
@@ -89,8 +105,33 @@ export function ChatSidebar({
     const lastMessage = messages[messages.length - 1];
     if (!lastMessage || lastMessage.role !== "assistant") return;
 
+    // Check modern parts array
+    if (Array.isArray(lastMessage.parts)) {
+      for (const part of lastMessage.parts) {
+        if (
+          (part.type === "tool-call" || part.type === "tool-input-available") &&
+          part.toolName === "update_architecture"
+        ) {
+          const graphData = part.args || part.input;
+          if (graphData && graphData.nodes && graphData.edges) {
+            onArchitectureUpdate(graphData);
+          }
+        }
+        if (
+          (part.type === "tool-result" || part.type === "tool-output-available") &&
+          part.toolName === "update_architecture"
+        ) {
+          const graphData = part.result || part.output;
+          if (graphData && graphData.nodes && graphData.edges) {
+            onArchitectureUpdate(graphData);
+          }
+        }
+      }
+    }
+
+    // Check legacy toolInvocations array
     const toolInvocations = lastMessage.toolInvocations;
-    if (toolInvocations) {
+    if (Array.isArray(toolInvocations)) {
       for (const invocation of toolInvocations) {
         if (invocation.toolName === "update_architecture") {
           const graphData = invocation.result || invocation.args;
@@ -102,70 +143,169 @@ export function ChatSidebar({
     }
   }, [messages, onArchitectureUpdate]);
 
+  // Extract human-readable text from either modern parts or classic content
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extractMessageText = (msg: any): string => {
+    if (typeof msg.content === "string" && msg.content.trim()) {
+      return msg.content;
+    }
+    if (Array.isArray(msg.parts)) {
+      return msg.parts
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((p: any) => p.type === "text" && typeof p.text === "string")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((p: any) => p.text)
+        .join("");
+    }
+    return "";
+  };
+
   return (
-    <div className="flex flex-col h-full border rounded-lg bg-background overflow-hidden">
+    <div className="flex flex-col h-full border rounded-lg bg-background overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="p-4 border-b bg-muted/30 flex items-center justify-between">
+      <div className="p-3.5 border-b bg-muted/30 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <h3 className="font-bold text-base">Arkkitehti Co-Pilot</h3>
+          <Bot className="h-5 w-5 text-purple-500" />
+          <h3 className="font-bold text-sm tracking-tight">Arkkitehti Co-Pilot</h3>
         </div>
-        <span className="text-xs text-muted-foreground bg-primary/10 px-2.5 py-1 rounded-full font-medium text-primary">
+        <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full font-medium">
           Reaaliaikainen
         </span>
       </div>
 
       {/* Messages list */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-base">
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-muted-foreground text-center p-4 text-sm">
-            Anna ohjelmistoideasi tai kysy tekoälyltä ehdotuksia arkkitehtuurin hiomiseen.
+          <div className="h-full flex flex-col justify-center items-center text-center p-2 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+              <Bot className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-semibold text-sm text-foreground">Co-Pilot valmiina</h4>
+              <p className="text-xs text-muted-foreground max-w-[240px]">
+                Arkkitehtuuriprojekti on luotu. Voit käynnistää kattavan analyysin ja sparrauksen.
+              </p>
+            </div>
+
+            <div className="w-full space-y-2 pt-2">
+              <Button
+                onClick={handleStartInitialAnalysis}
+                disabled={isLoading}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs h-9 shadow-sm"
+              >
+                ⚡ Käynnistä Co-Pilot -analyysi
+              </Button>
+
+              <div className="text-[11px] text-muted-foreground pt-1">Tai kysy suoraan:</div>
+              <div className="flex flex-col gap-1.5 w-full text-left">
+                <button
+                  type="button"
+                  onClick={() =>
+                    sendPromptText("Mitkä ovat tämän arkkitehtuurin kriittisimmät skaalautuvuushaasteet?")
+                  }
+                  className="text-xs text-left p-2 rounded-md bg-muted/40 hover:bg-muted border border-border/40 text-foreground transition-colors"
+                >
+                  🚀 Kriittisimmät skaalautuvuushaasteet?
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    sendPromptText("Miten tietoturva ja käyttäjätodennus kannattaa ratkaista tässä?")
+                  }
+                  className="text-xs text-left p-2 rounded-md bg-muted/40 hover:bg-muted border border-border/40 text-foreground transition-colors"
+                >
+                  🔒 Tietoturvan ja autentikaation arviointi
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    sendPromptText("Tarvitseeko järjestelmä välimuistia tai taustajonoja (Queue/Workers)?")
+                  }
+                  className="text-xs text-left p-2 rounded-md bg-muted/40 hover:bg-muted border border-border/40 text-foreground transition-colors"
+                >
+                  ⚡ Välimuistin ja asynkronisten jonojen tarve
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
-          messages.map((message: { id: string; role: string; content: string; toolInvocations?: Array<{ toolCallId: string }> }) => (
-            <div
-              key={message.id}
-              className={`flex items-start space-x-2 ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {message.role !== "user" && (
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-none mt-0.5">
-                  <Bot className="h-4.5 w-4.5" />
-                </div>
-              )}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          messages.map((message: any, index: number) => {
+            const isLastMessage = index === messages.length - 1;
+            const isAssistant = message.role !== "user";
+            const textContent = extractMessageText(message);
+
+            return (
               <div
-                className={`rounded-lg px-3.5 py-2.5 max-w-[85%] whitespace-pre-wrap text-base leading-relaxed ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground font-medium"
-                    : "bg-muted/60 text-foreground border"
+                key={message.id || index}
+                className={`flex items-start space-x-2 ${
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {message.content}
-                {message.toolInvocations?.map((tool: { toolCallId: string }) => (
-                  <div key={tool.toolCallId} className="mt-2 text-sm text-muted-foreground italic border-t pt-1.5">
-                    ⚡ Arkkitehtuurikaaviota päivitetty
+                {isAssistant && (
+                  <div className="w-7 h-7 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-none mt-0.5">
+                    <Bot className="h-4 w-4" />
                   </div>
-                ))}
-              </div>
-              {message.role === "user" && (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground flex-none mt-0.5">
-                  <User className="h-4.5 w-4.5" />
+                )}
+                <div
+                  className={`rounded-xl px-3.5 py-2.5 max-w-[88%] whitespace-pre-wrap text-sm leading-relaxed ${
+                    message.role === "user"
+                      ? "bg-purple-600 text-white font-medium shadow-sm"
+                      : "bg-muted/60 text-foreground border border-border/60"
+                  }`}
+                >
+                  {textContent || (
+                    <span className="text-xs text-muted-foreground italic">
+                      {isAssistant ? "Valmistellaan vastausta..." : ""}
+                    </span>
+                  )}
+
+                  {/* Tool Call notifications */}
+                  {Array.isArray(message.parts) &&
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    message.parts.some((p: any) => p.type === "tool-call" || p.toolName === "update_architecture") && (
+                      <div className="mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium italic border-t pt-1.5 flex items-center gap-1.5">
+                        <span>⚡</span> Arkkitehtuurikaaviota päivitetty kankaalle
+                      </div>
+                    )}
+
+                  {/* Completion confirmation on last assistant message when not loading */}
+                  {isAssistant && isLastMessage && !isLoading && textContent && (
+                    <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                        ✓ Analyysi valmis
+                      </span>
+                      <span>Co-Pilot aktiivinen</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))
+                {message.role === "user" && (
+                  <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground flex-none mt-0.5">
+                    <User className="h-4 w-4" />
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
+
+        {/* Live dynamic progress HUD */}
         {isLoading && (
-          <div className="flex items-center space-x-3 p-3.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-300 animate-pulse shadow-sm">
-            <div className="relative flex items-center justify-center">
-              <Bot className="h-5 w-5 text-purple-500 animate-bounce" />
+          <div className="p-3.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-700 dark:text-purple-300 shadow-sm space-y-2 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 font-semibold text-xs tracking-tight">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-500" />
+                <span>⚡ Tekoäly-arkkitehti työskentelee...</span>
+              </div>
+              <span className="text-[10px] bg-purple-500/20 px-2 py-0.5 rounded-full font-bold">
+                Vaihe {loadingStep}/3
+              </span>
             </div>
-            <div className="flex-1 text-sm font-medium">
-              <span className="font-bold block text-base leading-tight">⚡ Tekoäly-arkkitehti työskentelee...</span>
-              <span className="text-xs text-muted-foreground">Lasketaan kerroksia & luodaan kaavioelementtejä...</span>
-            </div>
-            <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
+            <p className="text-xs text-muted-foreground font-medium pl-5">
+              {loadingStep === 1 && "1/3 Puretaan vaatimusmäärittelyä ja tunnistetaan kerrokset..."}
+              {loadingStep === 2 && "2/3 Lasketaan integraatioita ja riippuvuuksia..."}
+              {loadingStep === 3 && "3/3 Viimeistellään arkkitehtuurikatsausta ja suosituksia..."}
+            </p>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -176,11 +316,16 @@ export function ChatSidebar({
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Esim. 'Lisää Stripe-maksupalvelu'..."
-          className="flex-1 bg-muted/40 text-base px-3.5 py-2.5 rounded-md border border-input focus:outline-none focus:ring-1 focus:ring-ring"
+          placeholder="Kysy arkkitehdiltä tai ehdota muutosta..."
+          className="flex-1 bg-muted/40 text-sm px-3.5 py-2 rounded-md border border-input focus:outline-none focus:ring-1 focus:ring-purple-500"
           disabled={isLoading}
         />
-        <Button type="submit" size="default" disabled={isLoading || !input.trim()}>
+        <Button
+          type="submit"
+          size="default"
+          disabled={isLoading || !input.trim()}
+          className="bg-purple-600 hover:bg-purple-700 text-white h-9 px-3"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>

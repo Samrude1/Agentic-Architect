@@ -19,6 +19,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-10-02
+
+> **Agent Experience & AI SDK 4/7 Streaming Upgrade** — Real-time streaming fix, Co-Pilot interactive UX, canvas completion banners, and responsive layout polish.
+
+### Added
+- **Interactive Co-Pilot Empty State**: Rich welcoming card with a 1-click `[⚡ Käynnistä Co-Pilot -analyysi]` trigger and 3 pre-built architecture quick-prompt chips (scalability, security & auth, cache & queues).
+- **Dynamic 3-Phase Live Progress HUD**: Animated status indicator showing real-time analysis phases (*1/3 Puretaan vaatimusmäärittelyä*, *2/3 Lasketaan integraatioita*, *3/3 Viimeistellään suosituksia*).
+- **Analysis Completion Status Badge**: `✓ Analyysi valmis • Co-Pilot aktiivinen` visual indicator appended to completed assistant messages.
+- **Canvas Completion Banner**: Floating dismissible notification banner with 1-click CTA to `[Luo Tietokantamalli (Gate 1) →]`.
+- **Canvas Agent Working HUD Overlay**: Glassmorphism status overlay displaying real-time step checkmarks during architecture graph synthesis.
+
+### Fixed
+- **AI SDK 7 Streaming Integration (`/api/chat`)**: Replaced broken `toDataStreamResponse()` with `toUIMessageStreamResponse()`, enabling native SSE event streams for `@ai-sdk/react` 4.0.
+- **Message Structure Normalization (`/api/chat`)**: Added automatic normalization converting `@ai-sdk/react` 4.0 `UIMessage` `parts` into CoreMessage `content` strings, eliminating `AI_TypeValidationError`.
+- **Co-Pilot Send Hook (`ChatSidebar.tsx`)**: Replaced deprecated `append` with modern `chat.sendMessage({ text })` method and added universal fallback.
+- **Header Title Overlap (`PlaygroundWorkspace.tsx`)**: Added truncation, `min-w-0`, and `shrink-0` bounds to prevent long project titles from wrapping into 3 lines and covering top bar buttons on smaller screens.
+
+---
+
 ## [1.0.0] - 2026-09-15
 
 > **MVP Release** — Production-ready AI architecture visualizer and fullstack code generation engine.

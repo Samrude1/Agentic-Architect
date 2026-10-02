@@ -1,34 +1,46 @@
-# Memory — Codegen Phase & Local Disk Homebase Persistence
+# Memory — Agentic Architect Project Memory
 
-Last updated: 2026-08-13 18:52:00
+Last updated: 2026-10-02 19:05:00 +03:00
 
-## What was built
+## What was built & fixed in this session
 
-- **Prisma Schema Generator Server Action (`src/app/actions/codegen.ts`)**: Built `generatePrismaSchemaForProject` which synthesizes project requirements and architecture nodes into a clean SQLite-compatible Prisma schema using OpenRouter (GPT-4o mini) with a smart fallback generator. Added strict prompt rules requiring pure English model/field names.
-- **Direct Disk Persistence Action (`writeProjectFileToDisk`)**: Implemented safe file writing to the project's configured homebase target directory with path traversal security validation (`fullPath.startsWith(targetDir)`).
-- **Code Viewer & IDE Component (`src/components/code-viewer.tsx`)**: Built a tabbed code viewer component for Prisma schema previewing, editing, syntax highlighting, and 1-click disk synchronization to `prisma/schema.prisma`.
-- **Playground Workspace Integration (`src/components/playground-workspace.tsx` & `src/app/playground/page.tsx`)**: Added Code Viewer tab switching ("Arkkitehtuuri" vs "Prisma Schema / Koodi") and linked workspace target homebase path updating (`updateProjectHomebaseDir`).
+1. **AI SDK 4 / 7 Real-time Streaming Integration**:
+   - **Stream Response Fix (`src/app/api/chat/route.ts`)**: Replaced deprecated/broken `toDataStreamResponse()` with `toUIMessageStreamResponse()` from AI SDK 7. Configured valid SSE Server-Sent Events text fallback.
+   - **Message Structure Normalization**: Handled `@ai-sdk/react` 4.0 `UIMessage` format (where text resides in `parts: [{ type: "text", text: "..." }]`) by normalizing them into standard CoreMessages (`{ role, content }`) before passing to `streamText`, resolving `AI_TypeValidationError`.
+2. **Arkkitehti Co-Pilot UX & Interaction Upgrades (`src/components/chat-sidebar.tsx`)**:
+   - Replaced dead `append` call with modern `chat.sendMessage({ text })` method and added safe universal sender.
+   - Added text extraction helper `extractMessageText` supporting both modern `parts` array and legacy `content`.
+   - Built rich empty-state card featuring a 1-click `[⚡ Käynnistä Co-Pilot -analyysi]` trigger and 3 architecture quick-prompt chips (scalability, security & auth, cache & queues).
+   - Added dynamic 3-phase live progress HUD (`1/3 Puretaan vaatimusmäärittelyä...`, `2/3 Lasketaan integraatioita...`, `3/3 Viimeistellään suosituksia...`).
+   - Added `✓ Analyysi valmis • Co-Pilot aktiivinen` completion state indicator on completed assistant messages.
+3. **Canvas & Workspace Polish (`src/components/playground-workspace.tsx`)**:
+   - Fixed header layout bug where long project titles wrapped into 3 lines and collided with tab buttons and canvas banners on smaller screens; added truncation, `max-w`, `min-w-0`, and `shrink-0` guards.
+   - Built interactive, dismissible Completion Banner above the canvas (*"Arkkitehtuurikaavio valmis! (8 komponenttia, 7 yhteyttä)"*) with direct CTA to `[Luo Tietokantamalli (Gate 1) →]`.
+   - Added animated Agent Working HUD overlay covering the canvas during architecture generation.
+4. **Validation Test Run with "PulseDesk" (B2B SaaS)**:
+   - Generated and persisted 8 architecture nodes across 4 tiers into SQLite (`dev.db`, ID: `6259c627-86f4-436f-b933-a71ad811f04d`).
+   - Verified end-to-end streaming dialogue with Co-Pilot.
+5. **Code Health & Testing**:
+   - 34 Vitest tests passing across 9 test files (`npx vitest run`).
+   - TypeScript compilation: 0 errors (`npx tsc --noEmit`).
 
 ## Decisions made
 
-- **Strict English Schemas**: AI schemas enforce standard English for all model names, fields, enums, and relations regardless of user prompt language (e.g., Finnish requirements translate to English models like `User`, `Project`, `Task`).
-- **Disk Synchronization Policy**: File writes validate `targetPath` from Prisma project config and reject paths traversing outside the specified root directory.
-
-## Problems solved
-
-- **OpenRouter Schema Fallback**: Added robust fallback schema generator when OpenRouter API rate limits or network issues occur, ensuring schema generation never blocks the UI.
+- **Universal AI SDK Bridge**: Support both modern AI SDK 4/7 `sendMessage` + `parts` format and legacy `append` + `content` to ensure zero breaking changes.
+- **SSE Stream Protocol**: Enforce valid Server-Sent Events output (`text/event-stream; charset=utf-8`) across all API routes.
 
 ## Current state
 
-- Project compiles cleanly with `npm run build` (Turbopack + TypeScript).
-- Architecture visual editor, AI node description generation, Prisma schema codegen, and direct disk syncing are working end to end.
+- Architecture Canvas, Co-Pilot chat streaming, Node Inspector, and Export modal are fully functioning.
+- "PulseDesk" project is saved in local database and ready for Data Gate 1.
 
 ## Next session starts with
 
-- **Full Backend API & Component Scaffold Generation**: Extending `codegen.ts` to generate Next.js Route Handlers (`src/app/api/`) and React UI components based on the generated Prisma schema and architecture nodes.
-- **Diagram Export Enhancements**: Adding export features for PNG/SVG diagrams and Mermaid markdown documentation.
-- **Enterprise AI Observability (Langfuse)**: *Strategic addition.* Integrate Langfuse tracing to Vercel AI SDK streams to measure token costs, latency, and create structured evals for generated architecture quality. This shifts the project from "local MVP" to "production-ready AI platform".
-
-## Open questions
-
-- None.
+- **Data Gate 1 Execution for PulseDesk**:
+  - Open "Tietokantamalli (Gate 1)" tab.
+  - Generate SQLite/PostgreSQL Prisma schema with relations (`Workspace`, `User`, `FeedbackItem`, `Vote`, `Comment`, `Tag`).
+  - Configure Project Homebase Directory and test safe local disk write with path traversal verification.
+- **Data Gate 2 & 3 Execution**:
+  - Generate Next.js Route Handlers and Zod schemas (Gate 2).
+  - Generate React 19 UI component (Gate 3).
+  - Run Security Check and Optimize Code audit scorecards.

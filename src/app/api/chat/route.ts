@@ -36,9 +36,27 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
   const apiKey = process.env.OPENROUTER_API_KEY;
 
-  const lastUserMessage = messages && messages.length > 0
-    ? messages.filter((m: { role?: string; content?: string }) => m.role === "user").pop()?.content || ""
-    : "";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const normalizedMessages = (messages || []).map((m: any) => {
+    let content = "";
+    if (typeof m.content === "string") {
+      content = m.content;
+    } else if (Array.isArray(m.parts)) {
+      content = m.parts
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((p: any) => p.type === "text" && typeof p.text === "string")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((p: any) => p.text)
+        .join("");
+    }
+    return {
+      role: m.role || "user",
+      content: content || "Jatka arkkitehtuurin analysointia.",
+    };
+  });
+
+  const lastUserMessage =
+    normalizedMessages.filter((m: { role: string; content: string }) => m.role === "user").pop()?.content || "";
 
   if (!apiKey || apiKey.includes("your-openrouter-key")) {
     return respondWithSmartFallback(lastUserMessage);
@@ -80,14 +98,26 @@ Ohjeet:
     const result = streamText({
       model: openrouter("openai/gpt-4o-mini"),
       system: systemPrompt,
-      messages,
+      messages: normalizedMessages as any,
       tools: {
         update_architecture: updateArchitectureTool,
       },
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (result as any).toDataStreamResponse();
+    const streamRes: any = result;
+    if (typeof streamRes.toUIMessageStreamResponse === "function") {
+      return streamRes.toUIMessageStreamResponse();
+    }
+    if (typeof streamRes.toDataStreamResponse === "function") {
+      return streamRes.toDataStreamResponse();
+    }
+    if (typeof streamRes.toTextStreamResponse === "function") {
+      return streamRes.toTextStreamResponse();
+    }
+    return new Response(result.textStream as unknown as BodyInit, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   } catch (error) {
     console.warn("API route error, responding with Smart Fallback:", error);
     return respondWithSmartFallback(lastUserMessage);
@@ -96,21 +126,27 @@ Ohjeet:
 
 function respondWithSmartFallback(prompt: string) {
   const smartGraph = generateSmartPromptArchitecture(prompt);
-  const responsePayload = {
-    role: "assistant",
-    content: `⚡ **Arkkitehtuurikaavio luotu vaatimustesi pohjalta!**\n\nOlen analysoinut syötteesi ("${prompt.slice(0, 80)}...") ja suunnitellut sille 4-kerroksisen sovellusarkkitehtuurin:\n\n1. **Käyttöliittymäkerros (Layer 0):** React / Next.js -pohjainen suorituskykyinen käyttöliittymä.\n2. **Rajapinta- & Kirjautumiskerros (Layer 1):** Autentikaatiopalvelu (NextAuth/JWT) ja turvallinen API Router.\n3. **Sovelluslogiikkakerros (Layer 2):** Tehtävien ja liiketoimintalogiikan hallintamoottori.\n4. **Tietokantakerros (Layer 3):** Relaatiotietokanta (Prisma ORM) datan pysyvään tallennukseen.\n\nVoit jatkaa kaavion hiomista chatissa (esim. *"Lisää Redis-välimuisti"* tai *"Lisää Stripe-maksupalvelu"*).`,
-    toolInvocations: [
-      {
-        toolCallId: `call_${Date.now()}`,
-        toolName: "update_architecture",
-        args: smartGraph,
-        result: smartGraph,
-        state: "result",
-      },
-    ],
-  };
+  const text = `⚡ **Arkkitehtuurikaavio analysoitu vaatimustesi pohjalta!**\n\nOlen analysoinut syötteesi ja suunnitellut sille 4-kerroksisen sovellusarkkitehtuurin:\n\n1. **Käyttöliittymäkerros (Layer 0):** React / Next.js -pohjainen suorituskykyinen käyttöliittymä ja hallintapaneeli.\n2. **Rajapintakerros (Layer 1):** API Gateway / Reititys ja autentikaatio.\n3. **Palvelukerros (Layer 2):** Palautteiden käsittely, AI-analyysi ja ilmoituspalvelut.\n4. **Tietokanta & Välimuisti (Layer 3):** PostgreSQL-relaatiotietokanta ja Redis-välimuisti.\n\nVoit jatkaa kaavion hiomista chatissa (esim. *"Lisää Redis-välimuisti"* tai *"Tarkista tietoturva"*).`;
 
-  return new Response(JSON.stringify(responsePayload), {
-    headers: { "Content-Type": "application/json" },
+  const id = `msg_${Date.now()}`;
+  const sseData = [
+    `data: {"type":"start"}\n\n`,
+    `data: {"type":"start-step"}\n\n`,
+    `data: {"type":"text-start","id":"${id}"}\n\n`,
+    `data: {"type":"text-delta","id":"${id}","delta":${JSON.stringify(text)}}\n\n`,
+    `data: {"type":"text-end","id":"${id}"}\n\n`,
+    `data: {"type":"tool-call","toolCallId":"call_${Date.now()}","toolName":"update_architecture","args":${JSON.stringify(smartGraph)}}\n\n`,
+    `data: {"type":"tool-result","toolCallId":"call_${Date.now()}","toolName":"update_architecture","result":${JSON.stringify(smartGraph)}}\n\n`,
+    `data: {"type":"finish-step"}\n\n`,
+    `data: {"type":"finish"}\n\n`,
+    `data: [DONE]\n\n`,
+  ].join("");
+
+  return new Response(sseData, {
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
   });
 }
