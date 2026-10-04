@@ -1,13 +1,22 @@
 # Agentic Architect
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/Samrude1/Agentic-Architect)
-[![Version](https://img.shields.io/badge/version-1.1.0-blueviolet.svg)](https://github.com/Samrude1/Agentic-Architect/releases)
+[![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20In%20Active%20Development-orange.svg)](https://github.com/Samrude1/Agentic-Architect)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/Tests-46%20Passing-brightgreen.svg)](./tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 > An AI-powered fullstack architecture visualizer and code generation engine for technical founders, software architects, and solo developers — transforming plain-language requirements into interactive 4-tier system diagrams, Prisma schemas, API handlers, and React UI components.
+
+> [!WARNING]
+> **Project Status: Active Alpha / Work in Progress (WIP)**
+>
+> ⚠️ **Notice**: This software is in early **Alpha** and under active daily development. While the visual React Flow canvas, streaming AI Co-Pilot, and Diff-based local disk writer are functional, end-to-end code generation workflows (**Data Gates 1–3**) are currently undergoing live field testing and stabilization.
+>
+> - **Experimental Code**: APIs, prompts, and templates may change without notice.
+> - **Safe Testing Recommended**: Never run direct disk writes against mission-critical production directories. Always use a clean test workspace and review every change via the interactive Diff Preview dialog.
+> - **Feedback Welcome**: If you encounter bugs, visual glitches, or unexpected behaviors, please file an issue or pull request!
 
 ---
 
@@ -150,12 +159,18 @@ For deployment runbooks, emergency rollback procedures, and secret rotation step
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ Roadmap & Maturity Status
 
-- [ ] Multi-file document dropzone support
-- [ ] Automated Cypress E2E test coverage
-- [ ] Team collaboration (shared project links)
-- [ ] Cloud deployment target (Vercel / Railway)
+| Component / Feature | Maturity | Current Status & Notes |
+| :--- | :---: | :--- |
+| **Visual Architecture Canvas** | 🟢 Stable | 4-tier React Flow layout, animated signals, custom node styles |
+| **AI Co-Pilot Streaming** | 🟢 Stable | AI SDK 7 SSE streaming, quick-prompt chips, 3-step progress HUD |
+| **Safe Diff Preview & Sandboxing** | 🟢 Stable | LCS-diff verification, automatic `.agentic-backup/`, allowlists |
+| **Data Gate 1: Prisma DB Schema** | 🟡 Alpha | Schema generation & local disk writer (in active testing) |
+| **Data Gate 2: Next.js API Routes** | 🟡 Alpha | Route Handler & Zod validation generation (in active testing) |
+| **Data Gate 3: React 19 UI Dashboards** | 🟡 Alpha | Feature dashboard code generator (in active testing) |
+| **Automated End-to-End Tests** | ⚪ Planned | Full Cypress / Playwright user flow validation |
+| **Multi-file Document Dropzone** | ⚪ Planned | Support for ingesting complex, multi-document architecture briefs |
 
 ---
 
