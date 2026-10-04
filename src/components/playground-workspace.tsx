@@ -1,27 +1,13 @@
 "use client";
 
 import { useState, useCallback, useTransition, useEffect } from "react";
-import Link from "next/link";
 import {
-  ArrowLeft,
-  Sparkles,
-  Save,
-  Loader2,
-  Check,
-  ShieldCheck,
   Database,
   LayoutGrid,
-  HardDrive,
   Server,
+  ShieldCheck,
   Zap,
-  Key,
-  Download,
-  CheckCircle2,
-  Circle,
-  Bot,
-  X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
@@ -33,6 +19,9 @@ import { HomebasePathCard } from "@/components/workspace/homebase-path-card";
 import { Gate1SchemaTab } from "@/components/workspace/gate1-schema-tab";
 import { Gate2ApiTab } from "@/components/workspace/gate2-api-tab";
 import { Gate3UiTab } from "@/components/workspace/gate3-ui-tab";
+import { WorkspaceHeader } from "@/components/workspace/workspace-header";
+import { CompletionBanner } from "@/components/workspace/completion-banner";
+import { AgentWorkingHud } from "@/components/workspace/agent-working-hud";
 import { runSecurityAudit, runOptimizationAudit, AuditReport } from "@/app/actions/audit";
 import { inferTechStackAndEnv, TechStackProfile } from "@/app/actions/tech-stack";
 import { useRouter } from "next/navigation";
@@ -47,7 +36,10 @@ import {
   generateApiRoutesForProject,
   generateUiComponentsForProject,
   writeProjectFileToDisk,
+  previewProjectFileWrite,
 } from "@/app/actions/codegen";
+import { DiffPreviewDialog } from "@/components/diff-preview-dialog";
+import type { DiffResult } from "@/lib/diff";
 import { Node, Edge } from "@xyflow/react";
 
 interface PlaygroundWorkspaceProps {
@@ -97,8 +89,12 @@ export function PlaygroundWorkspace({
   const [showArchCompleteBanner, setShowArchCompleteBanner] = useState<boolean>(
     initialNodes.length > 0 && !initialPrismaSchema
   );
-  const [isWritingToDisk, setIsWritingToDisk] = useState(false);
   const [diskMessage, setDiskMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [savedGates, setSavedGates] = useState<{ gate1?: boolean; gate2?: boolean; gate3?: boolean }>({
+    gate1: !!initialPrismaSchema,
+    gate2: !!initialApiCode,
+    gate3: !!initialUiCode,
+  });
 
   // Export Diagram Modal State
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -128,14 +124,48 @@ export function PlaygroundWorkspace({
     onConfirm: () => {},
   });
 
+  const [diffDialog, setDiffDialog] = useState<{
+    open: boolean;
+    title: string;
+    relativePath: string;
+    fullPath?: string;
+    diff: DiffResult | null;
+    isLoadingPreview: boolean;
+    isWriting: boolean;
+    contentToWrite: string;
+    writeResult?: {
+      success: boolean;
+      fullPath?: string;
+      backupCreated?: boolean;
+      backupPath?: string;
+    } | null;
+  }>({
+    open: false,
+    title: "",
+    relativePath: "",
+    diff: null,
+    isLoadingPreview: false,
+    isWriting: false,
+    contentToWrite: "",
+    writeResult: null,
+  });
+
+  const isWritingToDisk = diffDialog.isWriting;
+
   // Generate initial architecture diagram immediately if canvas is empty and prompt exists
   useEffect(() => {
-    if (initialPrompt && initialNodes.length === 0) {
-      setIsGeneratingArch(true);
-      setArchGenStep(1);
+    let initTimer: NodeJS.Timeout | undefined;
+    let t1: NodeJS.Timeout | undefined;
+    let t2: NodeJS.Timeout | undefined;
 
-      const t1 = setTimeout(() => setArchGenStep(2), 700);
-      const t2 = setTimeout(() => setArchGenStep(3), 1400);
+    if (initialPrompt && initialNodes.length === 0) {
+      initTimer = setTimeout(() => {
+        setIsGeneratingArch(true);
+        setArchGenStep(1);
+      }, 0);
+
+      t1 = setTimeout(() => setArchGenStep(2), 700);
+      t2 = setTimeout(() => setArchGenStep(3), 1400);
 
       generateRealArchitecture(initialPrompt)
         .then((data) => {
@@ -150,8 +180,9 @@ export function PlaygroundWorkspace({
         })
         .finally(() => {
           setIsGeneratingArch(false);
-          clearTimeout(t1);
-          clearTimeout(t2);
+          if (initTimer) clearTimeout(initTimer);
+          if (t1) clearTimeout(t1);
+          if (t2) clearTimeout(t2);
         });
     }
 
@@ -161,6 +192,12 @@ export function PlaygroundWorkspace({
         .then((profile) => setTechProfile(profile))
         .catch((err) => console.error("Failed to infer tech stack profile:", err));
     }
+
+    return () => {
+      if (initTimer) clearTimeout(initTimer);
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+    };
   }, [initialPrompt, initialNodes.length]);
 
   const handleArchitectureUpdate = useCallback(
@@ -248,43 +285,6 @@ export function PlaygroundWorkspace({
     }
   };
 
-  const handleWriteToDisk = async () => {
-    if (!currentProjectId) {
-      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
-      return;
-    }
-    if (!targetPath.trim()) {
-      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
-      return;
-    }
-    if (!prismaSchema.trim()) {
-      setDiskMessage({ type: "error", text: "Generoi tietokantamalli ensin." });
-      return;
-    }
-
-    setIsWritingToDisk(true);
-    try {
-      // Save targetPath to DB first
-      await updateProjectTargetPath(currentProjectId, targetPath);
-
-      const result = await writeProjectFileToDisk(currentProjectId, "prisma/schema.prisma", prismaSchema);
-      if (result.success) {
-        setDiskMessage({
-          type: "success",
-          text: `Tiedosto kirjoitettu onnistuneesti! (${result.fullPath})`,
-        });
-      } else {
-        setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
-      setDiskMessage({ type: "error", text: msg });
-    } finally {
-      setIsWritingToDisk(false);
-      setTimeout(() => setDiskMessage(null), 5000);
-    }
-  };
-
   const handleGenerateApiRoutes = async () => {
     setIsGeneratingApi(true);
     try {
@@ -301,46 +301,6 @@ export function PlaygroundWorkspace({
       console.error("Failed to generate API routes:", err);
     } finally {
       setIsGeneratingApi(false);
-    }
-  };
-
-  const handleWriteApiToDisk = async () => {
-    if (!currentProjectId) {
-      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
-      return;
-    }
-    if (!targetPath.trim()) {
-      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
-      return;
-    }
-    if (!apiCode.trim()) {
-      setDiskMessage({ type: "error", text: "Generoi taustajärjestelmän API-koodi ensin." });
-      return;
-    }
-
-    setIsWritingToDisk(true);
-    try {
-      await updateProjectTargetPath(currentProjectId, targetPath);
-
-      const result = await writeProjectFileToDisk(
-        currentProjectId,
-        "src/app/api/endpoints/route.ts",
-        apiCode
-      );
-      if (result.success) {
-        setDiskMessage({
-          type: "success",
-          text: `API-koodi kirjoitettu onnistuneesti! (${result.fullPath})`,
-        });
-      } else {
-        setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
-      setDiskMessage({ type: "error", text: msg });
-    } finally {
-      setIsWritingToDisk(false);
-      setTimeout(() => setDiskMessage(null), 5000);
     }
   };
 
@@ -361,46 +321,6 @@ export function PlaygroundWorkspace({
       console.error("Failed to generate UI components:", err);
     } finally {
       setIsGeneratingUi(false);
-    }
-  };
-
-  const handleWriteUiToDisk = async () => {
-    if (!currentProjectId) {
-      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
-      return;
-    }
-    if (!targetPath.trim()) {
-      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
-      return;
-    }
-    if (!uiCode.trim()) {
-      setDiskMessage({ type: "error", text: "Generoi käyttöliittymäkomponentit ensin." });
-      return;
-    }
-
-    setIsWritingToDisk(true);
-    try {
-      await updateProjectTargetPath(currentProjectId, targetPath);
-
-      const result = await writeProjectFileToDisk(
-        currentProjectId,
-        "src/components/features/dashboard.tsx",
-        uiCode
-      );
-      if (result.success) {
-        setDiskMessage({
-          type: "success",
-          text: `UI-komponentti kirjoitettu onnistuneesti! (${result.fullPath})`,
-        });
-      } else {
-        setDiskMessage({ type: "error", text: result.error || "Virhe kirjoitettaessa levylle." });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
-      setDiskMessage({ type: "error", text: msg });
-    } finally {
-      setIsWritingToDisk(false);
-      setTimeout(() => setDiskMessage(null), 5000);
     }
   };
 
@@ -520,42 +440,136 @@ export function PlaygroundWorkspace({
     }
   };
 
-  const triggerWritePrismaToDiskConfirmation = () => {
-    setConfirmDialog({
+  const handleOpenDiffPreview = async (
+    relativePath: string,
+    content: string,
+    title: string
+  ) => {
+    if (!currentProjectId) {
+      setDiskMessage({ type: "error", text: "Tallenna projekti ensin ennen levylle kirjoittamista." });
+      return;
+    }
+    if (!targetPath.trim()) {
+      setDiskMessage({ type: "error", text: "Syötä projektin kotikansio (Project Homebase Directory) ensin." });
+      return;
+    }
+    if (!content.trim()) {
+      setDiskMessage({ type: "error", text: "Ei kirjoitettavaa koodia." });
+      return;
+    }
+
+    setDiffDialog({
       open: true,
-      title: "Kirjoitetaanko tietokantamalli levylle?",
-      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'prisma/schema.prisma' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
-      confirmLabel: "Kyllä, kirjoita tiedosto",
-      variant: "purple",
-      icon: <HardDrive className="h-5 w-5" />,
-      consequences: [
-        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
-        "Varmista, että olet tallentanut mahdolliset aiemmat muutokset",
-      ],
-      onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, open: false }));
-        await handleWriteToDisk();
-      },
+      title,
+      relativePath,
+      fullPath: undefined,
+      diff: null,
+      isLoadingPreview: true,
+      isWriting: false,
+      contentToWrite: content,
+      writeResult: null,
     });
+
+    try {
+      await updateProjectTargetPath(currentProjectId, targetPath);
+
+      const previewRes = await previewProjectFileWrite(
+        currentProjectId,
+        relativePath,
+        content
+      );
+
+      if (!previewRes.success || !previewRes.diff) {
+        setDiffDialog((prev) => ({ ...prev, open: false }));
+        setDiskMessage({
+          type: "error",
+          text: previewRes.error || "Esikatselun laskeminen epäonnistui.",
+        });
+        return;
+      }
+
+      setDiffDialog((prev) => ({
+        ...prev,
+        diff: previewRes.diff || null,
+        fullPath: previewRes.fullPath,
+        isLoadingPreview: false,
+      }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Esikatselu epäonnistui.";
+      setDiffDialog((prev) => ({ ...prev, open: false }));
+      setDiskMessage({ type: "error", text: msg });
+    }
+  };
+
+  const handleConfirmDiffWrite = async () => {
+    if (!currentProjectId || !diffDialog.relativePath || !diffDialog.contentToWrite) {
+      return;
+    }
+
+    setDiffDialog((prev) => ({ ...prev, isWriting: true }));
+    try {
+      const result = await writeProjectFileToDisk(
+        currentProjectId,
+        diffDialog.relativePath,
+        diffDialog.contentToWrite
+      );
+
+      if (result.success) {
+        const backupNote = result.backupCreated
+          ? ` (Varmuuskopio tallennettu: ${result.backupPath})`
+          : "";
+        setDiskMessage({
+          type: "success",
+          text: `Tiedosto tallennettu onnistuneesti! (${result.fullPath})${backupNote}`,
+        });
+        setDiffDialog((prev) => ({
+          ...prev,
+          isWriting: false,
+          writeResult: {
+            success: true,
+            fullPath: result.fullPath,
+            backupCreated: result.backupCreated,
+            backupPath: result.backupPath,
+          },
+        }));
+
+        if (diffDialog.relativePath === "prisma/schema.prisma") {
+          setSavedGates((prev) => ({ ...prev, gate1: true }));
+        } else if (diffDialog.relativePath === "src/app/api/endpoints/route.ts") {
+          setSavedGates((prev) => ({ ...prev, gate2: true }));
+        } else if (diffDialog.relativePath === "src/components/features/dashboard.tsx") {
+          setSavedGates((prev) => ({ ...prev, gate3: true }));
+        }
+      } else {
+        setDiskMessage({
+          type: "error",
+          text: result.error || "Tiedoston kirjoitus epäonnistui.",
+        });
+        setDiffDialog((prev) => ({ ...prev, isWriting: false }));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tiedoston kirjoitus epäonnistui.";
+      setDiskMessage({ type: "error", text: msg });
+      setDiffDialog((prev) => ({ ...prev, isWriting: false }));
+    } finally {
+      setTimeout(() => setDiskMessage(null), 8000);
+    }
+  };
+
+  const triggerWritePrismaToDiskConfirmation = () => {
+    handleOpenDiffPreview(
+      "prisma/schema.prisma",
+      prismaSchema,
+      "Data Gate 1: Prisma Database Schema"
+    );
   };
 
   const triggerWriteApiToDiskConfirmation = () => {
-    setConfirmDialog({
-      open: true,
-      title: "Kirjoitetaanko API-koodi levylle?",
-      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'src/app/api/endpoints/route.ts' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
-      confirmLabel: "Kyllä, kirjoita tiedosto",
-      variant: "purple",
-      icon: <HardDrive className="h-5 w-5" />,
-      consequences: [
-        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
-        "Luo tarvittavat hakemistot automaattisesti",
-      ],
-      onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, open: false }));
-        await handleWriteApiToDisk();
-      },
-    });
+    handleOpenDiffPreview(
+      "src/app/api/endpoints/route.ts",
+      apiCode,
+      "Data Gate 2: Next.js API Endpoints"
+    );
   };
 
   const triggerGenerateUiConfirmation = () => {
@@ -583,171 +597,31 @@ export function PlaygroundWorkspace({
   };
 
   const triggerWriteUiToDiskConfirmation = () => {
-    setConfirmDialog({
-      open: true,
-      title: "Kirjoitetaanko UI-komponentti levylle?",
-      description: `Tämä toiminto luo tai ylikirjoittaa tiedoston 'src/components/features/dashboard.tsx' valitussa kotikansiossa:\n${targetPath || "Valittu kotikansio"}`,
-      confirmLabel: "Kyllä, kirjoita tiedosto",
-      variant: "purple",
-      icon: <HardDrive className="h-5 w-5" />,
-      consequences: [
-        "Kirjoittaa suoraan paikalliseen tiedostojärjestelmään",
-        "Luo tarvittavat hakemistot automaattisesti",
-      ],
-      onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, open: false }));
-        await handleWriteUiToDisk();
-      },
-    });
+    handleOpenDiffPreview(
+      "src/components/features/dashboard.tsx",
+      uiCode,
+      "Data Gate 3: UI Dashboard Component"
+    );
   };
 
   return (
     <div className="h-screen flex flex-col bg-muted/20">
-      {/* Top bar */}
-      <header className="h-14 border-b bg-background px-4 lg:px-6 flex items-center justify-between flex-none gap-3 overflow-hidden">
-        <div className="flex items-center space-x-3 min-w-0 shrink">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            render={<Link href={currentProjectId ? `/projects/${currentProjectId}` : "/"} />}
-            nativeButton={false}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center space-x-2 min-w-0">
-            <Sparkles className="h-5 w-5 text-purple-500 shrink-0" />
-            <h1
-              className="font-bold text-sm sm:text-base md:text-lg tracking-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px] lg:max-w-[380px]"
-              title={currentProjectName ? `Ajatushautomo: ${currentProjectName}` : "Arkkitehtuurin Hiekkalaatikko"}
-            >
-              {currentProjectName ? `Ajatushautomo: ${currentProjectName}` : "Arkkitehtuurin Hiekkalaatikko"}
-            </h1>
-          </div>
-
-          {/* View Mode Toggle Tabs */}
-          <div className="hidden sm:flex ml-2 lg:ml-4 items-center bg-muted/50 p-1 rounded-lg border border-border/50 text-xs font-medium shrink-0">
-            <button
-              onClick={() => setActiveTab("canvas")}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
-                activeTab === "canvas"
-                  ? "bg-background text-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5 text-purple-500" />
-              <span>Visuaalinen Kaavio</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("schema")}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
-                activeTab === "schema"
-                  ? "bg-background text-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Database className="h-3.5 w-3.5 text-purple-500" />
-              <span>Tietokantamalli (Gate 1)</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("api")}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
-                activeTab === "api"
-                  ? "bg-background text-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Server className="h-3.5 w-3.5 text-purple-500" />
-              <span>API & Actions (Gate 2)</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("ui")}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-md transition-all ${
-                activeTab === "ui"
-                  ? "bg-background text-foreground shadow-sm font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5 text-purple-500" />
-              <span>UI-Komponentit (Gate 3)</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          {/* Canvas Export Dialog Button */}
-          <Button
-            onClick={() => setIsExportModalOpen(true)}
-            variant="outline"
-            size="sm"
-            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
-          >
-            <Download className="mr-1.5 h-4 w-4 text-purple-500" />
-            Vie Kaavio
-          </Button>
-
-          {/* Quality & Security Suite Buttons */}
-          <Button
-            onClick={triggerSecurityCheck}
-            variant="outline"
-            size="sm"
-            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
-          >
-            <ShieldCheck className="mr-1.5 h-4 w-4 text-purple-500" />
-            Security Check
-          </Button>
-
-          <Button
-            onClick={triggerOptimizationCheck}
-            variant="outline"
-            size="sm"
-            className="border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-medium"
-          >
-            <Zap className="mr-1.5 h-4 w-4 text-amber-500" />
-            Optimize Code
-          </Button>
-
-          {/* Tech Stack & .env guidance button */}
-          <Button
-            onClick={() => setIsEnvDialogOpen(true)}
-            variant="outline"
-            size="sm"
-            className="border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
-          >
-            <Key className="mr-1.5 h-4 w-4 text-purple-500" />
-            {techProfile?.tierLabel ? `${techProfile.tierLabel.split(" ")[0]} Avaimet & .env` : "Avaimet & .env"}
-          </Button>
-
-          {currentProjectId ? (
-            <Button onClick={handleSaveToDb} disabled={isPending} size="sm">
-              {isPending ? (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-              ) : savedSuccess ? (
-                <Check className="mr-1.5 h-4 w-4 text-green-400" />
-              ) : (
-                <Save className="mr-1.5 h-4 w-4" />
-              )}
-              {savedSuccess ? "Tallennettu!" : "Tallenna muutokset"}
-            </Button>
-          ) : (
-            <Button
-              onClick={handleCreateAndSaveProject}
-              disabled={isPending}
-              size="sm"
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium"
-            >
-              {isPending ? (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-              ) : savedSuccess ? (
-                <Check className="mr-1.5 h-4 w-4 text-green-400" />
-              ) : (
-                <Save className="mr-1.5 h-4 w-4" />
-              )}
-              {savedSuccess ? "Tallennettu!" : "Tallenna Projekti"}
-            </Button>
-          )}
-        </div>
-      </header>
+      {/* Modular Top Bar Header */}
+      <WorkspaceHeader
+        currentProjectId={currentProjectId}
+        currentProjectName={currentProjectName}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        savedGates={savedGates}
+        techProfile={techProfile}
+        isPending={isPending}
+        savedSuccess={savedSuccess}
+        onExportClick={() => setIsExportModalOpen(true)}
+        onSecurityCheck={triggerSecurityCheck}
+        onOptimizationCheck={triggerOptimizationCheck}
+        onEnvClick={() => setIsEnvDialogOpen(true)}
+        onSave={currentProjectId ? handleSaveToDb : handleCreateAndSaveProject}
+      />
 
       {/* Main Workspace Layout */}
       <div className="flex-1 min-h-0 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -761,43 +635,15 @@ export function PlaygroundWorkspace({
             >
               {/* Completion Banner */}
               {showArchCompleteBanner && nodes.length > 0 && (
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-purple-500/10 via-background to-emerald-500/10 border border-purple-500/30 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold flex-none">
-                      <Check className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-foreground flex items-center gap-1.5">
-                        <span>Arkkitehtuurikaavio valmis!</span>
-                        <span className="text-xs font-normal text-muted-foreground">({nodes.length} komponenttia, {edges.length} yhteyttä)</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Järjestelmäkerrokset ja rajapinnat mallinnettu. Voit tutkia solmuja tai siirtyä seuraavaan vaiheeseen.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setActiveTab("schema");
-                        setShowArchCompleteBanner(false);
-                      }}
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs h-8 shadow-sm"
-                    >
-                      <Database className="mr-1.5 h-3.5 w-3.5" />
-                      Luo Tietokantamalli (Gate 1) &rarr;
-                    </Button>
-                    <button
-                      type="button"
-                      onClick={() => setShowArchCompleteBanner(false)}
-                      className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted"
-                      title="Sulje ilmoitus"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
+                <CompletionBanner
+                  nodeCount={nodes.length}
+                  edgeCount={edges.length}
+                  onNextStep={() => {
+                    setActiveTab("schema");
+                    setShowArchCompleteBanner(false);
+                  }}
+                  onDismiss={() => setShowArchCompleteBanner(false)}
+                />
               )}
 
               <div className="flex items-center justify-between mb-2">
@@ -819,60 +665,7 @@ export function PlaygroundWorkspace({
                 />
 
                 {/* Animated Agent Working HUD Overlay */}
-                {isGeneratingArch && (
-                  <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 transition-all duration-300 rounded-lg">
-                    <div className="max-w-md w-full bg-card border border-purple-500/40 rounded-2xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-                          <Bot className="h-5 w-5 animate-pulse" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-base text-foreground">Tekoäly-arkkitehti työskentelee</h3>
-                          <p className="text-xs text-muted-foreground">Muodostetaan 4-tasoista järjestelmärakennetta...</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 pt-1">
-                        <div className="flex items-center space-x-3 text-xs">
-                          {archGenStep > 1 ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-none" />
-                          ) : archGenStep === 1 ? (
-                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
-                          ) : (
-                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
-                          )}
-                          <span className={archGenStep === 1 ? "font-semibold text-foreground" : "text-muted-foreground"}>
-                            1. Puretaan vaatimusmäärittely ja tunnistetaan integraatiot
-                          </span>
-                        </div>
-
-                        <div className="flex items-center space-x-3 text-xs">
-                          {archGenStep > 2 ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-none" />
-                          ) : archGenStep === 2 ? (
-                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
-                          ) : (
-                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
-                          )}
-                          <span className={archGenStep === 2 ? "font-semibold text-foreground" : "text-muted-foreground"}>
-                            2. Muotoillaan 4-kerroksinen arkkitehtuuri (Client, API, Services, DB)
-                          </span>
-                        </div>
-
-                        <div className="flex items-center space-x-3 text-xs">
-                          {archGenStep >= 3 ? (
-                            <Loader2 className="h-4 w-4 text-purple-500 animate-spin flex-none" />
-                          ) : (
-                            <Circle className="h-4 w-4 text-muted-foreground/40 flex-none" />
-                          )}
-                          <span className={archGenStep === 3 ? "font-semibold text-foreground" : "text-muted-foreground"}>
-                            3. Sijoitetaan solmut ja kytketään tietovirrat
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {isGeneratingArch && <AgentWorkingHud step={archGenStep} />}
               </div>
             </div>
 
@@ -962,6 +755,34 @@ export function PlaygroundWorkspace({
         isLoading={confirmDialog.isLoading}
         consequences={confirmDialog.consequences}
         onConfirm={confirmDialog.onConfirm}
+      />
+
+      {/* Diff Preview & File Write Dialog */}
+      <DiffPreviewDialog
+        open={diffDialog.open}
+        onOpenChange={(open) => setDiffDialog((prev) => ({ ...prev, open }))}
+        title={diffDialog.title}
+        relativePath={diffDialog.relativePath}
+        fullPath={diffDialog.fullPath}
+        diff={diffDialog.diff}
+        isLoadingPreview={diffDialog.isLoadingPreview}
+        isWriting={diffDialog.isWriting}
+        writeResult={diffDialog.writeResult}
+        onConfirmWrite={handleConfirmDiffWrite}
+        onNextStep={
+          diffDialog.relativePath === "prisma/schema.prisma"
+            ? () => setActiveTab("api")
+            : diffDialog.relativePath === "src/app/api/endpoints/route.ts"
+            ? () => setActiveTab("ui")
+            : undefined
+        }
+        nextStepLabel={
+          diffDialog.relativePath === "prisma/schema.prisma"
+            ? "Siirry Data Gate 2:een (API) →"
+            : diffDialog.relativePath === "src/app/api/endpoints/route.ts"
+            ? "Siirry Data Gate 3:een (UI) →"
+            : "Valmis"
+        }
       />
 
       {/* Visual Audit Report Scorecard Modal */}

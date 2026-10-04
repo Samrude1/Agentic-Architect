@@ -98,6 +98,7 @@ Ohjeet:
     const result = streamText({
       model: openrouter("openai/gpt-4o-mini"),
       system: systemPrompt,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       messages: normalizedMessages as any,
       tools: {
         update_architecture: updateArchitectureTool,

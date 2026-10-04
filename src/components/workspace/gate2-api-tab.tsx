@@ -23,7 +23,7 @@ export function Gate2ApiTab({
 }: Gate2ApiTabProps) {
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
-      <div className="flex items-center justify-between flex-none">
+      <div className="flex flex-wrap items-center justify-between gap-3 flex-none">
         <div>
           <h3 className="font-bold text-base flex items-center space-x-2">
             <Server className="h-5 w-5 text-purple-500" />
@@ -65,6 +65,17 @@ export function Gate2ApiTab({
               Kirjoita levylle (src/app/api/endpoints/route.ts)
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* AI Co-Pilot Advisory Banner */}
+      <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-start space-x-2.5 text-xs text-purple-300 flex-none">
+        <Sparkles className="h-4 w-4 text-purple-400 flex-none mt-0.5" />
+        <div>
+          <span className="font-semibold text-purple-200">AI Co-Pilot -apukuljettaja:</span>{" "}
+          <span className="text-foreground/80">
+            Päätepisteet ja Zod-skeemat generoidaan arkkitehtuurin pohjalta. Tarkista koodi ja vahvista levykirjoitus <strong>Diff-esikatselun</strong> kautta ennen paikallista tallennusta.
+          </span>
         </div>
       </div>
 

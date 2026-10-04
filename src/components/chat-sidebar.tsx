@@ -38,8 +38,8 @@ export function ChatSidebar({
   // Cycle loading step description during AI processing
   useEffect(() => {
     if (!isLoading) {
-      setLoadingStep(1);
-      return;
+      const t = setTimeout(() => setLoadingStep(1), 0);
+      return () => clearTimeout(t);
     }
     const interval = setInterval(() => {
       setLoadingStep((prev) => (prev % 3) + 1);

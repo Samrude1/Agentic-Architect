@@ -1,10 +1,10 @@
 # Agentic Architect
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/Samrude1/Agentic-Architect)
-[![Version](https://img.shields.io/badge/version-1.0.0--MVP-blueviolet.svg)](https://github.com/Samrude1/Agentic-Architect/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blueviolet.svg)](https://github.com/Samrude1/Agentic-Architect/releases)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-34%20Passing-brightgreen.svg)](./tests/)
+[![Tests](https://img.shields.io/badge/Tests-46%20Passing-brightgreen.svg)](./tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 > An AI-powered fullstack architecture visualizer and code generation engine for technical founders, software architects, and solo developers — transforming plain-language requirements into interactive 4-tier system diagrams, Prisma schemas, API handlers, and React UI components.
@@ -26,6 +26,9 @@
 - **🗄️ Data Gate 1 — Prisma Schema Generator**: Converts the visual architecture graph into a syntactically valid `schema.prisma` file and writes it directly to your local project folder.
 - **🔌 Data Gate 2 — API Code Generator**: Generates production-ready Next.js Route Handlers and Server Actions with Zod validation schemas, directly scaffolded to your target path.
 - **🖼️ Data Gate 3 — UI Component Generator**: Produces React 19 + Tailwind CSS feature components with live state, search filtering, and modal forms, ready to write to disk.
+- **🛡️ Two-Step Safe Disk Writer & Diff Preview**: Zero blind overwrites — every file write triggers an interactive line-by-line Diff modal (`+` additions, `-` deletions, line counts) for full user approval before touching the disk.
+- **📦 Automatic Safety Backups (`.agentic-backup/`)**: When overwriting existing code, a timestamped snapshot is automatically created under `.agentic-backup/` before the write proceeds.
+- **🔒 Path Sandboxing & Bounds Security**: Enforced server-side path allowlists and canonical containment checks prevent path traversal attacks beyond the user's selected Homebase directory.
 - **📤 Multi-Format Diagram Export**: One-click export of the canvas to PNG (2× retina), SVG vector, and Mermaid.js markdown (`.mmd` / `.md`).
 - **🔒 Quality Suite**: Built-in one-click OWASP Security Check and Code Optimization audit with an interactive scorecard modal.
 - **💾 Project Persistence**: Save, load, and manage architecture sessions in a local SQLite database. Resume any project from the dashboard.
@@ -44,7 +47,7 @@
 | **Database ORM** | Prisma v7 + libSQL (SQLite) | Local project persistence schema |
 | **Validation** | Zod v4 | End-to-end type-safe payload validation |
 | **PDF Parsing** | `pdf-parse` v2 | Spec document ingestion from `.pdf` files |
-| **Testing** | Vitest v5 + Testing Library | 34 unit & security tests |
+| **Testing** | Vitest v5 + Testing Library | 46 unit & security tests |
 | **Language** | TypeScript (strict) | Full type safety across frontend and backend |
 
 ---
@@ -110,7 +113,7 @@ Ensure the following are installed on your local machine:
 | `build` | `npm run build` | Produces optimized production build |
 | `start` | `npm run start` | Runs the production server locally |
 | `lint` | `npm run lint` | Runs ESLint static analysis across the codebase |
-| `test` | `npm run test` | Runs Vitest unit & security test suite (34 tests) |
+| `test` | `npm run test` | Runs Vitest unit & security test suite (46 tests) |
 | `test:watch` | `npm run test:watch` | Runs Vitest in interactive watch mode |
 
 ---

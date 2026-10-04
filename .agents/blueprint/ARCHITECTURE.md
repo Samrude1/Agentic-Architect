@@ -38,9 +38,16 @@ graph TD
 | `src/app/api/chat/route.ts` | Vercel AI SDK Co-Pilot stream endpoint backed by OpenRouter LLMs |
 | `src/components/architecture-canvas.tsx` | Visual diagram canvas built on `@xyflow/react`, tier auto-layout calculation, animated edge signals |
 | `src/components/playground-workspace.tsx` | Main interactive state orchestrator (Canvas + Inspector + Chat Sidebar + Schema Generator) |
+| `src/components/workspace/workspace-header.tsx` | Responsive header toolbar with compact tabs, adaptive tools dropdown, and save button |
+| `src/components/workspace/agent-working-hud.tsx` | Animated 3-phase AI synthesis progress HUD overlay |
+| `src/components/workspace/completion-banner.tsx` | Architecture completion banner with direct Gate 1 transition CTA |
+| `src/components/diff-preview-dialog.tsx` | Visual line-by-line diff preview modal with safe write & backup confirmation |
 | `src/components/node-inspector.tsx` | Slide-over inspector for node titles, tags, AI descriptions, and single-node AI audits |
 | `src/components/idea-input-form.tsx` | Entry point form for prompts & document dropzone |
 | `src/components/code-viewer.tsx` | Code display component with syntax highlighting and one-click copy |
+| `src/lib/codegen/smart-templates.ts` | Extracted template generators for Prisma schemas, API route handlers, and React 19 UI |
+| `src/lib/path-security.ts` | Safe filesystem path validation, Homebase bounds verification, and traversal defense |
+| `src/lib/diff.ts` | LCS-based line-by-line diff calculation for code comparison |
 | `src/lib/prisma.ts` | Prisma client instantiation with libSQL SQLite adapter support |
 | `prisma/schema.prisma` | Application metadata storage schema |
 

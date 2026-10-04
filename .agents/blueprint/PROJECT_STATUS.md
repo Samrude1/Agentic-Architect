@@ -61,9 +61,10 @@ This document tracks verified implementation progress, active feature matrix, te
 
 ## 4. Technical Debt & Maintenance Tracking
 
-1. ~~**`playground-workspace.tsx` Modularization** (P3 - Low)~~: 🟩 Resolved (2026-09-15). Extracted `Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`, and `HomebasePathCard` into `src/components/workspace/`.
-2. **Next.js CSP Production Hardening** (P3 - Low):
+1. ~~**`playground-workspace.tsx` Modularization** (P3 - Low)~~: 🟩 Resolved (2026-09-15 & 2026-10-04). Extracted `Gate1SchemaTab`, `Gate2ApiTab`, `Gate3UiTab`, `HomebasePathCard`, `WorkspaceHeader`, `CompletionBanner`, and `AgentWorkingHud` into `src/components/workspace/` (< 750 lines).
+2. ~~**`codegen.ts` Action / Template Monolith** (P3 - Low)~~: 🟩 Resolved (2026-10-04). Extracted template generators (~600 lines) into `src/lib/codegen/smart-templates.ts`, reducing `codegen.ts` to 460 lines.
+3. **Next.js CSP Production Hardening** (P3 - Low):
    - Review `'unsafe-inline'` and `'unsafe-eval'` script policies in `next.config.ts` if strict enterprise CSP reporting is required.
-3. **Prisma CLI Sub-dependency CVEs** (Tracked / Non-blocking):
+4. **Prisma CLI Sub-dependency CVEs** (Tracked / Non-blocking):
    - 4 High CVEs in internal `@prisma/config` dev tools (tracked in `SECURITY_AUDIT.md`). Runtime unaffected (app uses SQLite/libsql).
 

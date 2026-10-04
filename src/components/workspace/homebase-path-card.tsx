@@ -17,12 +17,14 @@ export function HomebasePathCard({
 }: HomebasePathCardProps) {
   return (
     <div className="bg-background rounded-lg border p-4 shadow-sm space-y-3 flex-none">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Folder className="h-5 w-5 text-purple-500" />
-          <h3 className="font-semibold text-sm">Projektin Kotikansio (Project Homebase Directory)</h3>
+      <div className="flex flex-wrap items-center justify-between gap-1">
+        <div className="flex items-center space-x-2 min-w-0">
+          <Folder className="h-4 w-4 text-purple-500 shrink-0" />
+          <h3 className="font-semibold text-xs sm:text-sm truncate">
+            Projektin Kotikansio <span className="hidden md:inline text-muted-foreground font-normal">(Homebase)</span>
+          </h3>
         </div>
-        <span className="text-xs text-muted-foreground">Koodikannan juuripolku levyllä</span>
+        <span className="text-xs text-muted-foreground hidden sm:inline">Koodikannan juuripolku levyllä</span>
       </div>
 
       <div className="flex items-center space-x-2">

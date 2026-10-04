@@ -1,46 +1,50 @@
 # Memory — Agentic Architect Project Memory
 
-Last updated: 2026-10-02 19:05:00 +03:00
+Last updated: 2026-10-04 16:35:00 +03:00
 
 ## What was built & fixed in this session
 
-1. **AI SDK 4 / 7 Real-time Streaming Integration**:
-   - **Stream Response Fix (`src/app/api/chat/route.ts`)**: Replaced deprecated/broken `toDataStreamResponse()` with `toUIMessageStreamResponse()` from AI SDK 7. Configured valid SSE Server-Sent Events text fallback.
-   - **Message Structure Normalization**: Handled `@ai-sdk/react` 4.0 `UIMessage` format (where text resides in `parts: [{ type: "text", text: "..." }]`) by normalizing them into standard CoreMessages (`{ role, content }`) before passing to `streamText`, resolving `AI_TypeValidationError`.
-2. **Arkkitehti Co-Pilot UX & Interaction Upgrades (`src/components/chat-sidebar.tsx`)**:
-   - Replaced dead `append` call with modern `chat.sendMessage({ text })` method and added safe universal sender.
-   - Added text extraction helper `extractMessageText` supporting both modern `parts` array and legacy `content`.
-   - Built rich empty-state card featuring a 1-click `[⚡ Käynnistä Co-Pilot -analyysi]` trigger and 3 architecture quick-prompt chips (scalability, security & auth, cache & queues).
-   - Added dynamic 3-phase live progress HUD (`1/3 Puretaan vaatimusmäärittelyä...`, `2/3 Lasketaan integraatioita...`, `3/3 Viimeistellään suosituksia...`).
-   - Added `✓ Analyysi valmis • Co-Pilot aktiivinen` completion state indicator on completed assistant messages.
-3. **Canvas & Workspace Polish (`src/components/playground-workspace.tsx`)**:
-   - Fixed header layout bug where long project titles wrapped into 3 lines and collided with tab buttons and canvas banners on smaller screens; added truncation, `max-w`, `min-w-0`, and `shrink-0` guards.
-   - Built interactive, dismissible Completion Banner above the canvas (*"Arkkitehtuurikaavio valmis! (8 komponenttia, 7 yhteyttä)"*) with direct CTA to `[Luo Tietokantamalli (Gate 1) →]`.
-   - Added animated Agent Working HUD overlay covering the canvas during architecture generation.
-4. **Validation Test Run with "PulseDesk" (B2B SaaS)**:
-   - Generated and persisted 8 architecture nodes across 4 tiers into SQLite (`dev.db`, ID: `6259c627-86f4-436f-b933-a71ad811f04d`).
-   - Verified end-to-end streaming dialogue with Co-Pilot.
-5. **Code Health & Testing**:
-   - 34 Vitest tests passing across 9 test files (`npx vitest run`).
-   - TypeScript compilation: 0 errors (`npx tsc --noEmit`).
+1. **Koodipohjan Monoliittien Purkaminen (`/app-optimize`)**:
+   - `playground-workspace.tsx` (~1,141 riviä → ~750 riviä): Purettu kolmeen erilliseen alikomponenttiin: `src/components/workspace/workspace-header.tsx`, `completion-banner.tsx`, ja `agent-working-hud.tsx`. Siivottu kuolleet ikonit ja importit.
+   - `codegen.ts` (~1,056 riviä → 460 riviä): Purettu mallipohjageneraattorit (~600 riviä) uuteen erilliseen moduuliin `src/lib/codegen/smart-templates.ts`.
+   - Varmistettu 100% taaksepäin yhteensopivuus, tyyppiturvallisuus ja nopeutettu agentin työskentelyä murto-osaan aiemmasta token-kulutuksesta.
+
+2. **Turvallisuus & Tiedostojärjestelmän Suojaus (`src/lib/path-security.ts`, `src/app/actions/codegen.ts`, `src/app/actions/project.ts`)**:
+   - **Allowed Write Paths**: Luotu tiukka allowlist (`ALLOWED_WRITE_PATHS`) sallituille tiedostoille (`prisma/schema.prisma`, `src/app/api/endpoints/route.ts`, `src/components/features/dashboard.tsx`, `.env.local.example`).
+   - **Kotikansion (Homebase) Validointi**: Estetään levyjuuret (`C:\`, `/`), suora käyttäjän kotikansio (`os.homedir()`) ja kriittiset järjestelmäkansiot (`Windows`, `System32`, `Program Files`, `/usr`, `/etc`).
+   - **Path Traversal & Bounds**: Varmistettu `path.relative`- ja kanonisen polun tarkistus, jottei mikään kirjoitus pääse karkaamaan projektikansion ulkopuolelle.
+   - **Automaattinen Varmuuskopiointi (`.agentic-backup/`)**: Jos tiedosto on jo olemassa levyltä ja sen sisältö poikkeaa uudesta, luodaan automaattisesti aikaleimattu varmuuskopio hakemistoon `.agentic-backup/<aikaleima>/...` ennen ylikirjoitusta.
+
+3. **Interaktiivinen Diff-esikatselu (`src/components/diff-preview-dialog.tsx`, `src/lib/diff.ts`)**:
+   - **LCS Line Diff**: Rakennettu nopea ja tarkka LCS-pohjainen rivieroitus (`computeLineDiff`).
+   - **Diff Preview Dialog**: Korvattu sokeat vahvistusdialogit interaktiivisella Diff-näkymällä (lisäykset vihreällä `+`, poistot punaisella `-`, tilastot `+X / -Y`, ja varmuuskopiolupaus).
+   - Tunnistaa automaattisesti: Uusi tiedosto / Olemassa oleva muuttuu / Identtinen levyn kanssa.
+
+4. **Responsiivinen Yläpalkki (Header Overhaul)**:
+   - Ratkaistu yläpalkin nappien päällekkäisyys kapeilla ja jaetuilla näytöillä (`< lg`).
+   - Siirretty apuohjelmat (*Vie Kaavio*, *Security Check*, *Optimize Code*, *Avaimet & .env*) mobiili- ja tablettikoossa siistiin **Työkalut** (`MoreHorizontal`) -pudotusvalikkoon.
+   - Välilehtien tekstit tiivistetty (`Kaavio`, `Gate 1`, `Gate 2`, `Gate 3`) ja estetty rivittyminen / päällekkäisyys.
+   - Projektin otsikolle ja Kotikansio-kortille lisätty responsiivinen katkeaminen (`truncate`).
+
+5. **Diff Preview -onnistumisilmoitus & Sizing**:
+   - Diff Preview -modaalin leveyttä kasvatettu (`w-[94vw] sm:max-w-4xl md:max-w-5xl`), jolloin pitkät tiedostopolut ja koodirivit mahtuvat kokonaisuudessaan ilman leikkautumista.
+   - Lisätty tiedoston kirjoituksen jälkeen selkeä **Valmis / Onnistui** -näkymä vihreällä tarkistusmerkillä, tiedostopolulla ja suoralla toimintopainikkeella seuraavaan Gate-vaiheeseen hiljaisen sulkeutumisen sijaan.
+
+6. **Koodin Vakaus & Testaus**:
+   - Yksikkötestit laajennettu: **46/46 testiä läpäisty** 11 testitiedostossa (`npx vitest run`).
+   - TypeScript-käännös: **0 virhettä** (`npx tsc --noEmit`).
+   - ESLint: **0 virhettä** (`npm run lint`).
+   - Tuotantopaketti: **Onnistunut Turbopack-build** (`npm run build`).
 
 ## Decisions made
 
-- **Universal AI SDK Bridge**: Support both modern AI SDK 4/7 `sendMessage` + `parts` format and legacy `append` + `content` to ensure zero breaking changes.
-- **SSE Stream Protocol**: Enforce valid Server-Sent Events output (`text/event-stream; charset=utf-8`) across all API routes.
+- **Kaksivaiheinen tallennus**: Ennen minkään koodin kirjoitusta levylle näytetään aina rivitason Diff-esikatselu, jossa käyttäjä näkee tarkalleen mitä luodaan tai muuttuu.
+- **Varmuuskopiointi aina ennen ylikirjoitusta**: Olemassa olevaa tiedostoa ei koskaan korvata ilman `.agentic-backup`-kopiota.
+- **Palvelinpuolen Allowlist**: API ja Server Actions sallivat ainoastaan sallitut suhteelliset polut riippumatta käyttöliittymän kutsutavasta.
+- **Responsiivinen pudotusvalikko**: Kapeilla näytöillä työkalut ryhmitellään pudotusvalikkoon, jotta tilapalkin välilehdet ja tallennuspainike pysyvät aina esteettöminä ja näkyvillä.
+- **Koodin modulaarisuus & nopea kehityssykli**: Yli 1 000 rivin tiedostot pilkottu alikomponentteihin ja malleihin, jotta agentin työskentely pysyy kevyenä ja token-tehokkaana.
 
 ## Current state
 
-- Architecture Canvas, Co-Pilot chat streaming, Node Inspector, and Export modal are fully functioning.
-- "PulseDesk" project is saved in local database and ready for Data Gate 1.
-
-## Next session starts with
-
-- **Data Gate 1 Execution for PulseDesk**:
-  - Open "Tietokantamalli (Gate 1)" tab.
-  - Generate SQLite/PostgreSQL Prisma schema with relations (`Workspace`, `User`, `FeedbackItem`, `Vote`, `Comment`, `Tag`).
-  - Configure Project Homebase Directory and test safe local disk write with path traversal verification.
-- **Data Gate 2 & 3 Execution**:
-  - Generate Next.js Route Handlers and Zod schemas (Gate 2).
-  - Generate React 19 UI component (Gate 3).
-  - Run Security Check and Optimize Code audit scorecards.
+- Koodipohja optimoitu ja monoliitit purettu.
+- Dev-palvelin käynnissä ja valmis Gate 1:n (Prisma Schema) läpivientiin!

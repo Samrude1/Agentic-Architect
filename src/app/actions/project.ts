@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { generateArchitectureDiagram } from "@/agents/architecture-agent";
+import { validateProjectTargetPath } from "@/lib/path-security";
 
 export async function getProjects() {
   return await prisma.project.findMany({
@@ -43,21 +44,36 @@ export async function getProjectById(id: string) {
   });
 }
 
+function safeRevalidatePath(path: string) {
+  try {
+    revalidatePath(path);
+  } catch {
+    // In Next.js 16 Turbopack or background execution, store may be absent
+  }
+}
+
 export async function updateProjectArchitecture(id: string, architecture: string) {
   const project = await prisma.project.update({
     where: { id },
     data: { architecture },
   });
-  revalidatePath(`/projects/${id}`);
+  safeRevalidatePath(`/projects/${id}`);
   return project;
 }
 
 export async function updateProjectTargetPath(id: string, targetPath: string) {
+  if (targetPath && targetPath.trim()) {
+    const val = validateProjectTargetPath(targetPath);
+    if (!val.isValid) {
+      throw new Error(val.error || "Virheellinen kotikansio.");
+    }
+    targetPath = val.normalizedPath || targetPath;
+  }
   const project = await prisma.project.update({
     where: { id },
     data: { targetPath },
   });
-  revalidatePath(`/projects/${id}`);
+  safeRevalidatePath(`/projects/${id}`);
   return project;
 }
 
@@ -66,7 +82,7 @@ export async function updateProjectPrismaSchema(id: string, prismaSchema: string
     where: { id },
     data: { prismaSchema },
   });
-  revalidatePath(`/projects/${id}`);
+  safeRevalidatePath(`/projects/${id}`);
   return project;
 }
 
@@ -75,7 +91,7 @@ export async function updateProjectApiCode(id: string, apiCode: string) {
     where: { id },
     data: { apiCode },
   });
-  revalidatePath(`/projects/${id}`);
+  safeRevalidatePath(`/projects/${id}`);
   return project;
 }
 
@@ -84,16 +100,15 @@ export async function updateProjectUiCode(id: string, uiCode: string) {
     where: { id },
     data: { uiCode },
   });
-  revalidatePath(`/projects/${id}`);
+  safeRevalidatePath(`/projects/${id}`);
   return project;
 }
-
 
 export async function deleteProject(id: string) {
   await prisma.project.delete({
     where: { id },
   });
-  revalidatePath("/");
+  safeRevalidatePath("/");
 }
 
 export async function generateMockArchitecture(_prompt?: string | null) {

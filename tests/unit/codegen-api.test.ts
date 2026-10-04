@@ -14,9 +14,11 @@ vi.mock("@/lib/prisma", () => ({
 // Mock fs
 vi.mock("fs", () => ({
   default: {
+    existsSync: vi.fn().mockReturnValue(false),
     promises: {
       mkdir: vi.fn().mockResolvedValue(undefined),
       writeFile: vi.fn().mockResolvedValue(undefined),
+      readFile: vi.fn().mockResolvedValue(""),
     },
   },
 }));
