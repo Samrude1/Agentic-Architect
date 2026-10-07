@@ -170,7 +170,7 @@ export function ArchitectureCanvas({
           </div>
         </div>
       )}
-      <div className="flex-1 border rounded-md overflow-hidden bg-background relative">
+      <div className="flex-1 w-full h-full min-h-[450px] border rounded-md overflow-hidden bg-background relative">
         {isGenerating && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center space-x-3 bg-background/95 backdrop-blur-md px-5 py-2.5 rounded-full border border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.35)] animate-bounce">
             <div className="relative flex items-center justify-center">

@@ -6,6 +6,8 @@ export const ALLOWED_WRITE_PATHS = [
   "src/app/api/endpoints/route.ts",
   "src/components/features/dashboard.tsx",
   ".env.local.example",
+  "docs/SECURITY_AUDIT.md",
+  "docs/OPTIMIZATION_REPORT.md",
 ] as const;
 
 export type AllowedWritePath = (typeof ALLOWED_WRITE_PATHS)[number];

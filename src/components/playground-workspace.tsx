@@ -22,7 +22,7 @@ import { Gate3UiTab } from "@/components/workspace/gate3-ui-tab";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { CompletionBanner } from "@/components/workspace/completion-banner";
 import { AgentWorkingHud } from "@/components/workspace/agent-working-hud";
-import { runSecurityAudit, runOptimizationAudit, AuditReport } from "@/app/actions/audit";
+import { runSecurityAudit, runOptimizationAudit, getLatestAuditReportAction, AuditReport } from "@/app/actions/audit";
 import { inferTechStackAndEnv, TechStackProfile } from "@/app/actions/tech-stack";
 import { useRouter } from "next/navigation";
 import {
@@ -324,14 +324,27 @@ export function PlaygroundWorkspace({
     }
   };
 
-  // Safe action triggers requiring user confirmation
+  // Pre-load existing saved security audit report on mount so Security button opens instantly
+  useEffect(() => {
+    if (currentProjectId) {
+      getLatestAuditReportAction(currentProjectId, "security")
+        .then((res) => {
+          if (res.success && res.report) {
+            setAuditReport(res.report);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentProjectId]);
+
+  // Safe action triggers requiring user confirmation for new LLM runs
   const triggerSecurityCheck = () => {
     setConfirmDialog({
       open: true,
-      title: "Haluatko suorittaa tietoturvatarkastuksen?",
+      title: "Haluatko suorittaa uuden tietoturvatarkastuksen?",
       description:
         "Tämä toiminto suorittaa automatisoidun OWASP-tietoturva-analyysin nykyiselle arkkitehtuurille, tietokantamallille ja taustajärjestelmän API-koodille.",
-      confirmLabel: "Kyllä, tarkista tietoturva",
+      confirmLabel: "Kyllä, suorita uusi tarkistus",
       variant: "purple",
       icon: <ShieldCheck className="h-5 w-5" />,
       consequences: [
@@ -358,10 +371,34 @@ export function PlaygroundWorkspace({
     });
   };
 
+  // Click handler: opens cached/saved report instantly at 0 token cost, or triggers audit if none exists
+  const handleSecurityClick = async () => {
+    if (auditReport && auditReport.type === "security") {
+      setIsAuditModalOpen(true);
+      return;
+    }
+
+    if (currentProjectId) {
+      try {
+        setIsAuditModalOpen(true);
+        const res = await getLatestAuditReportAction(currentProjectId, "security");
+        if (res.success && res.report) {
+          setAuditReport(res.report);
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not load cached security report:", err);
+      }
+    }
+
+    setIsAuditModalOpen(false);
+    triggerSecurityCheck();
+  };
+
   const triggerOptimizationCheck = () => {
     setConfirmDialog({
       open: true,
-      title: "Haluatko suorittaa koodin & suorituskyvyn optimoinnin?",
+      title: "Haluatko suorittaa uuden koodin & suorituskyvyn optimoinnin?",
       description:
         "Tämä toiminto etsii arkkitehtuurin ja koodin suorituskykypullonkaulat, tarkastaa tietokantaindeksit ja välimuististrategiat.",
       confirmLabel: "Kyllä, optimoi ja tarkista",
@@ -390,6 +427,29 @@ export function PlaygroundWorkspace({
         }
       },
     });
+  };
+
+  const handleOptimizationClick = async () => {
+    if (auditReport && auditReport.type === "optimization") {
+      setIsAuditModalOpen(true);
+      return;
+    }
+
+    if (currentProjectId) {
+      try {
+        setIsAuditModalOpen(true);
+        const res = await getLatestAuditReportAction(currentProjectId, "optimization");
+        if (res.success && res.report) {
+          setAuditReport(res.report);
+          return;
+        }
+      } catch (err) {
+        console.warn("Could not load cached optimization report:", err);
+      }
+    }
+
+    setIsAuditModalOpen(false);
+    triggerOptimizationCheck();
   };
 
   const triggerGenerateSchemaConfirmation = () => {
@@ -617,8 +677,8 @@ export function PlaygroundWorkspace({
         isPending={isPending}
         savedSuccess={savedSuccess}
         onExportClick={() => setIsExportModalOpen(true)}
-        onSecurityCheck={triggerSecurityCheck}
-        onOptimizationCheck={triggerOptimizationCheck}
+        onSecurityCheck={handleSecurityClick}
+        onOptimizationCheck={handleOptimizationClick}
         onEnvClick={() => setIsEnvDialogOpen(true)}
         onSave={currentProjectId ? handleSaveToDb : handleCreateAndSaveProject}
       />
@@ -790,6 +850,18 @@ export function PlaygroundWorkspace({
         report={auditReport}
         open={isAuditModalOpen}
         onOpenChange={setIsAuditModalOpen}
+        projectId={currentProjectId}
+        targetPath={targetPath}
+        onRerunAudit={() => {
+          setIsAuditModalOpen(false);
+          triggerSecurityCheck();
+        }}
+        isRerunning={confirmDialog.open && confirmDialog.isLoading}
+        onSendToAgent={(agentPrompt) => {
+          setActiveTab("canvas");
+          setExternalPrompt(agentPrompt);
+          setIsAuditModalOpen(false);
+        }}
       />
 
       {/* Tech Stack & .env.local.example Dialog */}

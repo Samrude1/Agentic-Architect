@@ -69,16 +69,17 @@ Your task is to design a clean, production-ready Prisma schema (schema.prisma) b
 
 STRICT RULES:
 1. ALL model names, field names, relations, enum names, and code comments MUST BE STRICTLY IN STANDARD ENGLISH. Do not use Finnish or any other language in model names or comments.
-2. Use SQLite as the datasource provider:
+2. Use PostgreSQL as the datasource provider unless SQLite is explicitly requested:
    datasource db {
-     provider = "sqlite"
+     provider = "postgresql"
      url      = env("DATABASE_URL")
    }
    generator client {
      provider = "prisma-client-js"
    }
-3. Define complete models with primary keys (@id @default(uuid())), creation/update timestamps (@default(now()), @updatedAt), appropriate indexes, and relations.
-4. Return ONLY valid raw Prisma schema content. Do NOT wrap it in markdown code blocks (\`\`\`prisma).`;
+3. Security: NEVER store plain text passwords. Always use "passwordHash String" or NextAuth models (Account, Session, User).
+4. Define complete models with primary keys (@id @default(uuid())), creation/update timestamps (@default(now()), @updatedAt), appropriate indexes (@@index), and cascade relations.
+5. Return ONLY valid raw Prisma schema content. Do NOT wrap it in markdown code blocks (\`\`\`prisma).`;
 
       const userContent = `Project Business Requirement: "${prompt}"
 
@@ -165,10 +166,11 @@ Your task is to generate production-ready Next.js App Router Route Handlers and 
 
 STRICT RULES:
 1. ALL code, schemas, variables, routes, and comments MUST BE STRICTLY IN STANDARD ENGLISH.
-2. Include Zod input validation schemas for all mutation inputs.
-3. Use a standardized API response envelope: { success: boolean, data?: any, error?: { code: string, message: string } }.
-4. Include Next.js Route Handlers (GET / POST) with proper status codes (200, 400, 500) and Next.js Server Actions with revalidatePath.
-5. Return ONLY valid TypeScript code. Do NOT wrap it in markdown code blocks (\`\`\`typescript).`;
+2. Include authentication and authorization checks (e.g. bearer token or session check) on protected routes and mutations to prevent data leaks.
+3. Include Zod input validation schemas for all mutation inputs.
+4. Use a standardized API response envelope: { success: boolean, data?: any, error?: { code: string, message: string } }.
+5. Include Next.js Route Handlers (GET / POST) with proper status codes (200, 401, 400, 500) and Next.js Server Actions with revalidatePath.
+6. Return ONLY valid TypeScript code. Do NOT wrap it in markdown code blocks (\`\`\`typescript).`;
 
       const userContent = `Project Business Requirements: "${prompt}"
 

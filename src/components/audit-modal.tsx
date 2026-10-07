@@ -20,21 +20,60 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  HardDrive,
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  RotateCcw,
 } from "lucide-react";
-import { AuditReport } from "@/app/actions/audit";
+import { AuditReport, writeAuditReportToDiskAction } from "@/app/actions/audit";
 
 interface AuditModalProps {
   report: AuditReport | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId?: string;
+  targetPath?: string;
+  onSendToAgent?: (prompt: string) => void;
+  onRerunAudit?: () => void;
+  isRerunning?: boolean;
 }
 
-export function AuditModal({ report, open, onOpenChange }: AuditModalProps) {
+export function AuditModal({
+  report,
+  open,
+  onOpenChange,
+  projectId,
+  targetPath,
+  onSendToAgent,
+  onRerunAudit,
+  isRerunning = false,
+}: AuditModalProps) {
   const [copied, setCopied] = useState(false);
   const [filter, setFilter] = useState<"all" | "critical" | "warning" | "success">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isSavingToDisk, setIsSavingToDisk] = useState(false);
+  const [saveDiskMessage, setSaveDiskMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
-  if (!report) return null;
+  if (!report) {
+    if (!open) return null;
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md p-6 bg-card border-border shadow-2xl rounded-2xl flex flex-col items-center justify-center py-12 text-center">
+          <Loader2 className="h-8 w-8 text-purple-500 animate-spin mb-3" />
+          <DialogTitle className="text-base font-semibold text-foreground">
+            Ladataan auditointiraporttia...
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1">
+            Haetaan tallennetut löydökset ja terveysindeksi.
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const isSecurity = report.type === "security";
 
@@ -82,6 +121,79 @@ ${report.findings
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
+  };
+
+  const targetDocName = isSecurity ? "docs/SECURITY_AUDIT.md" : "docs/OPTIMIZATION_REPORT.md";
+
+  const handleSaveToDisk = async () => {
+    if (!projectId) {
+      setSaveDiskMessage({
+        type: "error",
+        text: "Tallenna projekti ensin ennen tiedostotallennusta.",
+      });
+      return;
+    }
+    if (!targetPath || !targetPath.trim()) {
+      setSaveDiskMessage({
+        type: "error",
+        text: "Aseta projektin kotikansio työtilassa ensin.",
+      });
+      return;
+    }
+
+    setIsSavingToDisk(true);
+    try {
+      const res = await writeAuditReportToDiskAction(projectId, report);
+      if (res.success) {
+        setSaveDiskMessage({
+          type: "success",
+          text: `Dokumentti luotu: ${res.relativePath}!`,
+        });
+      } else {
+        setSaveDiskMessage({
+          type: "error",
+          text: res.error || "Tallennus epäonnistui.",
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Virhe raporttia tallennettaessa.";
+      setSaveDiskMessage({ type: "error", text: msg });
+    } finally {
+      setIsSavingToDisk(false);
+      setTimeout(() => setSaveDiskMessage(null), 5000);
+    }
+  };
+
+  const handleSendToAgent = () => {
+    if (!report) return;
+
+    const relevantFindings = report.findings.filter(
+      (f) => f.type === "critical" || f.type === "warning"
+    );
+    const findingsList = relevantFindings.length > 0 ? relevantFindings : report.findings;
+    const findingsSummary = findingsList
+      .map(
+        (f, i) =>
+          `${i + 1}. [${f.type.toUpperCase()}] ${f.title}\n   - Kuvaus: ${f.detail}\n   - Suositus: ${f.recommendation}`
+      )
+      .join("\n\n");
+
+    const promptText = `Ohessa on järjestelmän tuore laadunvarmistus- ja auditointiraportti:
+Otsikko: ${report.title}
+Terveysindeksi: ${report.score} / 100 (Arvosana ${report.grade})
+Tiivistelmä: ${report.summary}
+
+Tärkeimmät havainnot ja toimenpidesuositukset:
+${findingsSummary}
+
+Toimi kokeneena Principal Architect -tekoälynä:
+1. Analysoi nämä havainnot ja selitä minulle selkokielellä, miksi ne ovat kriittisiä ja miten ne ratkaistaan.
+2. Esitä selkeä, vaiheittainen korjaussuunnitelma (Action Plan).
+3. Päivitä arkkitehtuurikaavio heti update_architecture-työkalulla heijastamaan korjattua rakennetta (esim. lisätään Auth Service, PostgreSQL tuotannossa ja asianmukaiset yhteydet).
+4. Pyydä minulta lopuksi selkeä hyväksyntä suunnitelmalle ennen seuraaviin vaiheisiin (Gate 1 Prisma, Gate 2 API, Gate 3 UI) siirtymistä.`;
+
+    onSendToAgent?.(promptText);
+    onOpenChange(false);
   };
 
   return (
@@ -276,25 +388,93 @@ ${report.findings
           )}
         </div>
 
-        {/* Footer actions */}
-        <div className="flex-none pt-4 border-t border-border/50 flex items-center justify-between">
-          <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs">
-            {copied ? (
-              <>
-                <Check className="mr-1.5 h-3.5 w-3.5 text-emerald-500" />
-                Kopioitu leikepöydälle!
-              </>
+        {/* Status Message for disk saving */}
+        {saveDiskMessage && (
+          <div
+            className={`flex-none p-2.5 rounded-lg text-xs font-medium flex items-center space-x-2 ${
+              saveDiskMessage.type === "success"
+                ? "bg-green-500/10 text-green-600 border border-green-500/30"
+                : "bg-destructive/10 text-destructive border border-destructive/30"
+            }`}
+          >
+            {saveDiskMessage.type === "success" ? (
+              <Check className="h-4 w-4 text-green-500 flex-none" />
             ) : (
-              <>
-                <Copy className="mr-1.5 h-3.5 w-3.5" />
-                Kopioi raportti
-              </>
+              <AlertCircle className="h-4 w-4 text-destructive flex-none" />
             )}
-          </Button>
+            <span className="truncate">{saveDiskMessage.text}</span>
+          </div>
+        )}
 
-          <Button size="sm" onClick={() => onOpenChange(false)}>
-            Sulje raportti
-          </Button>
+        {/* Footer actions */}
+        <div className="flex-none pt-4 border-t border-border/50 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm" onClick={handleCopy} className="text-xs h-8">
+              {copied ? (
+                <>
+                  <Check className="mr-1.5 h-3.5 w-3.5 text-emerald-500" />
+                  Kopioitu!
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-1.5 h-3.5 w-3.5" />
+                  Kopioi
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveToDisk}
+              disabled={isSavingToDisk}
+              className="text-xs h-8 border-purple-500/30 hover:bg-purple-500/10 text-foreground"
+              title={`Tallenna raportti tiedostoksi: ${targetDocName}`}
+            >
+              {isSavingToDisk ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <HardDrive className="mr-1.5 h-3.5 w-3.5 text-purple-500" />
+              )}
+              <span>Tallenna tiedostoksi</span>
+            </Button>
+
+            {onRerunAudit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRerunAudit}
+                disabled={isRerunning}
+                className="text-xs h-8 text-muted-foreground hover:text-foreground"
+                title="Suorita uusi tarkastus tekoälyllä"
+              >
+                {isRerunning ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                <span>Aja uusi tarkastus</span>
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="text-xs h-8">
+              Sulje
+            </Button>
+
+            {onSendToAgent && (
+              <Button
+                size="sm"
+                onClick={handleSendToAgent}
+                className="text-xs h-8 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-md flex items-center space-x-1.5"
+                title="Lähetä raportti suoraan AI Co-Pilotille analysoitavaksi ja korjattavaksi"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>🚀 Anna agentille korjattavaksi</span>
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

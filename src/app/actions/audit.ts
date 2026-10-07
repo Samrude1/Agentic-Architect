@@ -1,6 +1,10 @@
 "use server";
 
+import fs from "fs";
+import path from "path";
 import OpenAI from "openai";
+import { prisma } from "@/lib/prisma";
+import { writeProjectFileToDisk } from "@/app/actions/codegen";
 
 export interface AuditFinding {
   id: string;
@@ -51,9 +55,33 @@ function runFallbackSecurityAudit(
   const findings: AuditFinding[] = [];
   let score = 95;
 
-  const nodeLabels = nodes.map((n) => (n.data?.label || "").toLowerCase());
-  const hasAuthNode = nodeLabels.some((l) => l.includes("auth") || l.includes("login") || l.includes("identity") || l.includes("session"));
-  const hasDbNode = nodeLabels.some((l) => l.includes("database") || l.includes("db") || l.includes("postgres") || l.includes("sqlite"));
+  const hasAuthInSchema = Boolean(
+    prismaSchema &&
+      (prismaSchema.includes("passwordHash") ||
+        prismaSchema.includes("Session") ||
+        prismaSchema.includes("Account") ||
+        prismaSchema.toLowerCase().includes("nextauth"))
+  );
+  const hasAuthNode =
+    hasAuthInSchema ||
+    nodes.some((n) => {
+      const text = `${n.data?.label || ""} ${n.data?.tech || ""} ${n.data?.description || ""}`.toLowerCase();
+      return (
+        text.includes("auth") ||
+        text.includes("login") ||
+        text.includes("identity") ||
+        text.includes("session")
+      );
+    });
+  const hasDbNode = nodes.some((n) => {
+    const text = `${n.data?.label || ""} ${n.data?.tech || ""} ${n.data?.description || ""}`.toLowerCase();
+    return (
+      text.includes("database") ||
+      text.includes("db") ||
+      text.includes("postgres") ||
+      text.includes("sqlite")
+    );
+  });
 
   // Check 1: Authentication layer
   if (!hasAuthNode) {
@@ -321,7 +349,7 @@ Respond ONLY with valid JSON in this exact structure without markdown backticks:
       const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
       const parsed = JSON.parse(cleaned);
 
-      return {
+      const report: AuditReport = {
         type: "security",
         title: "Tietoturva-auditointi (Security Check)",
         score: typeof parsed.score === "number" ? parsed.score : 85,
@@ -330,12 +358,16 @@ Respond ONLY with valid JSON in this exact structure without markdown backticks:
         findings: Array.isArray(parsed.findings) ? parsed.findings : [],
         timestamp: new Date().toISOString(),
       };
+      if (projectId) await saveAuditReportToCache(projectId, report);
+      return report;
     } catch (err) {
       console.warn("OpenRouter security audit failed, falling back to rule engine:", err);
     }
   }
 
-  return runFallbackSecurityAudit(nodes, edges, prismaSchema, apiCode);
+  const fallbackReport = runFallbackSecurityAudit(nodes, edges, prismaSchema, apiCode);
+  if (projectId) await saveAuditReportToCache(projectId, fallbackReport);
+  return fallbackReport;
 }
 
 /**
@@ -410,7 +442,7 @@ Respond ONLY with valid JSON in this exact structure without markdown backticks:
       const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
       const parsed = JSON.parse(cleaned);
 
-      return {
+      const report: AuditReport = {
         type: "optimization",
         title: "Suorituskyky & Koodin Optimointi (Optimize Audit)",
         score: typeof parsed.score === "number" ? parsed.score : 85,
@@ -419,10 +451,297 @@ Respond ONLY with valid JSON in this exact structure without markdown backticks:
         findings: Array.isArray(parsed.findings) ? parsed.findings : [],
         timestamp: new Date().toISOString(),
       };
+      if (projectId) await saveAuditReportToCache(projectId, report);
+      return report;
     } catch (err) {
       console.warn("OpenRouter optimization audit failed, falling back to rule engine:", err);
     }
   }
 
-  return runFallbackOptimizationAudit(nodes, edges, prismaSchema, apiCode);
+  const fallbackReport = runFallbackOptimizationAudit(nodes, edges, prismaSchema, apiCode);
+  if (projectId) await saveAuditReportToCache(projectId, fallbackReport);
+  return fallbackReport;
 }
+
+/**
+ * Formats an AuditReport into structured, readable GitHub Markdown.
+ */
+export async function formatAuditReportMarkdown(report: AuditReport): Promise<string> {
+  const icon = report.type === "security" ? "🛡️" : "⚡";
+  const dateFormatted = new Date(report.timestamp || Date.now()).toLocaleString("fi-FI");
+
+  const lines: string[] = [
+    `# ${icon} ${report.title}`,
+    "",
+    `> **Raportti luotu:** ${dateFormatted}  `,
+    `> **Terveysindeksi:** ${report.score} / 100 (${report.score >= 85 ? "Erinomainen" : report.score >= 70 ? "Tyydyttävä" : "Kriittinen"})  `,
+    `> **Arvosana:** **${report.grade}**  `,
+    `> **Tyyppi:** ${report.type === "security" ? "OWASP Top 10 Tietoturvatarkastus" : "Koodin & Arkkitehtuurin Optimointi"}`,
+    "",
+    "---",
+    "",
+    "## 📋 Tiivistelmä",
+    "",
+    report.summary,
+    "",
+    "---",
+    "",
+    "## 🔍 Löydökset ja toimenpidesuositukset",
+    "",
+  ];
+
+  if (!report.findings || report.findings.length === 0) {
+    lines.push("_Ei erillisiä löydöksiä raportoitu._");
+  } else {
+    report.findings.forEach((finding, index) => {
+      const typeBadge =
+        finding.type === "critical"
+          ? "🔴 **KRIITTINEN (CRITICAL)**"
+          : finding.type === "warning"
+          ? "🟡 **HUOMIOITAVAA (WARNING)**"
+          : finding.type === "success"
+          ? "🟢 **KUNNOSSA (SUCCESS)**"
+          : "🔵 **INFO**";
+
+      lines.push(`### ${index + 1}. ${finding.title}`);
+      lines.push("");
+      lines.push(`- **Tila**: ${typeBadge}`);
+      lines.push(`- **Kuvaus**: ${finding.detail}`);
+      lines.push(`- **Suositeltu toimenpide**: ${finding.recommendation}`);
+      lines.push("");
+    });
+  }
+
+  lines.push("---");
+  lines.push("");
+  lines.push("## 🤖 Seuraavat askeleet (AI Agent Action Plan)");
+  lines.push("");
+  lines.push(
+    "1. **Tarkista suositukset**: Käy läpi yllä olevat kriittiset ja huomioitavat kohdat."
+  );
+  lines.push(
+    "2. **Agentin korjaussuunnitelma**: Anna tämä raportti Agentic Architectin AI Co-Pilotille käsiteltäväksi ('🚀 Anna agentille korjattavaksi')."
+  );
+  lines.push(
+    "3. **Hyväksy suunnitelma**: Vahvista agentin ehdottama vaiheittainen korjaussuunnitelma ennen koodimuutoksia."
+  );
+  lines.push(
+    "4. **Päivitä Data Gatet**: Suorita Gate 1 (Prisma), Gate 2 (API) ja Gate 3 (UI) päivitykset."
+  );
+  lines.push("");
+
+  return lines.join("\n");
+}
+
+/**
+ * Saves the audit report directly to the target project's disk under docs/
+ */
+export async function writeAuditReportToDiskAction(
+  projectId: string,
+  report: AuditReport
+): Promise<{ success: boolean; fullPath?: string; relativePath?: string; error?: string }> {
+  if (!projectId) {
+    return { success: false, error: "Projektin id puuttuu." };
+  }
+  if (!report) {
+    return { success: false, error: "Audit-raportti puuttuu." };
+  }
+
+  const relativePath =
+    report.type === "security"
+      ? "docs/SECURITY_AUDIT.md"
+      : "docs/OPTIMIZATION_REPORT.md";
+
+  const markdownContent = await formatAuditReportMarkdown(report);
+
+  const result = await writeProjectFileToDisk(projectId, relativePath, markdownContent);
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  await saveAuditReportToCache(projectId, report);
+
+  return {
+    success: true,
+    fullPath: result.fullPath,
+    relativePath,
+  };
+}
+
+async function saveAuditReportToCache(projectId: string, report: AuditReport) {
+  if (!projectId || !report) return;
+  try {
+    const cacheDir = path.resolve(process.cwd(), ".audit-cache");
+    await fs.promises.mkdir(cacheDir, { recursive: true });
+    const cacheFile = path.resolve(cacheDir, `${projectId}-${report.type}.json`);
+    await fs.promises.writeFile(cacheFile, JSON.stringify(report, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Could not save audit report to cache:", err);
+  }
+}
+
+/**
+ * Parses a saved markdown audit report back into an AuditReport object.
+ */
+export async function parseAuditReportMarkdown(
+  markdown: string,
+  type: "security" | "optimization"
+): Promise<AuditReport | null> {
+  try {
+    const titleMatch = markdown.match(/^#\s+(?:🛡️|⚡)?\s*(.+)$/m);
+    const title = titleMatch
+      ? titleMatch[1].trim()
+      : type === "security"
+      ? "Tietoturva-auditointi (Security Check)"
+      : "Suorituskyky & Koodin Optimointi";
+
+    const scoreMatch = markdown.match(/Terveysindeksi:\*\*\s*(\d+)/i);
+    const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 75;
+
+    const gradeMatch = markdown.match(/Arvosana:\*\*\s*\*\*([A-Fa-f][+-]?)\*\*/i);
+    const grade = (gradeMatch ? gradeMatch[1].toUpperCase() : calculateGrade(score)) as
+      | "A"
+      | "B"
+      | "C"
+      | "D"
+      | "F";
+
+    let summary = "";
+    const summaryHeader = markdown.indexOf("## 📋 Tiivistelmä");
+    if (summaryHeader !== -1) {
+      const afterSummary = markdown.slice(summaryHeader + "## 📋 Tiivistelmä".length);
+      const nextDivider = afterSummary.indexOf("---");
+      if (nextDivider !== -1) {
+        summary = afterSummary.slice(0, nextDivider).trim();
+      } else {
+        summary = afterSummary.trim();
+      }
+    }
+    if (!summary) {
+      summary = "Tallennettu audit-raportti ladattu levyltä.";
+    }
+
+    const findings: AuditFinding[] = [];
+    const findingsSectionIdx = markdown.indexOf("## 🔍 Löydökset ja toimenpidesuositukset");
+    if (findingsSectionIdx !== -1) {
+      const findingsContent = markdown.slice(findingsSectionIdx);
+      const endIdx = findingsContent.indexOf("\n## ");
+      const sectionToParse = endIdx > 0 ? findingsContent.slice(0, endIdx) : findingsContent;
+
+      const items = sectionToParse.split(/\n###\s+/);
+      items.shift();
+
+      items.forEach((item, idx) => {
+        const lines = item.split("\n");
+        const cleanTitle = (lines[0] || "").replace(/^\d+\.\s*/, "").trim();
+
+        let findingType: "critical" | "warning" | "success" | "info" = "info";
+        if (item.includes("CRITICAL") || item.includes("KRIITTINEN")) {
+          findingType = "critical";
+        } else if (item.includes("WARNING") || item.includes("HUOMIOITAVAA")) {
+          findingType = "warning";
+        } else if (item.includes("SUCCESS") || item.includes("KUNNOSSA")) {
+          findingType = "success";
+        }
+
+        const detailMatch = item.match(/-\s+\*\*Kuvaus\*\*:\s*([\s\S]*?)(?=\n-\s+\*\*|$)/);
+        const recMatch = item.match(
+          /-\s+\*\*Suositeltu toimenpide\*\*:\s*([\s\S]*?)(?=\n###|\n---|$)/
+        );
+
+        if (cleanTitle) {
+          findings.push({
+            id: `${type}-${idx + 1}`,
+            type: findingType,
+            title: cleanTitle,
+            detail: detailMatch ? detailMatch[1].trim() : "Katso raportin tiedot.",
+            recommendation: recMatch ? recMatch[1].trim() : "Tarkista suositukset.",
+          });
+        }
+      });
+    }
+
+    return {
+      type,
+      title,
+      score,
+      grade,
+      summary,
+      findings,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error("Failed to parse audit report markdown:", err);
+    return null;
+  }
+}
+
+/**
+ * Loads the latest cached or saved audit report for the project without re-running LLM analysis.
+ */
+export async function getLatestAuditReportAction(
+  projectId: string,
+  type: "security" | "optimization"
+): Promise<{ success: boolean; report?: AuditReport; error?: string }> {
+  if (!projectId) {
+    return { success: false, error: "Projektin id puuttuu." };
+  }
+
+  // 1. Check local cache file (.audit-cache/<projectId>-<type>.json)
+  try {
+    const cacheFile = path.resolve(process.cwd(), ".audit-cache", `${projectId}-${type}.json`);
+    if (fs.existsSync(cacheFile)) {
+      const data = await fs.promises.readFile(cacheFile, "utf-8");
+      const report = JSON.parse(data) as AuditReport;
+      return { success: true, report };
+    }
+  } catch (err) {
+    console.warn("Error reading audit cache file:", err);
+  }
+
+  // 2. Check target project's disk (docs/SECURITY_AUDIT.md or docs/OPTIMIZATION_REPORT.md)
+  try {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (project?.targetPath) {
+      const docFileName =
+        type === "security" ? "docs/SECURITY_AUDIT.md" : "docs/OPTIMIZATION_REPORT.md";
+      const docFile = path.resolve(project.targetPath, docFileName);
+
+      if (fs.existsSync(docFile)) {
+        const mdContent = await fs.promises.readFile(docFile, "utf-8");
+        const parsedReport = await parseAuditReportMarkdown(mdContent, type);
+        if (parsedReport) {
+          // Cache it for fast retrieval next time
+          await saveAuditReportToCache(projectId, parsedReport);
+          return { success: true, report: parsedReport };
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Error checking project targetPath for audit report:", err);
+  }
+
+  // 3. Check workspace docs as fallback
+  try {
+    const docFileName =
+      type === "security" ? "docs/SECURITY_AUDIT.md" : "docs/OPTIMIZATION_REPORT.md";
+    const localDocFile = path.resolve(process.cwd(), docFileName);
+    if (fs.existsSync(localDocFile)) {
+      const mdContent = await fs.promises.readFile(localDocFile, "utf-8");
+      const parsedReport = await parseAuditReportMarkdown(mdContent, type);
+      if (parsedReport) {
+        await saveAuditReportToCache(projectId, parsedReport);
+        return { success: true, report: parsedReport };
+      }
+    }
+  } catch (err) {
+    console.warn("Error checking local workspace for audit report:", err);
+  }
+
+  return { success: false, error: "Ei aiempaa raporttia tallennettuna." };
+}
+
+

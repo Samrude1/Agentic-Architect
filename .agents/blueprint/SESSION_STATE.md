@@ -5,45 +5,32 @@ This file tracks the current state, active context, and primary handoff files fo
 ---
 
 ## 📅 Session Snapshot
-- **Timestamp**: 2026-10-04T18:40:00+03:00
-- **Active Task**: App Codebase Optimization & Monolith Deconstruction (`/app-optimize`) Completed
-- **Codebase Stability**: 🟩 Verified Production Ready (46 Vitest tests passing across 11 test files, `npx tsc --noEmit` 0 errors, `npm run lint` 0 errors, `npm run build` Turbopack success)
+- **Timestamp**: 2026-10-07T16:40:00+03:00
+- **Active Task**: Security Check & Pipeline Synchronisation Completed
+- **Codebase Stability**: 🟩 Verified Production Ready (50 Vitest tests passing across 11 test files, `npx tsc --noEmit` 0 errors, Turbopack dev server healthy)
 
 ---
 
 ## 🚀 Key Achievements Completed
-1. **Koodipohjan Monoliittien Purkaminen (`/app-optimize`)**:
-   - `playground-workspace.tsx` (~1,141 riviä → ~750 riviä): Eristetty `workspace-header.tsx`, `completion-banner.tsx` ja `agent-working-hud.tsx`. Poistettu kuolleet importit.
-   - `codegen.ts` (~1,056 riviä → 460 riviä): Eristetty ~600 riviä koodigeneraattoreita omaan moduuliin `src/lib/codegen/smart-templates.ts`.
-   - Token-kulutuksen ja muokkausviiveen merkittävä pudotus.
-
-2. **Turvallisuus & Tiedostojärjestelmän Suojaus (`src/lib/path-security.ts`, `src/app/actions/codegen.ts`, `src/app/actions/project.ts`)**:
-   - Tiukka allowlist (`ALLOWED_WRITE_PATHS`) sallituille tiedostoille.
-   - Kotikansion validointi: estää levyjuuret (`C:\`, `/`), suoran käyttäjän kotikansion (`os.homedir()`) ja järjestelmäkansiot (`Windows`, `System32`, `Program Files`, `/usr`, `/etc`).
-   - Path traversal & Canonical containment -suojaus.
-   - Automaattinen varmuuskopiointi: jos olemassa oleva tiedosto muuttuu, `.agentic-backup/<aikaleima>/` luodaan ennen kirjoitusta.
-
-3. **Interaktiivinen Diff-esikatselu (`src/components/diff-preview-dialog.tsx`, `src/lib/diff.ts`)**:
-   - Nopea LCS-pohjainen rivieroitus (`computeLineDiff`).
-   - Visuaalinen Diff-dialogi (uusi tiedosto, muuttunut tiedosto, identtinen tiedosto, +lisäykset, -poistot, rivinumerot).
-   - Estää vahingossa tapahtuvat ylikirjoitukset ja antaa selkeän onnistumissivun.
-
-4. **Kattava Testaus & Koodin Laatu**:
-   - 46/46 testiä läpäisty (`tests/unit/path-security.test.ts`, `tests/unit/diff.test.ts` jne.).
-   - 0 TypeScript- ja 0 ESLint-virhettä.
-   - Turbopack-tuotantobuild testattu onnistuneesti.
+1. **Security Audit UX & Cache Korjaus (`src/app/actions/audit.ts`, `src/components/playground-workspace.tsx`, `src/components/audit-modal.tsx`)**:
+   - Security-painike avaa tallennetun raportin välittömästi (2ms, 0 tokenia) lukemalla suoraan projektin `docs/SECURITY_AUDIT.md` -tiedoston tai `.audit-cache`:n.
+   - Poistettu pakkotarkastuksen vahvistusdialogi – uusi tarkastus ajetaan vain erillisellä "🔄 Aja uusi tarkastus" -painikkeella.
+   - Lisätty "Tallenna tiedostoksi" ja "🚀 Anna agentille korjattavaksi" suoraan modaaliin.
+2. **PulseDesk Data Gate 1 & 2 Tuotantopäivitys (PostgreSQL & NextAuth RBAC)**:
+   - Gate 1 (`prisma/schema.prisma`): Siirretty SQLite -> PostgreSQL, poistettu selväkielinen salasana ja korvattu `passwordHash String` -kentällä sekä `Session`-mallilla ja indekseillä.
+   - Gate 2 (`src/app/api/endpoints/route.ts`): Lisätty `getAuthenticatedUser()`-tunnistus, 401 Unauthorized suojaus, datavuotojen esto ja tiukka Zod-validointi.
+   - Kirjoitettu turvallisesti levylle (`C:\Users\samru\DEVELOPER\PROJECTS\pulsedesk`).
+   - Uusi auditointi saavutti **Arvosanan A (95 / 100)** ja 0 kriittistä haavoittuvuutta.
+3. **Kattava Testaus & Koodin Laatu**:
+   - 50/50 yksikkötestiä läpäisty (lisätty markdown-parserin ja cache-latauksen testit).
+   - 0 TypeScript-virhettä.
 
 ---
 
 ## 🎯 Next Immediate Task for Fresh Session
-- **Execute Data Gate 1 for PulseDesk**:
-  - Open "Tietokantamalli (Gate 1)" tab in `/playground?projectId=6259c627-86f4-436f-b933-a71ad811f04d`.
-  - Review generated Prisma schema in the UI.
-  - Test safe local disk write using the new Diff Preview dialog.
-- **Execute Data Gate 2 & Gate 3**:
-  - Generate Next.js Route Handlers and Zod schemas (Gate 2).
-  - Generate React 19 UI component (Gate 3).
-  - Run Security Check (OWASP) and Optimize Code scorecard audits.
+- **Kytke Chat Co-Pilot ja Data Gatet yhteen (Pipeline Bridge)**:
+  - Toteuta mekanismi, jolla Co-Pilotin korjaussuunnitelma ("Anna agentille korjattavaksi") välittää vaatimukset suoraan Gate 1:n ja Gate 2:n koodigeneraattoreille ilman että käyttäjän tarvitsee arvuutella miksi koodi ei muuttunut.
+  - Varmista että Gate 3 (UI Dashboard) hyödyntää päivitettyjä istuntotietoja ja rooleja.
 
 ---
 

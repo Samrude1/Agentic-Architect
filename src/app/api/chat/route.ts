@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, tool } from "ai";
+import { streamText, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { generateSmartPromptArchitecture } from "@/agents/architecture-agent";
 
@@ -84,14 +84,37 @@ Ohjeet:
    - Kerros 2 (Palvelut / Taustalogiikka, y = 350): Order Service, Async Worker, AI Engine. (type: "default")
    - Kerros 3 (Tietokannat / Ulkoiset rajapinnat, y = 500): PostgreSQL, Redis, Stripe, S3. (type: "output")
 4. Sijoita saman kerroksen nodaalit vaakasuunnassa erilleen (esim. x = 160, 440, 720) niin että ne eivät mene päällekkäin.
-5. PAKOLLISTA: Generoi AINA jokaiselle nodaalille "description"-kenttään perusteellinen suomenkielinen kuvaus siitä, mitä kyseinen komponentti tekee (esim. "Käyttäjien todennus, JWT-autentikaatio ja salasanan bcrypt-tiivistys").`;
+5. PAKOLLISTA: Generoi AINA jokaiselle nodaalille "description"-kenttään perusteellinen suomenkielinen kuvaus siitä, mitä kyseinen komponentti tekee (esim. "Käyttäjien todennus, JWT-autentikaatio ja salasanan bcrypt-tiivistys").
+6. KUN KÄYTTÄJÄ PYYTÄÄ AUDITOINNIN KORJAUSTA TAI LISÄÄMÄÄN AUTH SERVICEN (esim. "Päivitä kaavio ja lisää Auth Service" tai "Jatka"):
+   - Kutsu AINA "update_architecture"-työkalua.
+   - Uudessa kaaviossa ON EHDOTTOMASTI OLTAVA nodaalit:
+     * id: "auth-service", label: "Auth Service", tech: "NextAuth v5", position: { x: 440, y: 200 }, description: "Käyttäjien autentikointi, istunnot ja roolipohjainen pääsynhallinta (RBAC)"
+     * id: "api-gateway", label: "API Gateway", position: { x: 160, y: 200 }
+     * id: "postgres-db", label: "PostgreSQL Database", tech: "PostgreSQL", position: { x: 160, y: 500 }, description: "Tuotantotietokanta käyttäjille, rooleille ja tiketeille"
+     * id: "next-web-app", label: "Next.js Web App", position: { x: 160, y: 50 }
+     * Palvelut: Feedback Service (x: 160, y: 350), AI Analysis Service (x: 440, y: 350), Notification Service (x: 720, y: 350)
+     * Kytke linkit (edges):
+       - "next-web-app" -> "api-gateway"
+       - "api-gateway" -> "auth-service"
+       - "api-gateway" -> "feedback-service"
+       - "auth-service" -> "postgres-db"
+       - "feedback-service" -> "postgres-db"
+   - TYÖKALUKUTSUN JÄLKEEN KIRJOITA AINA selkeä vastaus:
+     1. "Olen lisännyt arkkitehtuurikaavioon **Auth Service** -komponentin (NextAuth v5) ja kytkenyt sen PostgreSQL-tietokantaan."
+     2. "👉 **Mitä teet seuraavaksi:**
+        1. Siirry yläpalkista **'Gate 1 (Tietokanta)'** -välilehdelle ja klikkaa **'Päivitä skeema AI:lla'** (luodaan User, Account, Session ja PostgreSQL-skeema, ja tallennetaan levylle).
+        2. Tämän jälkeen siirrytään Gate 2:een (API-reitit) ja Gate 3:een (UI)."`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateArchitectureTool: any = tool({
       description: "Päivittää arkkitehtuurikaavion nodaalit (nodes) ja linkit (edges) React Flow -kankaalle.",
       parameters: architectureSchema,
       execute: async (args: z.infer<typeof architectureSchema>) => {
-        return args;
+        return {
+          success: true,
+          nodeCount: args.nodes.length,
+          nodeLabels: args.nodes.map((n) => n.data.label).join(", "),
+        };
       },
     } as never);
 
@@ -103,15 +126,16 @@ Ohjeet:
       tools: {
         update_architecture: updateArchitectureTool,
       },
+      stopWhen: isStepCount(3),
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const streamRes: any = result;
-    if (typeof streamRes.toUIMessageStreamResponse === "function") {
-      return streamRes.toUIMessageStreamResponse();
-    }
     if (typeof streamRes.toDataStreamResponse === "function") {
       return streamRes.toDataStreamResponse();
+    }
+    if (typeof streamRes.toUIMessageStreamResponse === "function") {
+      return streamRes.toUIMessageStreamResponse();
     }
     if (typeof streamRes.toTextStreamResponse === "function") {
       return streamRes.toTextStreamResponse();

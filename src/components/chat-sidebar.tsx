@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, RotateCcw } from "lucide-react";
 import { Node, Edge } from "@xyflow/react";
 
 interface ChatSidebarProps {
@@ -102,41 +102,48 @@ export function ChatSidebar({
   // Sync tool calls to React Flow canvas
   useEffect(() => {
     if (!messages || messages.length === 0) return;
-    const lastMessage = messages[messages.length - 1];
-    if (!lastMessage || lastMessage.role !== "assistant") return;
 
-    // Check modern parts array
-    if (Array.isArray(lastMessage.parts)) {
-      for (const part of lastMessage.parts) {
-        if (
-          (part.type === "tool-call" || part.type === "tool-input-available") &&
-          part.toolName === "update_architecture"
-        ) {
-          const graphData = part.args || part.input;
-          if (graphData && graphData.nodes && graphData.edges) {
-            onArchitectureUpdate(graphData);
+    for (let i = messages.length - 1; i >= Math.max(0, messages.length - 3); i--) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const msg: any = messages[i];
+      if (!msg || msg.role !== "assistant") continue;
+
+      // Check modern parts array
+      if (Array.isArray(msg.parts)) {
+        for (const part of msg.parts) {
+          if (
+            (part.type === "tool-call" || part.type === "tool-input-available") &&
+            part.toolName === "update_architecture"
+          ) {
+            const graphData = part.args || part.input;
+            if (graphData && graphData.nodes && graphData.edges) {
+              onArchitectureUpdate(graphData);
+              return;
+            }
           }
-        }
-        if (
-          (part.type === "tool-result" || part.type === "tool-output-available") &&
-          part.toolName === "update_architecture"
-        ) {
-          const graphData = part.result || part.output;
-          if (graphData && graphData.nodes && graphData.edges) {
-            onArchitectureUpdate(graphData);
+          if (
+            (part.type === "tool-result" || part.type === "tool-output-available") &&
+            part.toolName === "update_architecture"
+          ) {
+            const graphData = part.result || part.output;
+            if (graphData && graphData.nodes && graphData.edges) {
+              onArchitectureUpdate(graphData);
+              return;
+            }
           }
         }
       }
-    }
 
-    // Check legacy toolInvocations array
-    const toolInvocations = lastMessage.toolInvocations;
-    if (Array.isArray(toolInvocations)) {
-      for (const invocation of toolInvocations) {
-        if (invocation.toolName === "update_architecture") {
-          const graphData = invocation.result || invocation.args;
-          if (graphData && graphData.nodes && graphData.edges) {
-            onArchitectureUpdate(graphData);
+      // Check legacy toolInvocations array
+      const toolInvocations = msg.toolInvocations;
+      if (Array.isArray(toolInvocations)) {
+        for (const invocation of toolInvocations) {
+          if (invocation.toolName === "update_architecture") {
+            const graphData = invocation.result || invocation.args;
+            if (graphData && graphData.nodes && graphData.edges) {
+              onArchitectureUpdate(graphData);
+              return;
+            }
           }
         }
       }
@@ -150,12 +157,22 @@ export function ChatSidebar({
       return msg.content;
     }
     if (Array.isArray(msg.parts)) {
-      return msg.parts
+      const text = msg.parts
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .filter((p: any) => p.type === "text" && typeof p.text === "string")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((p: any) => p.text)
         .join("");
+      if (text.trim()) return text;
+    }
+    // Check if message has tool calls or invocations
+    const hasTool =
+      (Array.isArray(msg.parts) &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        msg.parts.some((p: any) => p.type === "tool-call" || p.toolName === "update_architecture")) ||
+      (Array.isArray(msg.toolInvocations) && msg.toolInvocations.length > 0);
+    if (hasTool) {
+      return "⚡ Arkkitehtuurikaavio päivitetty kankaalle.";
     }
     return "";
   };
@@ -168,9 +185,26 @@ export function ChatSidebar({
           <Bot className="h-5 w-5 text-purple-500" />
           <h3 className="font-bold text-sm tracking-tight">Arkkitehti Co-Pilot</h3>
         </div>
-        <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full font-medium">
-          Reaaliaikainen
-        </span>
+        <div className="flex items-center space-x-1.5">
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof chat.setMessages === "function") {
+                  chat.setMessages([]);
+                }
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground p-1 rounded hover:bg-muted transition-colors flex items-center gap-1"
+              title="Aloita uusi keskustelu ja tyhjennä historia"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="text-[10px]">Uusi</span>
+            </button>
+          )}
+          <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full font-medium">
+            Reaaliaikainen
+          </span>
+        </div>
       </div>
 
       {/* Messages list */}
@@ -256,7 +290,11 @@ export function ChatSidebar({
                 >
                   {textContent || (
                     <span className="text-xs text-muted-foreground italic">
-                      {isAssistant ? "Valmistellaan vastausta..." : ""}
+                      {isAssistant
+                        ? isLoading && isLastMessage
+                          ? "Valmistellaan vastausta..."
+                          : "⚡ Arkkitehtuurikaavio päivitetty kankaalle."
+                        : ""}
                     </span>
                   )}
 

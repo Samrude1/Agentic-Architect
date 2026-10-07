@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { runSecurityAudit, runOptimizationAudit } from "@/app/actions/audit";
+import {
+  runSecurityAudit,
+  runOptimizationAudit,
+  formatAuditReportMarkdown,
+  writeAuditReportToDiskAction,
+  type AuditReport,
+} from "@/app/actions/audit";
 
 describe("Quality & Security Audit Suite (Option A)", () => {
   beforeEach(() => {
@@ -113,4 +119,96 @@ describe("Quality & Security Audit Suite (Option A)", () => {
       expect(report.findings.some((f) => f.id === "opt-api-cache")).toBe(true);
     });
   });
+
+  describe("formatAuditReportMarkdown", () => {
+    it("formats an audit report into structured GitHub Markdown with grade and recommendations", async () => {
+      const mockReport: AuditReport = {
+        type: "security",
+        title: "Tietoturva-auditointi (Security Check)",
+        score: 75,
+        grade: "C",
+        summary: "Arkkitehtuurissa on puutteita autentikoinnissa.",
+        findings: [
+          {
+            id: "sec-auth-missing",
+            type: "critical",
+            title: "Puuttuva autentikointi",
+            detail: "Kuka tahansa voi kutsua API-reittejä.",
+            recommendation: "Toteuta NextAuth v5.",
+          },
+        ],
+        timestamp: "2026-10-07T14:00:00.000Z",
+      };
+
+      const markdown = await formatAuditReportMarkdown(mockReport);
+      expect(markdown).toContain("# 🛡️ Tietoturva-auditointi (Security Check)");
+      expect(markdown).toContain("75 / 100");
+      expect(markdown).toContain("**C**");
+      expect(markdown).toContain("KRIITTINEN (CRITICAL)");
+      expect(markdown).toContain("Puuttuva autentikointi");
+      expect(markdown).toContain("Toteuta NextAuth v5");
+      expect(markdown).toContain("Seuraavat askeleet (AI Agent Action Plan)");
+    });
+  });
+
+  describe("writeAuditReportToDiskAction", () => {
+    it("returns error if projectId is missing", async () => {
+      const res = await writeAuditReportToDiskAction("", {
+        type: "security",
+        title: "Security",
+        score: 90,
+        grade: "A",
+        summary: "Ok",
+        findings: [],
+        timestamp: new Date().toISOString(),
+      });
+      expect(res.success).toBe(false);
+      expect(res.error).toContain("Projektin id puuttuu");
+    });
+  });
+
+  describe("parseAuditReportMarkdown", () => {
+    it("successfully parses formatted markdown back into structured AuditReport", async () => {
+      const { parseAuditReportMarkdown } = await import("@/app/actions/audit");
+      const mockReport: AuditReport = {
+        type: "security",
+        title: "Tietoturva-auditointi (Security Check)",
+        score: 75,
+        grade: "C",
+        summary: "Järjestelmässä on kriittisiä puutteita.",
+        findings: [
+          {
+            id: "sec-1",
+            type: "critical",
+            title: "Autentikoinnin puute",
+            detail: "API-reiteillä ei ole suojausta.",
+            recommendation: "Asenna NextAuth v5.",
+          },
+        ],
+        timestamp: "2026-10-07T14:00:00.000Z",
+      };
+
+      const markdown = await formatAuditReportMarkdown(mockReport);
+      const parsed = await parseAuditReportMarkdown(markdown, "security");
+
+      expect(parsed).not.toBeNull();
+      expect(parsed?.score).toBe(75);
+      expect(parsed?.grade).toBe("C");
+      expect(parsed?.summary).toBe("Järjestelmässä on kriittisiä puutteita.");
+      expect(parsed?.findings.length).toBe(1);
+      expect(parsed?.findings[0].title).toBe("Autentikoinnin puute");
+      expect(parsed?.findings[0].type).toBe("critical");
+      expect(parsed?.findings[0].recommendation).toBe("Asenna NextAuth v5.");
+    });
+  });
+
+  describe("getLatestAuditReportAction", () => {
+    it("returns error if projectId is missing", async () => {
+      const { getLatestAuditReportAction } = await import("@/app/actions/audit");
+      const res = await getLatestAuditReportAction("", "security");
+      expect(res.success).toBe(false);
+      expect(res.error).toContain("Projektin id puuttuu");
+    });
+  });
 });
+

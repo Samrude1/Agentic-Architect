@@ -194,5 +194,24 @@ Chronological record of architectural decisions, completed sprints, and developm
   - `npm run lint`: **0 ESLint errors**.
   - Verified zero functional regressions across all 3 data gates and diff verification.
 
+---
+
+### 2026-10-07 — Security Audit Caching, Grade A Security Fixes & Pipeline Bridge Vision (`/save`)
+- **Security Audit UX & Instant Cache (`src/app/actions/audit.ts`, `src/components/playground-workspace.tsx`, `src/components/audit-modal.tsx`)**:
+  - Fixed Security Check button so clicking it opens existing reports instantly (2ms, 0 tokens) directly from project's `docs/SECURITY_AUDIT.md` or `.audit-cache`.
+  - Replaced blocking confirmation modal with an explicit "🔄 Aja uusi tarkastus" button in the audit modal footer.
+  - Added "Tallenna tiedostoksi" and "🚀 Anna agentille korjattavaksi" directly in the modal.
+- **PulseDesk Gate 1 & Gate 2 Security Hardening**:
+  - Gate 1 ([schema.prisma](file:///C:/Users/samru/DEVELOPER/PROJECTS/pulsedesk/prisma/schema.prisma)): Upgraded SQLite -> PostgreSQL, eliminated plaintext password vulnerability by switching to `passwordHash String` and added `Session` model with foreign key indexes.
+  - Gate 2 ([route.ts](file:///C:/Users/samru/DEVELOPER/PROJECTS/pulsedesk/src/app/api/endpoints/route.ts)): Added `getAuthenticatedUser()` verification, 401 Unauthorized handling, sanitized user outputs to prevent token/password leaks, and strict Zod validation.
+  - Verified with fresh audit: Health score reached **95 / 100** (Grade **A**), 0 critical vulnerabilities.
+- **Core Architecture Vision & Next Session Roadmap (Pipeline Bridge)**:
+  - *Unified Workspace Vision*: Vasen ikkuna (Sisältö: Kaavio, Gate 1, Gate 2, Gate 3) ja Oikea ikkuna (Co-Pilot) on oltava saumattomasti yhteydessä toisiinsa konepellin alla samalla tavalla kuin Antigravity IDE:ssä.
+  - Co-Pilot ei saa toimia erillisenä chat-saarekkeena: sille on annettava suora kyky (`update_gate_code` / automaattinen tilasilta) päivittää Gatejen koodiluonnokset, kun se sopii käyttäjän kanssa korjaustoimenpiteistä.
+  - Chat-muotoilu: Korjataan raa'at `###` ja `**` muotoilut siististi renderöidyksi rikkaaksi tekstiksi ChatSidebarissa.
+- **Automated Verification**:
+  - 50/50 Vitest-testiä läpäisty (`npm test -- --run`).
+  - 0 TypeScript-virhettä (`npx tsc --noEmit`).
+
 
 
