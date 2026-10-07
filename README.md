@@ -169,6 +169,7 @@ For deployment runbooks, emergency rollback procedures, and secret rotation step
 | **Data Gate 1: Prisma DB Schema** | 🟡 Alpha | Schema generation & local disk writer (in active testing) |
 | **Data Gate 2: Next.js API Routes** | 🟡 Alpha | Route Handler & Zod validation generation (in active testing) |
 | **Data Gate 3: React 19 UI Dashboards** | 🟡 Alpha | Feature dashboard code generator (in active testing) |
+| **Pipeline Bridge (Chat-to-Gate Sync)** | ⚪ Planned | Direct code update channel from Co-Pilot to Data Gates |
 | **Automated End-to-End Tests** | ⚪ Planned | Full Cypress / Playwright user flow validation |
 | **Multi-file Document Dropzone** | ⚪ Planned | Support for ingesting complex, multi-document architecture briefs |
 
