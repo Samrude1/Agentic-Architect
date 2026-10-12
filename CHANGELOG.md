@@ -17,6 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team collaboration via shared project links
 - Cloud deployment packaging (Vercel / Railway)
 
+## [1.3.1] - 2026-10-12
+
+> **Foolproof UX & Unambiguous Gate Step Progression** — Simplified single-action workflow for non-technical users, step banners (Vaihe 1/3, 2/3, 3/3), sequential next-step buttons upon disk writes, and reactive header state badges.
+
+### Added
+- **Unambiguous Primary Action Priority (`gate1-schema-tab.tsx`, `gate2-api-tab.tsx`, `gate3-ui-tab.tsx`)**: Replaced competing buttons with a single clear primary action per gate state. When AI updates are staged, the only highlighted button is a pulsating emerald `[💾 Tallenna muutokset levylle]`.
+- **Step-by-Step Visual Guidance Banners**: Added explicit Finnish plain-language banners for each gate (`⚡ Vaihe 1/3`, `2/3`, `3/3`) explaining what was modified and what to click next.
+- **Sequential Next-Step Guidance (`onNavigateNext`)**: Added direct green completion banners with automatic next-step progression buttons:
+  - Gate 1 saved ➔ `[ Siirry Gate 2:een (API) ➔ ]`
+  - Gate 2 saved ➔ `[ Siirry Gate 3:een (UI) ➔ ]`
+  - Gate 3 saved ➔ `[ 🎉 Kaikki 3 Gatea valmiina! Avaa kaavio ➔ ]`
+- **Dynamic Header Status Badges (`workspace-header.tsx`)**: Välilehdet näyttävät sykkivän keltaisen merkkivalon (`⚡ Odottaa tallennusta`) tallentamattomille AI-päivityksille ja vihreän merkin (`✓`) levylle tallennetuille tiedostoille.
+
+### Fixed
+- **Canvas Empty Edge Crash**: Eliminated empty `{}` edge objects from PulseDesk SQLite database and added auto-sanitization fallback in React Flow.
+- **Deterministic Studio AI Handler**: Prioritized structured studio analysis over LLM hallucinations in chat endpoint.
+
+---
+
 ## [1.3.0] - 2026-10-12
 
 > **Codebase Optimization Suite & Platform Stability** — Automated deep codebase scanner, live progress audit banner, interactive confirmation gate, Co-Pilot AI optimization tool, React 19 render cycle fixes, and Mermaid export guards.

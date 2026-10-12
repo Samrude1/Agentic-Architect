@@ -48,6 +48,7 @@ This document tracks verified implementation progress, active feature matrix, te
 | **Workspace Modularization** | `workspace/*.tsx` | 🟩 Complete | Gate1/Gate2/Gate3 tab components & HomebasePathCard extracted |
 | **Live Workspace Bridge** | `chat-sidebar.tsx`, `/api/chat`, `workspace-context.ts` | 🟩 Complete | Bi-directional state & code updates (Ihminen ⟷ Agentti) |
 | **Topology & Graph Resilience**| `route.ts`, `playground-workspace.tsx` | 🟩 Complete | Full edge topology mapping, partial graph update merging & position guard |
+| **Foolproof Gate Workflow** | `gate1/2/3*.tsx`, `playground-workspace.tsx` | 🟩 Complete | Single-action priority, visual step banners (1/3, 2/3, 3/3), next-step buttons & dynamic header badges |
 
 *Status Legend: 🟩 Complete | 🟨 In Progress | 🟥 Defect / Missing | ⬜ Planned*
 

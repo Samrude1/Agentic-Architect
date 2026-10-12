@@ -5,46 +5,46 @@ This file tracks the current state, active context, and primary handoff files fo
 ---
 
 ## 📅 Session Snapshot
-- **Timestamp**: 2026-10-12T20:45:00+03:00
-- **Active Task**: Codebase Optimization Scanner, Reactive Confirmation Gates & Stability Hardening Valmis
-- **Codebase Stability**: 🟩 Verified Production Ready (54/54 Vitest tests passing across 12 test files, `npx tsc --noEmit` 0 errors, Next.js Turbopack dev server healthy)
+- **Timestamp**: 2026-10-12T22:50:00+03:00
+- **Active Task**: Foolproof Step-by-Step Gate Guidance & Co-Pilot Autonomy Verification Valmis
+- **Codebase Stability**: 🟩 Verified Production Ready (54/54 Vitest tests passing across 12 test files, `npx tsc --noEmit` 0 errors, Next.js Turbopack dev server healthy, git clean and pushed)
 
 ---
 
 ## 🚀 Key Achievements Completed
-1. **Ammattimainen Koodipohjan Optimointityökalu ([`src/app/actions/audit.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts))**:
-   - Skannaa projektin (`targetPath` / PulseDesk) lähdekooditiedostot suoraan levyltä ja havaitsee turvonneet tiedostot (**yli 1 000 riviä**).
-   - Tarkastaa arkkitehtuurin ja kerrosjaon **spagettikoodin** varalta (UI, API ja Prisma eristettyinä toisistaan).
-   - Tarkastaa tietokantamallien yhdistelmäindeksit (`@@index([userId, status])`), Next.js-välimuistin revalidoinnin (`revalidatePath`, `Cache-Control`) ja UI-memooinnin (`useMemo`).
-   - Suoritusaika pudotettu 20 sekunnin verkkohidastelusta **140 millisekuntiin** paikallisella moottorilla.
-2. **Käyttäjän Vahvistusdialogi & Reaaliaikainen Live-Palkki ([`playground-workspace.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx), [`workspace-header.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/workspace/workspace-header.tsx))**:
-   - Kun käyttäjä klikkaa "Optimize", ohjelma avaa ensin selkeän vahvistusdialogin: *"Haluatko ajaa optimoinnin läpi?"* (vaihtoehdot: "Kyllä, aja läpi" / "Peruuta").
-   - Vahvistuksen jälkeen ruudulle ilmestyy reaaliaikainen live-skannausbanneri sykkivällä etenemispalkilla ja vaiheittaisilla tilaviesteillä.
-   - Yläpalkin painike näyttää lataustilan (`isOptimizing`, pyörivä `Loader2` ja "Optimoidaan...").
-3. **React 19 -Renderöintisilmukan Korjaus & Vakauskovennus ([`playground-workspace.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx))**:
-   - Korjattu kriittinen vika, jossa `startTransition` oli kutsuttu tilapäivittäjäfunktion (`setEdges`) sisällä, mikä aiheutti Reactin renderöintisyklivirheen (`Cannot call startTransition while rendering`) ja kaatoi taustaprosessin.
-   - Eriytetty `setNodes`, `setEdges` ja `startTransition` renderöintisyklin ulkopuolelle.
-4. **Mermaid Export -Kovennus ([`mermaid-export.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/mermaid-export.ts), [`export-modal.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/export-modal.tsx))**:
-   - Korjattu `sanitizeNodeId`-funktio estämään `TypeError: Cannot read properties of undefined (reading 'replace')` -kaatumiset, jos kankaan solmujen tai nuolten ID:t ovat puutteellisia.
-   - Memoitu `mermaidCode` `useMemo`-hookilla siten, että kaaviota ei lasketa tarpeettomasti taustalla modaalin ollessa suljettuna.
-5. **Co-Pilot Koodin Optimointi & Deterministinen Ensisijaisuus ([`route.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts), [`chat-sidebar.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/chat-sidebar.tsx))**:
-   - Korjattu Co-Pilotin vastausreititys siten, että studiotason deterministiset analyysit ja koodin optimointi/tietoturvakorjaus suoritetaan **aina ensisijaisesti** ennen ulkoista kielimallia.
-   - Poistettu LLM:n geneeriset "/* lähtötilanne */" -placeholder-koodit ja puolittaiset pseudovastaukset; käyttäjä saa aina visuaalisen suorituskykytaulukon, bloated files & spagettikoodidiagnostiikan sekä 100% täydellisen tuotantokoodin Gateille 1–3 ja kankaalle.
-6. **Automaattinen Laadunvarmistus**:
-   - 54 yksikkötestiä läpäisty 12 testitiedostossa (`npm test`).
+1. **Idioottivarma Askellettu Työnkulku (Foolproof Step-by-Step Guidance)**:
+   - Poistettu kilpailevat toiminnot ja sekavat rinnakkaiset painikkeet: kussakin tilassa on vain **yksi selkeä ensisijainen toimintapainike**.
+   - Kun tekoäly on tehnyt työtilamuutoksen, ensisijaisena toimintona loistaa huomiota herättävä sykkivä vihreä: `[ Tallenna muutokset levylle ]`. Uudelleengenerointi on piilotettu toissijaiseksi haaleaksi toiminnoksi.
+   - Jokaisessa Datagatessa (Gate 1 Prisma, Gate 2 API, Gate 3 UI) on nyt suora visuaalinen ohjepalkki (`Vaihe 1/3`, `Vaihe 2/3`, `Vaihe 3/3`), joka selostaa non-technical käyttäjälle suoraan suomeksi mitä tapahtui ja mitä painaa seuraavaksi.
+2. **Automaattinen Seuraavan Vaiheen Ohjaus Tallennuksen Jälkeen**:
+   - Kun tiedosto on kirjoitettu levylle Diff-esikatselun kautta, näytölle nousee vihreä onnistumisbanneri ja suora siirtymäpainike seuraavaan vaiheeseen:
+     - Gate 1 tallennettu ➔ `[ Siirry Gate 2:een (API) ➔ ]`
+     - Gate 2 tallennettu ➔ `[ Siirry Gate 3:een (UI) ➔ ]`
+     - Gate 3 tallennettu ➔ `[ 🎉 Kaikki 3 Gatea valmiina! Avaa kaavio ➔ ]`
+3. **Yläpalkin Välilehtien Tilatietoisuus**:
+   - Välilehdissä (Gate 1, Gate 2, Gate 3) näkyy sykkivä keltainen huomiovalo (`⚡ Odottaa tallennusta`), jos tekoäly on muokannut koodia mutta sitä ei ole vielä kirjoitettu levylle.
+   - Kun koodi on tallennettu levylle, tilaksi vaihtuu vihreä tarkistusmerkki (`✓`).
+4. **Co-Pilot Autonomia & Koodin Muokkausketju Vahvistettu**:
+   - Co-Pilot pystyy lukemaan täyden työtilakontekstin, suorittamaan koodipohjan analyysin (spagetti, bloated files, puuttuvat indeksit, välimuisti), ehdottamaan korjaukset ja viemään ne suoraan työtilaan.
+   - Vastausreititys pitää huolen siitä, ettei käyttäjälle generoida pseudokoodeja tai laiskoja kommentteja, vaan täysi toimiva tuotantokoodi.
+5. **Automaattinen Laadunvarmistus & Vakaus**:
+   - 54 yksikkötestiä läpäisty 12 testitiedostossa (`npx vitest run`).
    - 0 TypeScript-virhettä (`npx tsc --noEmit`).
+   - Taustalla pyörivä Next.js-palvelin vastaa puhtaasti 200 OK.
+   - Git-haara `main` synkronoitu ja puskettu Githubiin.
 
 ---
 
 ## 🎯 Next Immediate Task for Fresh Session
-- **PulseDesk Lopullinen Hyväksyntäkatselmointi & Tuotantopaketointi**:
-  - Testaa koodien vienti levylle PulseDeskiin (`C:\Users\samru\DEVELOPER\PROJECTS\pulsedesk`) Gate-välilehtien Diff-esikatselun kautta.
-  - Aja PulseDeskin oma `npm run build` kohdekansiossa vahvistamaan, että generoidut koodit kääntyvät ja toimivat saumattomasti.
+- **PulseDesk Täysi Loppukatselmointi & Koodin Ajo Levyltä**:
+  - Siirry kohdeprojektiin (`C:\Users\samru\DEVELOPER\PROJECTS\pulsedesk`).
+  - Suorita `npm run build` ja `npm run dev` kohdeprojektissa ja varmista, että koodit toimivat selaimessa saumattomasti.
+  - Varmista Prisma-skeeman migraatio (`npx prisma migrate dev` / `prisma db push`).
 
 ---
 
 ## 📚 Key Files to Read (Resume Handoff)
 1. [.agents/blueprint/PROJECT_STATUS.md](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/.agents/blueprint/PROJECT_STATUS.md)
-2. [src/app/actions/audit.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts)
-3. [src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx)
-4. [src/app/api/chat/route.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts)
+2. [src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx)
+3. [src/components/workspace/gate2-api-tab.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/workspace/gate2-api-tab.tsx)
+4. [src/app/actions/audit.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts)

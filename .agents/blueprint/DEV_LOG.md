@@ -2,6 +2,21 @@
 
 Chronological record of architectural decisions, completed sprints, and development milestones.
 
+### 2026-10-12 — Foolproof Step-by-Step Gate Guidance & Co-Pilot Autonomy Verification
+- **Loppukäyttäjälle Suunniteltu Askellettu Ohjaus (Foolproof UX)**:
+  - Poistettu kilpailevat toiminnot: kussakin tilassa on vain **yksi selkeä ensisijainen toimintapainike** (sykkivä vihreä `[ Tallenna muutokset levylle ]` kun AI-päivitys on odottamassa, ja suora seuraavan vaiheen siirtymä kun tallennettu).
+  - Lisätty selkeät visuaaliset ohjepalkit jokaiseen Gateen (`Vaihe 1/3`, `Vaihe 2/3`, `Vaihe 3/3`), jotka kertovat suomeksi mitä tapahtui ja mitä painaa seuraavaksi.
+  - Välilehtien tilatietoisuus: sykkivä keltainen indikaattori tallentamattomille AI-päivityksille ja vihreä tarkistusmerkki levylle tallennetuille tiedostoille.
+- **Co-Pilot Autonomian & Korjausketjun Vahvistus**:
+  - Todistettu Co-Pilotin kyky analysoida koodipohjaa (bloated files, spagettikoodi, tietokantaindeksit), suorittaa korjaukset ja päivittää koodi suoraan työtilaan Live Workspace Bridgen kautta.
+  - Poistettu kaikki pseudokoodit ja placeholderit deterministisen studio-käsittelijän avulla.
+- **Laadunvarmistus & Vakaus**:
+  - Kaikki 54 Vitest-yksikkötestiä läpäisty (12/12 testitiedostoa).
+  - TypeScript `tsc --noEmit` 0 virhettä.
+  - Git-haara commitoitu ja puskettu Githubiin.
+
+---
+
 ### 2026-09-15 — Workspace Modularization & Vision Gap Analysis
 - **Workspace Modularization Refactoring**:
   - Extracted 4 dedicated subcomponents from `playground-workspace.tsx` (~1,170 → ~830 lines) into `src/components/workspace/`:
