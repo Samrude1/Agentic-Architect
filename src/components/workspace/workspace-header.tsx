@@ -33,6 +33,11 @@ export interface WorkspaceHeaderProps {
     gate2?: boolean;
     gate3?: boolean;
   };
+  agentUpdatedGates?: {
+    gate1?: { summary: string; timestamp: number };
+    gate2?: { summary: string; timestamp: number };
+    gate3?: { summary: string; timestamp: number };
+  };
   techProfile: TechStackProfile | null;
   isPending: boolean;
   savedSuccess: boolean;
@@ -51,6 +56,7 @@ export function WorkspaceHeader({
   activeTab,
   setActiveTab,
   savedGates,
+  agentUpdatedGates,
   techProfile,
   isPending,
   savedSuccess,
@@ -107,7 +113,7 @@ export function WorkspaceHeader({
 
           <button
             onClick={() => setActiveTab("schema")}
-            className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
+            className={`flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
               activeTab === "schema"
                 ? "bg-background text-foreground shadow-sm font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -116,14 +122,19 @@ export function WorkspaceHeader({
           >
             <Database className="h-3.5 w-3.5 text-purple-500 shrink-0" />
             <span>Gate 1</span>
-            {savedGates.gate1 && (
+            {agentUpdatedGates?.gate1 ? (
+              <span className="flex h-2 w-2 relative" title="Uusi päivitys odottaa tallennusta">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+            ) : savedGates.gate1 ? (
               <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-            )}
+            ) : null}
           </button>
 
           <button
             onClick={() => setActiveTab("api")}
-            className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
+            className={`flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
               activeTab === "api"
                 ? "bg-background text-foreground shadow-sm font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -132,14 +143,19 @@ export function WorkspaceHeader({
           >
             <Server className="h-3.5 w-3.5 text-purple-500 shrink-0" />
             <span>Gate 2</span>
-            {savedGates.gate2 && (
+            {agentUpdatedGates?.gate2 ? (
+              <span className="flex h-2 w-2 relative" title="Uusi päivitys odottaa tallennusta">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+            ) : savedGates.gate2 ? (
               <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-            )}
+            ) : null}
           </button>
 
           <button
             onClick={() => setActiveTab("ui")}
-            className={`flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
+            className={`flex items-center space-x-1.5 px-2 sm:px-2.5 py-1 rounded-md transition-all text-xs shrink-0 whitespace-nowrap ${
               activeTab === "ui"
                 ? "bg-background text-foreground shadow-sm font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -148,9 +164,14 @@ export function WorkspaceHeader({
           >
             <LayoutGrid className="h-3.5 w-3.5 text-purple-500 shrink-0" />
             <span>Gate 3</span>
-            {savedGates.gate3 && (
+            {agentUpdatedGates?.gate3 ? (
+              <span className="flex h-2 w-2 relative" title="Uusi päivitys odottaa tallennusta">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+            ) : savedGates.gate3 ? (
               <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-            )}
+            ) : null}
           </button>
         </div>
       </div>

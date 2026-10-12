@@ -12,6 +12,7 @@ import {
   HardDrive,
   Loader2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { NodeInspector } from "@/components/node-inspector";
@@ -415,19 +416,19 @@ export function PlaygroundWorkspace({
     (data: GateCodeUpdatePayload) => {
       if (data.gate === "gate1") {
         setPrismaSchema(data.code);
-        setSavedGates((prev) => ({ ...prev, gate1: true }));
+        setSavedGates((prev) => ({ ...prev, gate1: false }));
         if (currentProjectId) {
           updateProjectPrismaSchema(currentProjectId, data.code).catch(console.error);
         }
       } else if (data.gate === "gate2") {
         setApiCode(data.code);
-        setSavedGates((prev) => ({ ...prev, gate2: true }));
+        setSavedGates((prev) => ({ ...prev, gate2: false }));
         if (currentProjectId) {
           updateProjectApiCode(currentProjectId, data.code).catch(console.error);
         }
       } else if (data.gate === "gate3") {
         setUiCode(data.code);
-        setSavedGates((prev) => ({ ...prev, gate3: true }));
+        setSavedGates((prev) => ({ ...prev, gate3: false }));
         if (currentProjectId) {
           updateProjectUiCode(currentProjectId, data.code).catch(console.error);
         }
@@ -931,6 +932,7 @@ export function PlaygroundWorkspace({
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         savedGates={savedGates}
+        agentUpdatedGates={agentUpdatedGates}
         techProfile={techProfile}
         isPending={isPending}
         savedSuccess={savedSuccess}
@@ -1009,50 +1011,55 @@ export function PlaygroundWorkspace({
 
       {/* Agent Live Code Update Notification Banner */}
       {agentCodeNotification && (
-        <div className="mx-4 mt-3 mb-1 p-3 bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-transparent border border-purple-500/30 rounded-xl flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2">
+        <div className="mx-4 mt-3 mb-1 p-3.5 bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-emerald-500/10 border-2 border-purple-500/40 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400">
-              <Sparkles className="h-4 w-4" />
+            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 shrink-0">
+              <Sparkles className="h-5 w-5 animate-pulse" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <div className="text-xs font-bold text-foreground flex items-center gap-2 flex-wrap">
                 <span>⚡ Co-Pilot päivitti koodin:</span>
-                <span className="text-purple-400 font-bold">{agentCodeNotification.label}</span>
+                <span className="text-purple-400 font-extrabold">{agentCodeNotification.label}</span>
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
+                  Odottaa tallennusta levylle
+                </span>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">{agentCodeNotification.summary}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 shrink-0">
             {((agentCodeNotification.gate === "gate1" && activeTab === "schema") ||
               (agentCodeNotification.gate === "gate2" && activeTab === "api") ||
               (agentCodeNotification.gate === "gate3" && activeTab === "ui")) ? (
-              <button
+              <Button
                 onClick={() => {
                   if (agentCodeNotification.gate === "gate1") triggerWritePrismaToDiskConfirmation();
                   else if (agentCodeNotification.gate === "gate2") triggerWriteApiToDiskConfirmation();
                   else if (agentCodeNotification.gate === "gate3") triggerWriteUiToDiskConfirmation();
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 px-4 flex items-center gap-1.5 shadow-md"
               >
                 <HardDrive className="h-3.5 w-3.5" />
                 <span>Tallenna muutokset levylle</span>
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => {
                   if (agentCodeNotification.gate === "gate1") setActiveTab("schema");
                   else if (agentCodeNotification.gate === "gate2") setActiveTab("api");
                   else if (agentCodeNotification.gate === "gate3") setActiveTab("ui");
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center gap-1 shadow-sm transition-all"
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs h-9 px-4 flex items-center gap-1.5 shadow-md"
               >
-                <span>Siirry katsomaan</span>
+                <span>Siirry Gateen ja tallenna</span>
                 <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             )}
             <button
               onClick={() => setAgentCodeNotification(null)}
-              className="text-xs text-muted-foreground hover:text-foreground px-2 py-1"
+              className="text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-lg hover:bg-muted"
             >
               Sulje
             </button>
@@ -1132,11 +1139,13 @@ export function PlaygroundWorkspace({
                 prismaSchema={prismaSchema}
                 isGeneratingSchema={isGeneratingSchema}
                 isWritingToDisk={isWritingToDisk}
+                isSaved={Boolean(savedGates.gate1 && !agentUpdatedGates.gate1)}
                 diskMessage={diskMessage}
                 techProfile={techProfile}
                 agentUpdate={agentUpdatedGates.gate1}
                 onGenerateSchema={triggerGenerateSchemaConfirmation}
                 onWriteToDisk={triggerWritePrismaToDiskConfirmation}
+                onNavigateNext={() => setActiveTab("api")}
                 onDismissAgentUpdate={() =>
                   setAgentUpdatedGates((prev) => {
                     const next = { ...prev };
@@ -1150,10 +1159,12 @@ export function PlaygroundWorkspace({
                 apiCode={apiCode}
                 isGeneratingApi={isGeneratingApi}
                 isWritingToDisk={isWritingToDisk}
+                isSaved={Boolean(savedGates.gate2 && !agentUpdatedGates.gate2)}
                 diskMessage={diskMessage}
                 agentUpdate={agentUpdatedGates.gate2}
                 onGenerateApi={triggerGenerateApiConfirmation}
                 onWriteToDisk={triggerWriteApiToDiskConfirmation}
+                onNavigateNext={() => setActiveTab("ui")}
                 onDismissAgentUpdate={() =>
                   setAgentUpdatedGates((prev) => {
                     const next = { ...prev };
@@ -1167,10 +1178,12 @@ export function PlaygroundWorkspace({
                 uiCode={uiCode}
                 isGeneratingUi={isGeneratingUi}
                 isWritingToDisk={isWritingToDisk}
+                isSaved={Boolean(savedGates.gate3 && !agentUpdatedGates.gate3)}
                 diskMessage={diskMessage}
                 agentUpdate={agentUpdatedGates.gate3}
                 onGenerateUi={triggerGenerateUiConfirmation}
                 onWriteToDisk={triggerWriteUiToDiskConfirmation}
+                onNavigateNext={() => setActiveTab("canvas")}
                 onDismissAgentUpdate={() =>
                   setAgentUpdatedGates((prev) => {
                     const next = { ...prev };
