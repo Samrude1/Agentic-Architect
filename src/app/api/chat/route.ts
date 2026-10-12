@@ -809,8 +809,6 @@ function buildOptimizedArchitecture(existingNodes?: any[], existingEdges?: any[]
       ? [...existingNodes]
       : generateSmartPromptArchitecture("Fullstack SaaS").nodes;
 
-  const currentEdges = existingEdges && existingEdges.length > 0 ? [...existingEdges] : [];
-
   // Standardize Redis Cache & Queue and PostgreSQL Database
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updatedNodes = currentNodes.map((n: any) => {
@@ -844,7 +842,65 @@ function buildOptimizedArchitecture(existingNodes?: any[], existingEdges?: any[]
     return n;
   });
 
-  return { nodes: updatedNodes, edges: currentEdges };
+  // Sanitize existing edges: filter out corrupted edges without valid source/target
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawEdges = (existingEdges || []).filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) =>
+      e &&
+      typeof e.source === "string" &&
+      e.source.trim().length > 0 &&
+      typeof e.target === "string" &&
+      e.target.trim().length > 0
+  );
+
+  // If edges were empty or wiped, reconstruct clean 4-tier connections
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let finalEdges: any[] = rawEdges;
+  if (finalEdges.length === 0 && updatedNodes.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const webNode = updatedNodes.find((n: any) => n.id === "1" || n.data?.label?.includes("Web") || n.position?.y === 50);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const apiNode = updatedNodes.find((n: any) => n.id === "2" || n.data?.label?.includes("Gateway") || n.id === "api-gateway");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const authNode = updatedNodes.find((n: any) => n.id === "auth-service" || n.data?.label?.includes("Auth"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feedbackNode = updatedNodes.find((n: any) => n.id === "3" || n.data?.label?.includes("Feedback"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const aiNode = updatedNodes.find((n: any) => n.id === "4" || n.data?.label?.includes("AI"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const notifNode = updatedNodes.find((n: any) => n.id === "5" || n.data?.label?.includes("Notification"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dbNode = updatedNodes.find((n: any) => n.id === "6" || n.data?.label?.includes("PostgreSQL") || n.data?.label?.includes("Database"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const redisNode = updatedNodes.find((n: any) => n.id === "7" || n.data?.label?.includes("Redis"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const webhookNode = updatedNodes.find((n: any) => n.id === "8" || n.data?.label?.includes("Webhook"));
+
+    const webId = webNode?.id || "1";
+    const apiId = apiNode?.id || "2";
+    const authId = authNode?.id || "auth-service";
+    const fbId = feedbackNode?.id || "3";
+    const aiId = aiNode?.id || "4";
+    const notifId = notifNode?.id || "5";
+    const dbId = dbNode?.id || "6";
+    const redisId = redisNode?.id || "7";
+    const whId = webhookNode?.id || "8";
+
+    finalEdges = [
+      { id: `e-${webId}-${apiId}`, source: webId, target: apiId, label: "HTTPS / REST", animated: true },
+      { id: `e-${apiId}-${authId}`, source: apiId, target: authId, label: "validateSession", animated: true },
+      { id: `e-${apiId}-${fbId}`, source: apiId, target: fbId, label: "/api/feedback", animated: true },
+      { id: `e-${apiId}-${aiId}`, source: apiId, target: aiId, label: "/api/ai", animated: true },
+      { id: `e-${authId}-${dbId}`, source: authId, target: dbId, label: "users / sessions", animated: true },
+      { id: `e-${fbId}-${dbId}`, source: fbId, target: dbId, label: "CRUD / Prisma", animated: true },
+      { id: `e-${fbId}-${notifId}`, source: fbId, target: notifId, label: "events", animated: true },
+      { id: `e-${aiId}-${redisId}`, source: aiId, target: redisId, label: "cache / queue", animated: true },
+      { id: `e-${notifId}-${whId}`, source: notifId, target: whId, label: "webhooks / email", animated: true },
+    ];
+  }
+
+  return { nodes: updatedNodes, edges: finalEdges };
 }
 
 // Schemas

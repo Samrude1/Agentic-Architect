@@ -62,6 +62,59 @@ interface PlaygroundWorkspaceProps {
   initialUiCode?: string;
 }
 
+function sanitizeEdges(rawEdges?: Edge[]): Edge[] {
+  return (rawEdges || [])
+    .filter(
+      (e) =>
+        e &&
+        typeof e.source === "string" &&
+        e.source.trim().length > 0 &&
+        typeof e.target === "string" &&
+        e.target.trim().length > 0
+    )
+    .map((e, idx) => ({
+      ...e,
+      id: e.id && typeof e.id === "string" && e.id.trim().length > 0 ? e.id : `edge-${e.source}-${e.target}-${idx}`,
+      animated: e.animated ?? true,
+    }));
+}
+
+function generateFallbackEdges(currentNodes: Node[]): Edge[] {
+  const getLabel = (n: Node) => String((n.data as { label?: string } | undefined)?.label || "");
+  const webNode = currentNodes.find((n) => n.id === "1" || getLabel(n).includes("Web") || n.position?.y === 50);
+  const apiNode = currentNodes.find((n) => n.id === "2" || getLabel(n).includes("Gateway") || n.id === "api-gateway");
+  const authNode = currentNodes.find((n) => n.id === "auth-service" || getLabel(n).includes("Auth"));
+  const feedbackNode = currentNodes.find((n) => n.id === "3" || getLabel(n).includes("Feedback"));
+  const aiNode = currentNodes.find((n) => n.id === "4" || getLabel(n).includes("AI"));
+  const notifNode = currentNodes.find((n) => n.id === "5" || getLabel(n).includes("Notification"));
+  const dbNode = currentNodes.find((n) => n.id === "6" || getLabel(n).includes("PostgreSQL") || getLabel(n).includes("Database"));
+  const redisNode = currentNodes.find((n) => n.id === "7" || getLabel(n).includes("Redis"));
+  const webhookNode = currentNodes.find((n) => n.id === "8" || getLabel(n).includes("Webhook"));
+
+  const webId = webNode?.id || "1";
+  const apiId = apiNode?.id || "2";
+  const authId = authNode?.id || "auth-service";
+  const fbId = feedbackNode?.id || "3";
+  const aiId = aiNode?.id || "4";
+  const notifId = notifNode?.id || "5";
+  const dbId = dbNode?.id || "6";
+  const redisId = redisNode?.id || "7";
+  const whId = webhookNode?.id || "8";
+
+  const fallback: Edge[] = [];
+  if (webNode && apiNode) fallback.push({ id: `e-${webId}-${apiId}`, source: webId, target: apiId, label: "HTTPS / REST", animated: true });
+  if (apiNode && authNode) fallback.push({ id: `e-${apiId}-${authId}`, source: apiId, target: authId, label: "validateSession", animated: true });
+  if (apiNode && feedbackNode) fallback.push({ id: `e-${apiId}-${fbId}`, source: apiId, target: fbId, label: "/api/feedback", animated: true });
+  if (apiNode && aiNode) fallback.push({ id: `e-${apiId}-${aiId}`, source: apiId, target: aiId, label: "/api/ai", animated: true });
+  if (authNode && dbNode) fallback.push({ id: `e-${authId}-${dbId}`, source: authId, target: dbId, label: "users / sessions", animated: true });
+  if (feedbackNode && dbNode) fallback.push({ id: `e-${fbId}-${dbId}`, source: fbId, target: dbId, label: "CRUD / Prisma", animated: true });
+  if (feedbackNode && notifNode) fallback.push({ id: `e-${fbId}-${notifId}`, source: fbId, target: notifId, label: "events", animated: true });
+  if (aiNode && redisNode) fallback.push({ id: `e-${aiId}-${redisId}`, source: aiId, target: redisId, label: "cache / queue", animated: true });
+  if (notifNode && webhookNode) fallback.push({ id: `e-${notifId}-${whId}`, source: notifId, target: whId, label: "webhooks / email", animated: true });
+
+  return fallback;
+}
+
 export function PlaygroundWorkspace({
   projectId,
   projectName,
@@ -77,7 +130,12 @@ export function PlaygroundWorkspace({
   const [currentProjectId, setCurrentProjectId] = useState<string | undefined>(projectId);
   const [currentProjectName, setCurrentProjectName] = useState<string | undefined>(projectName);
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const [edges, setEdges] = useState<Edge[]>(() => {
+    const sanitized = sanitizeEdges(initialEdges);
+    if (sanitized.length > 0) return sanitized;
+    if (initialNodes.length > 0) return generateFallbackEdges(initialNodes);
+    return [];
+  });
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -265,7 +323,9 @@ export function PlaygroundWorkspace({
         });
       }
 
-      const resolvedEdges = data.edges && data.edges.length > 0 ? data.edges : edges;
+      const rawEdges = data.edges && data.edges.length > 0 ? data.edges : edges;
+      const sanitized = sanitizeEdges(rawEdges);
+      const resolvedEdges = sanitized.length > 0 ? sanitized : generateFallbackEdges(resolvedNodes);
 
       setNodes(resolvedNodes);
       setEdges(resolvedEdges);
