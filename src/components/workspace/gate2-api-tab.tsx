@@ -9,8 +9,10 @@ interface Gate2ApiTabProps {
   isGeneratingApi: boolean;
   isWritingToDisk: boolean;
   diskMessage: { type: "success" | "error"; text: string } | null;
+  agentUpdate?: { summary: string; timestamp: number } | null;
   onGenerateApi: () => void;
   onWriteToDisk: () => void;
+  onDismissAgentUpdate?: () => void;
 }
 
 export function Gate2ApiTab({
@@ -18,8 +20,10 @@ export function Gate2ApiTab({
   isGeneratingApi,
   isWritingToDisk,
   diskMessage,
+  agentUpdate,
   onGenerateApi,
   onWriteToDisk,
+  onDismissAgentUpdate,
 }: Gate2ApiTabProps) {
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-background border rounded-lg p-4 shadow-sm space-y-4">
@@ -67,6 +71,61 @@ export function Gate2ApiTab({
           )}
         </div>
       </div>
+
+      {/* Prominent AI Remediation / Update Callout Banner */}
+      {agentUpdate && (
+        <div className="p-4 bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-emerald-500/10 border-2 border-purple-500/40 rounded-xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1 flex-none">
+          <div className="flex items-start space-x-3.5">
+            <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex-shrink-0 mt-0.5">
+              <Sparkles className="h-5 w-5 text-purple-300 animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-bold text-foreground">
+                  🤖 Tekoäly on päivittänyt tämän koodin työtilassa
+                </span>
+                <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold px-2 py-0.5 rounded-full">
+                  Tallentamaton muutos
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {agentUpdate.summary}
+              </p>
+              <p className="text-[11px] text-amber-500 dark:text-amber-400 font-medium flex items-center gap-1.5 pt-0.5">
+                <span>⚠️</span>
+                <span>
+                  Muutokset ovat valmiina esikatseltavissa alla, mutta niitä <strong>ei ole vielä kirjoitettu levylle</strong> projektisi tiedostoon.
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              onClick={onWriteToDisk}
+              disabled={isWritingToDisk}
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md h-9 px-4 flex items-center gap-2"
+            >
+              {isWritingToDisk ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <HardDrive className="h-4 w-4" />
+              )}
+              <span>Tallenna muutokset levylle</span>
+            </Button>
+            {onDismissAgentUpdate && (
+              <button
+                type="button"
+                onClick={onDismissAgentUpdate}
+                className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg hover:bg-muted transition-colors"
+              >
+                Sulje
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* AI Co-Pilot Advisory Banner */}
       <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-start space-x-2.5 text-xs text-purple-300 flex-none">

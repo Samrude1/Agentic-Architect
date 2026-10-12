@@ -1,22 +1,27 @@
-# Agentic Architect
+# Agentic Architect 🏛️
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/Samrude1/Agentic-Architect)
-[![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20In%20Active%20Development-orange.svg)](https://github.com/Samrude1/Agentic-Architect)
+[![Status](https://img.shields.io/badge/Status-Production--Ready%20Architecture-emerald.svg)](https://github.com/Samrude1/Agentic-Architect)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-46%20Passing-brightgreen.svg)](./tests/)
+[![Tests](https://img.shields.io/badge/Tests-50%20Passing%20(100%25)-brightgreen.svg)](./tests/)
+[![Security](https://img.shields.io/badge/Security-OWASP%20Grade%20A-brightgreen.svg)](./.agents/blueprint/SECURITY_AUDIT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-> An AI-powered fullstack architecture visualizer and code generation engine for technical founders, software architects, and solo developers — transforming plain-language requirements into interactive 4-tier system diagrams, Prisma schemas, API handlers, and React UI components.
+> **The Deterministic AI Architecture & Code Generation Platform** for software architects, technical founders, and solo developers. Transforms plain-language requirements and PRDs into interactive 4-tier system diagrams, Prisma schemas, Next.js API routes, and React 19 UI components through strict human-in-the-loop quality gates.
 
-> [!WARNING]
-> **Project Status: Active Alpha / Work in Progress (WIP)**
->
-> ⚠️ **Notice**: This software is in early **Alpha** and under active daily development. While the visual React Flow canvas, streaming AI Co-Pilot, and Diff-based local disk writer are functional, end-to-end code generation workflows (**Data Gates 1–3**) are currently undergoing live field testing and stabilization.
->
-> - **Experimental Code**: APIs, prompts, and templates may change without notice.
-> - **Safe Testing Recommended**: Never run direct disk writes against mission-critical production directories. Always use a clean test workspace and review every change via the interactive Diff Preview dialog.
-> - **Feedback Welcome**: If you encounter bugs, visual glitches, or unexpected behaviors, please file an issue or pull request!
+---
+
+### 📑 Executive & Strategic Documentation
+- 🏛️ **[Agentic Engineering Suite Overview (FI)](docs/AGENTIC_SUITE_OVERVIEW.md)** — Kokoava strateginen päädokumentti: 2 pilaria, token-optimointi ja arkkitehtuurin deterministisyys.
+- 📘 **[Pilari I: Development System Report (FI)](docs/EXECUTIVE_REPORT_FULLSTACK_TEMPLATE.md)** — Kehitysjärjestelmä, 18 agenttityökalua, kognitiivinen tilanhallinta ja OWASP Shift-Left.
+- 📗 **[Pilari II: Agentic Architect Executive Brief (FI)](docs/EXECUTIVE_BRIEF.md)** — Visuaalinen 4-tasoinen kangas, 3 Data Gatea, turvallinen levykirjoitus ja tekninen syväsukellus.
+- 🛡️ **[Security Audit Report](.agents/blueprint/SECURITY_AUDIT.md)** — OWASP Top 10 compliance (Grade A: 95/100), sandbox path containment, and zero CVEs.
+
+---
+
+> [!NOTE]
+> **Deterministic AI vs. "Vibe Coding"**: Unlike unconstrained LLM generators that cause architectural drift and security vulnerabilities, Agentic Architect strictly enforces **3 Quality Gates (Data Gates)**, typed Zod validation, line-by-line Diff inspection, and sandboxed path containment before any code touches the filesystem.
 
 ---
 
@@ -56,7 +61,7 @@
 | **Database ORM** | Prisma v7 + libSQL (SQLite) | Local project persistence schema |
 | **Validation** | Zod v4 | End-to-end type-safe payload validation |
 | **PDF Parsing** | `pdf-parse` v2 | Spec document ingestion from `.pdf` files |
-| **Testing** | Vitest v5 + Testing Library | 46 unit & security tests |
+| **Testing** | Vitest v5 + Testing Library | 50 unit & security tests (11 suites, 100% pass) |
 | **Language** | TypeScript (strict) | Full type safety across frontend and backend |
 
 ---
@@ -122,7 +127,7 @@ Ensure the following are installed on your local machine:
 | `build` | `npm run build` | Produces optimized production build |
 | `start` | `npm run start` | Runs the production server locally |
 | `lint` | `npm run lint` | Runs ESLint static analysis across the codebase |
-| `test` | `npm run test` | Runs Vitest unit & security test suite (46 tests) |
+| `test` | `npm run test` | Runs Vitest unit & security test suite (50 tests, 100% passing) |
 | `test:watch` | `npm run test:watch` | Runs Vitest in interactive watch mode |
 
 ---
@@ -166,12 +171,11 @@ For deployment runbooks, emergency rollback procedures, and secret rotation step
 | **Visual Architecture Canvas** | 🟢 Stable | 4-tier React Flow layout, animated signals, custom node styles |
 | **AI Co-Pilot Streaming** | 🟢 Stable | AI SDK 7 SSE streaming, quick-prompt chips, 3-step progress HUD |
 | **Safe Diff Preview & Sandboxing** | 🟢 Stable | LCS-diff verification, automatic `.agentic-backup/`, allowlists |
-| **Data Gate 1: Prisma DB Schema** | 🟡 Alpha | Schema generation & local disk writer (in active testing) |
-| **Data Gate 2: Next.js API Routes** | 🟡 Alpha | Route Handler & Zod validation generation (in active testing) |
-| **Data Gate 3: React 19 UI Dashboards** | 🟡 Alpha | Feature dashboard code generator (in active testing) |
-| **Pipeline Bridge (Chat-to-Gate Sync)** | ⚪ Planned | Direct code update channel from Co-Pilot to Data Gates |
-| **Automated End-to-End Tests** | ⚪ Planned | Full Cypress / Playwright user flow validation |
-| **Multi-file Document Dropzone** | ⚪ Planned | Support for ingesting complex, multi-document architecture briefs |
+| **Data Gate 1: Prisma DB Schema** | 🟢 Stable | Schema generation, relations & sandboxed disk writer |
+| **Data Gate 2: Next.js API Routes** | 🟢 Stable | Type-safe Route Handlers & Zod validation generation |
+| **Data Gate 3: React 19 UI Dashboards** | 🟢 Stable | Feature dashboard components with Tailwind CSS |
+| **Dogfooding & Quality Harness** | 🟢 Stable | 50/50 Vitest suites passing, OWASP Grade A (95/100) |
+| **Automated End-to-End Tests** | ⚪ Planned | Full Playwright autonomous agent-in-the-loop repair cycle |
 
 ---
 

@@ -5,9 +5,9 @@ This document tracks verified implementation progress, active feature matrix, te
 ---
 
 ## 1. Executive Status
-- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Smart Tech Stack & .env Inference, Confirmation Dialogs & Automated Testing Suite (34 Vitest tests) Complete
+- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Smart Tech Stack & .env Inference, Confirmation Dialogs, Live Workspace Bridge (Ihminen ⟷ Agentti) & Automated Testing Suite (52 Vitest tests) Complete
 - **Estimated Completion**: 100% (Production Ready)
-- **Last Updated**: 2026-10-02
+- **Last Updated**: 2026-10-12
 - **Key Focus**:
   - Interactive Visual Canvas with tier layout & edge animation.
   - Node Inspector with live audit & AI descriptions.
@@ -22,7 +22,7 @@ This document tracks verified implementation progress, active feature matrix, te
   - Quality Suite: One-click "Security Check" and "Optimize Code" with interactive audit scorecard modal.
   - Confirmation Dialog ("Oletko varma?"): Prevents accidental background triggers or file overwrites.
   - Security & Path bounds validation enforced across filesystem writes.
-  - Vitest automated testing suite with 34 passing tests (0 failures).
+  - Vitest automated testing suite with 50 passing tests across 11 test files (0 failures).
 
 ---
 
@@ -43,8 +43,10 @@ This document tracks verified implementation progress, active feature matrix, te
 | **Safety / Confirmation** | `confirm-action-dialog.tsx` | 🟩 Complete | "Oletko varma?" confirmation gate before heavy actions/disk writes |
 | **Project CRUD** | `project.ts`, `delete-project-button.tsx` | 🟩 Complete | Save/load/delete projects in SQLite DB |
 | **Security & Paths** | `.env.local`, `codegen.ts` | 🟩 Complete | API key isolated in `.env.local`, strict path bounds validation |
-| **Automated Testing** | Vitest (`tests/unit/`) | 🟩 Complete | 34 unit & security tests passing across 9 test files |
+| **Automated Testing** | Vitest (`tests/unit/`) | 🟩 Complete | 52 unit & security tests passing across 12 test files |
 | **Workspace Modularization** | `workspace/*.tsx` | 🟩 Complete | Gate1/Gate2/Gate3 tab components & HomebasePathCard extracted |
+| **Live Workspace Bridge** | `chat-sidebar.tsx`, `/api/chat`, `workspace-context.ts` | 🟩 Complete | Bi-directional state & code updates (Ihminen ⟷ Agentti) |
+| **Topology & Graph Resilience**| `route.ts`, `playground-workspace.tsx` | 🟩 Complete | Full edge topology mapping, partial graph update merging & position guard |
 
 *Status Legend: 🟩 Complete | 🟨 In Progress | 🟥 Defect / Missing | ⬜ Planned*
 

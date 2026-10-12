@@ -213,5 +213,25 @@ Chronological record of architectural decisions, completed sprints, and developm
   - 50/50 Vitest-testiä läpäisty (`npm test -- --run`).
   - 0 TypeScript-virhettä (`npx tsc --noEmit`).
 
+---
+
+### 2026-10-12 — Co-Pilot Live Topology Awareness, Partial Graph Resilience & Gate Staging Banners (`/save`)
+- **Co-Pilot Täysi Arkkitehtuuritietoisuus & Topologianäkyvyys ([src/app/api/chat/route.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts))**:
+  - Lisätty työtilakontekstiin reaaliaikainen kankaan yhteyksien kuvaus (`edgesSummary`), joka listaa suorat linkitykset muodossa `[Lähde] --[yhteys]--> [Kohde]`.
+  - Ohjeistettu Co-Pilot toimimaan Principal Architectina: se ei kysele passiivisia kysymyksiä, vaan analysoi suoraan solmujen kytkennät ja eriyttää selkeästi PostgreSQL:n (pääasiallinen relaatiotietokanta), Redis Cachen (välimuisti & jono) ja External Webhookit (ulkoiset rajapinnat).
+  - Korjattu `buildSecureArchitecture` -virhe, joka aiemmin nimesi automaattisesti kaikki alimman tason (`y === 500`) solmut PostgreSQL:ksi.
+- **Kankaan Eheys & Osittaisten Päivitysten Sulauttaminen (Partial Graph Merge & Position Guard)**:
+  - Korjattu Node Inspectorin *"AI Tarkista tämä node"* -toiminnosta johtunut tilanne, jossa tekoäly palautti vain tarkastellun solmun ilman koordinaatteja, mikä johti React Flow -virheeseen ja muiden solmujen katoamiseen.
+  - Sekä työtilan käsittelijä ([src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx)) että palvelinpuolen `updateArchitectureTool` sulauttavat nyt osittaiset solmupäivitykset olemassa oleviin solmuihin säilyttäen kaikki muut komponentit, koordinaatit ja yhteydet.
+  - Lisätty koordinaattisuoja (Position Guard), joka takaa kelvolliset `position.x` ja `position.y` -arvot kaikille solmuille.
+- **Automaattinen Projektin Palautus (`/playground`)**:
+  - Päivitetty [src/app/playground/page.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/playground/page.tsx) ohjaamaan automaattisesti aktiiviseen projektiin, jos käyttäjä lataa sivun uudelleen (F5) ilman URL-parametreja tyhjän näkymän sijaan.
+- **Gate-Välilehtien Huomiokehotteet & Diff-Esikatselu**:
+  - Lisätty Gate 1 (Prisma), Gate 2 (API) ja Gate 3 (UI) -välilehdille selkeä *"🤖 Tekoäly on päivittänyt tämän koodin"* -huomiopalkki, josta käyttäjä voi suoraan yhdellä klikkauksella avata Diff-esikatselun ja tallentaa muutokset levylle.
+- **Automated Verification**:
+  - `npx vitest run`: **52/52 testiä läpäisty** 12 testitiedostossa.
+  - `npx tsc --noEmit`: **0 TypeScript-virhettä**.
+
+
 
 

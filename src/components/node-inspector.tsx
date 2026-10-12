@@ -51,13 +51,15 @@ export function NodeInspector({
   };
 
   const handleAICheck = () => {
-    const prompt = `Suorita node-kohtainen tarkistus (Audit) tälle komponentille:
-- Nimi: "${label}"
-- Tyyppi/Kerros: ${selectedNode.type || "default"}
+    const prompt = `Suorita arkkitehtuurin tarkistus (Audit) komponentille "${label}" (ID: ${selectedNode.id}):
 - Teknologia: "${tech || "Ei määritelty"}"
 - Kuvaus: "${description || "Ei kuvausta"}"
+- Arkkitehtuurikerros: ${selectedNode.type || "default"}
 
-Arvioi tämä komponentti: Onko sen määrittelyssä puutteita, tietoturvariskejä tai suositeltavia lisäyksiä? Jos näet aiheelliseksi muuttaa kaaviota, kutsu update_architecture-työkalua.`;
+Arvioi tämä komponentti osana kokonaisarkkitehtuuria:
+1. Onko sen roolissa, teknologiassa tai kytkennöissä puutteita tai tietoturvariskejä?
+2. Anna konkreettiset parannussuositukset.
+(HUOM: Jos päivität kaaviota update_architecture-työkalulla, säilytä aina kaikki muut työtilan solmut ja yhteydet).`;
 
     onTriggerAICheck(prompt);
   };

@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useCallback, useTransition, useEffect } from "react";
+import { useState, useCallback, useTransition, useEffect, useMemo } from "react";
 import {
   Database,
   LayoutGrid,
   Server,
   ShieldCheck,
   Zap,
+  Sparkles,
+  ArrowRight,
+  HardDrive,
 } from "lucide-react";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
@@ -30,7 +33,11 @@ import {
   generateRealArchitecture,
   createProjectWithArchitecture,
   updateProjectTargetPath,
+  updateProjectPrismaSchema,
+  updateProjectApiCode,
+  updateProjectUiCode,
 } from "@/app/actions/project";
+import { WorkspaceContext, GateCodeUpdatePayload } from "@/types/workspace-context";
 import {
   generatePrismaSchemaForProject,
   generateApiRoutesForProject,
@@ -102,6 +109,21 @@ export function PlaygroundWorkspace({
   // Quality & Security Audit Suite States
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+
+  // Agent Live Code Notification State
+  const [agentCodeNotification, setAgentCodeNotification] = useState<{
+    gate: "gate1" | "gate2" | "gate3";
+    label: string;
+    summary: string;
+    timestamp: number;
+  } | null>(null);
+
+  // Track unwritten AI updates per gate
+  const [agentUpdatedGates, setAgentUpdatedGates] = useState<{
+    gate1?: { summary: string; timestamp: number };
+    gate2?: { summary: string; timestamp: number };
+    gate3?: { summary: string; timestamp: number };
+  }>({});
 
   // Tech Stack & .env Inference States
   const [techProfile, setTechProfile] = useState<TechStackProfile | null>(null);
@@ -202,19 +224,66 @@ export function PlaygroundWorkspace({
 
   const handleArchitectureUpdate = useCallback(
     (data: { nodes: Node[]; edges: Edge[] }) => {
-      if (data.nodes) setNodes(data.nodes);
-      if (data.edges) setEdges(data.edges);
+      if (!data || !data.nodes || data.nodes.length === 0) return;
 
-      if (selectedNode && data.nodes) {
-        const found = data.nodes.find((n) => n.id === selectedNode.id);
-        setSelectedNode(found || null);
-      }
+      setNodes((currentNodes) => {
+        // Check if this is a partial update (e.g. LLM sent 1 or 2 nodes while canvas has more)
+        const isPartialUpdate = currentNodes.length > 0 && data.nodes.length < currentNodes.length;
 
-      if (currentProjectId && data.nodes && data.edges) {
-        startTransition(async () => {
-          await updateProjectArchitecture(currentProjectId, JSON.stringify(data));
+        let resolvedNodes: Node[] = [];
+        if (isPartialUpdate) {
+          const incomingMap = new Map(data.nodes.map((n) => [n.id, n]));
+          resolvedNodes = currentNodes.map((existing) => {
+            const incoming = incomingMap.get(existing.id);
+            if (!incoming) return existing;
+            return {
+              ...existing,
+              ...incoming,
+              data: { ...existing.data, ...incoming.data },
+              position:
+                incoming.position && typeof incoming.position.x === "number" && typeof incoming.position.y === "number"
+                  ? incoming.position
+                  : existing.position,
+            };
+          });
+        } else {
+          // Full graph update: ensure every node has valid position coordinates
+          resolvedNodes = data.nodes.map((n, idx) => {
+            const existing = currentNodes.find((e) => e.id === n.id);
+            const validPosition =
+              n.position && typeof n.position.x === "number" && typeof n.position.y === "number"
+                ? n.position
+                : existing?.position || { x: 160 + (idx % 3) * 260, y: 100 + Math.floor(idx / 3) * 150 };
+
+            return {
+              ...n,
+              position: validPosition,
+            };
+          });
+        }
+
+        setEdges((currentEdges) => {
+          const resolvedEdges = data.edges && data.edges.length > 0 ? data.edges : currentEdges;
+
+          if (currentProjectId && resolvedNodes.length > 0) {
+            startTransition(async () => {
+              await updateProjectArchitecture(
+                currentProjectId,
+                JSON.stringify({ nodes: resolvedNodes, edges: resolvedEdges })
+              );
+            });
+          }
+
+          return resolvedEdges;
         });
-      }
+
+        if (selectedNode) {
+          const found = resolvedNodes.find((n) => n.id === selectedNode.id);
+          setSelectedNode(found || null);
+        }
+
+        return resolvedNodes;
+      });
     },
     [currentProjectId, selectedNode]
   );
@@ -230,6 +299,100 @@ export function PlaygroundWorkspace({
       });
     }
   };
+
+  // Bidirectional Workspace Context for Co-Pilot
+  const workspaceContext: WorkspaceContext = useMemo(() => {
+    return {
+      activeTab,
+      projectId: currentProjectId,
+      projectName: currentProjectName,
+      targetPath,
+      nodes,
+      edges,
+      gateStatus: {
+        hasSchema: !!prismaSchema,
+        hasApi: !!apiCode,
+        hasUi: !!uiCode,
+        schemaPreview: prismaSchema ? prismaSchema.slice(0, 1500) : undefined,
+        apiPreview: apiCode ? apiCode.slice(0, 1500) : undefined,
+        uiPreview: uiCode ? uiCode.slice(0, 1500) : undefined,
+      },
+      latestAudit: auditReport
+        ? {
+            type: auditReport.type,
+            grade: auditReport.grade,
+            score: auditReport.score,
+            title: auditReport.title,
+            summary: auditReport.summary,
+            criticalFindings: auditReport.findings
+              .filter((f) => f.type === "critical" || f.type === "warning")
+              .map((f) => ({
+                title: f.title,
+                detail: f.detail,
+                recommendation: f.recommendation,
+              })),
+          }
+        : null,
+    };
+  }, [
+    activeTab,
+    currentProjectId,
+    currentProjectName,
+    targetPath,
+    nodes,
+    edges,
+    prismaSchema,
+    apiCode,
+    uiCode,
+    auditReport,
+  ]);
+
+  // Handle live code update triggered by Co-Pilot
+  const handleAgentCodeUpdate = useCallback(
+    (data: GateCodeUpdatePayload) => {
+      if (data.gate === "gate1") {
+        setPrismaSchema(data.code);
+        setSavedGates((prev) => ({ ...prev, gate1: true }));
+        if (currentProjectId) {
+          updateProjectPrismaSchema(currentProjectId, data.code).catch(console.error);
+        }
+      } else if (data.gate === "gate2") {
+        setApiCode(data.code);
+        setSavedGates((prev) => ({ ...prev, gate2: true }));
+        if (currentProjectId) {
+          updateProjectApiCode(currentProjectId, data.code).catch(console.error);
+        }
+      } else if (data.gate === "gate3") {
+        setUiCode(data.code);
+        setSavedGates((prev) => ({ ...prev, gate3: true }));
+        if (currentProjectId) {
+          updateProjectUiCode(currentProjectId, data.code).catch(console.error);
+        }
+      }
+
+      const gateLabels: Record<string, string> = {
+        gate1: "Gate 1 (Prisma)",
+        gate2: "Gate 2 (API)",
+        gate3: "Gate 3 (UI)",
+      };
+
+      setAgentCodeNotification({
+        gate: data.gate,
+        label: gateLabels[data.gate] || data.gate,
+        summary: data.summary || "Agentti päivitti koodin tuotantovalmiiksi.",
+        timestamp: Date.now(),
+      });
+
+      setAgentUpdatedGates((prev) => ({
+        ...prev,
+        [data.gate]: {
+          summary: data.summary || "Agentti päivitti koodin tuotantovalmiiksi.",
+          timestamp: Date.now(),
+        },
+      }));
+    },
+    [currentProjectId]
+  );
 
   const handleSaveToDb = () => {
     if (!currentProjectId) return;
@@ -595,10 +758,25 @@ export function PlaygroundWorkspace({
 
         if (diffDialog.relativePath === "prisma/schema.prisma") {
           setSavedGates((prev) => ({ ...prev, gate1: true }));
+          setAgentUpdatedGates((prev) => {
+            const next = { ...prev };
+            delete next.gate1;
+            return next;
+          });
         } else if (diffDialog.relativePath === "src/app/api/endpoints/route.ts") {
           setSavedGates((prev) => ({ ...prev, gate2: true }));
+          setAgentUpdatedGates((prev) => {
+            const next = { ...prev };
+            delete next.gate2;
+            return next;
+          });
         } else if (diffDialog.relativePath === "src/components/features/dashboard.tsx") {
           setSavedGates((prev) => ({ ...prev, gate3: true }));
+          setAgentUpdatedGates((prev) => {
+            const next = { ...prev };
+            delete next.gate3;
+            return next;
+          });
         }
       } else {
         setDiskMessage({
@@ -683,6 +861,59 @@ export function PlaygroundWorkspace({
         onSave={currentProjectId ? handleSaveToDb : handleCreateAndSaveProject}
       />
 
+      {/* Agent Live Code Update Notification Banner */}
+      {agentCodeNotification && (
+        <div className="mx-4 mt-3 mb-1 p-3 bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-transparent border border-purple-500/30 rounded-xl flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <span>⚡ Co-Pilot päivitti koodin:</span>
+                <span className="text-purple-400 font-bold">{agentCodeNotification.label}</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{agentCodeNotification.summary}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {((agentCodeNotification.gate === "gate1" && activeTab === "schema") ||
+              (agentCodeNotification.gate === "gate2" && activeTab === "api") ||
+              (agentCodeNotification.gate === "gate3" && activeTab === "ui")) ? (
+              <button
+                onClick={() => {
+                  if (agentCodeNotification.gate === "gate1") triggerWritePrismaToDiskConfirmation();
+                  else if (agentCodeNotification.gate === "gate2") triggerWriteApiToDiskConfirmation();
+                  else if (agentCodeNotification.gate === "gate3") triggerWriteUiToDiskConfirmation();
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <HardDrive className="h-3.5 w-3.5" />
+                <span>Tallenna muutokset levylle</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (agentCodeNotification.gate === "gate1") setActiveTab("schema");
+                  else if (agentCodeNotification.gate === "gate2") setActiveTab("api");
+                  else if (agentCodeNotification.gate === "gate3") setActiveTab("ui");
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center gap-1 shadow-sm transition-all"
+              >
+                <span>Siirry katsomaan</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              onClick={() => setAgentCodeNotification(null)}
+              className="text-xs text-muted-foreground hover:text-foreground px-2 py-1"
+            >
+              Sulje
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Workspace Layout */}
       <div className="flex-1 min-h-0 p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left/Main Area based on activeTab */}
@@ -757,8 +988,16 @@ export function PlaygroundWorkspace({
                 isWritingToDisk={isWritingToDisk}
                 diskMessage={diskMessage}
                 techProfile={techProfile}
+                agentUpdate={agentUpdatedGates.gate1}
                 onGenerateSchema={triggerGenerateSchemaConfirmation}
                 onWriteToDisk={triggerWritePrismaToDiskConfirmation}
+                onDismissAgentUpdate={() =>
+                  setAgentUpdatedGates((prev) => {
+                    const next = { ...prev };
+                    delete next.gate1;
+                    return next;
+                  })
+                }
               />
             ) : activeTab === "api" ? (
               <Gate2ApiTab
@@ -766,8 +1005,16 @@ export function PlaygroundWorkspace({
                 isGeneratingApi={isGeneratingApi}
                 isWritingToDisk={isWritingToDisk}
                 diskMessage={diskMessage}
+                agentUpdate={agentUpdatedGates.gate2}
                 onGenerateApi={triggerGenerateApiConfirmation}
                 onWriteToDisk={triggerWriteApiToDiskConfirmation}
+                onDismissAgentUpdate={() =>
+                  setAgentUpdatedGates((prev) => {
+                    const next = { ...prev };
+                    delete next.gate2;
+                    return next;
+                  })
+                }
               />
             ) : (
               <Gate3UiTab
@@ -775,8 +1022,16 @@ export function PlaygroundWorkspace({
                 isGeneratingUi={isGeneratingUi}
                 isWritingToDisk={isWritingToDisk}
                 diskMessage={diskMessage}
+                agentUpdate={agentUpdatedGates.gate3}
                 onGenerateUi={triggerGenerateUiConfirmation}
                 onWriteToDisk={triggerWriteUiToDiskConfirmation}
+                onDismissAgentUpdate={() =>
+                  setAgentUpdatedGates((prev) => {
+                    const next = { ...prev };
+                    delete next.gate3;
+                    return next;
+                  })
+                }
               />
             )}
           </div>
@@ -798,6 +1053,8 @@ export function PlaygroundWorkspace({
             externalPrompt={externalPrompt}
             onClearExternalPrompt={() => setExternalPrompt(null)}
             onArchitectureUpdate={handleArchitectureUpdate}
+            workspaceContext={workspaceContext}
+            onCodeUpdate={handleAgentCodeUpdate}
           />
         </div>
       </div>

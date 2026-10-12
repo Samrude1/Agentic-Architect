@@ -167,30 +167,7 @@ ${report.findings
   const handleSendToAgent = () => {
     if (!report) return;
 
-    const relevantFindings = report.findings.filter(
-      (f) => f.type === "critical" || f.type === "warning"
-    );
-    const findingsList = relevantFindings.length > 0 ? relevantFindings : report.findings;
-    const findingsSummary = findingsList
-      .map(
-        (f, i) =>
-          `${i + 1}. [${f.type.toUpperCase()}] ${f.title}\n   - Kuvaus: ${f.detail}\n   - Suositus: ${f.recommendation}`
-      )
-      .join("\n\n");
-
-    const promptText = `Ohessa on järjestelmän tuore laadunvarmistus- ja auditointiraportti:
-Otsikko: ${report.title}
-Terveysindeksi: ${report.score} / 100 (Arvosana ${report.grade})
-Tiivistelmä: ${report.summary}
-
-Tärkeimmät havainnot ja toimenpidesuositukset:
-${findingsSummary}
-
-Toimi kokeneena Principal Architect -tekoälynä:
-1. Analysoi nämä havainnot ja selitä minulle selkokielellä, miksi ne ovat kriittisiä ja miten ne ratkaistaan.
-2. Esitä selkeä, vaiheittainen korjaussuunnitelma (Action Plan).
-3. Päivitä arkkitehtuurikaavio heti update_architecture-työkalulla heijastamaan korjattua rakennetta (esim. lisätään Auth Service, PostgreSQL tuotannossa ja asianmukaiset yhteydet).
-4. Pyydä minulta lopuksi selkeä hyväksyntä suunnitelmalle ennen seuraaviin vaiheisiin (Gate 1 Prisma, Gate 2 API, Gate 3 UI) siirtymistä.`;
+    const promptText = `🛡️ Suorita tietoturvakorjaus: Päivitä arkkitehtuurikaavio ja koodit (Gate 1 Prisma & Gate 2 API) vastaamaan raportin suosituksia.`;
 
     onSendToAgent?.(promptText);
     onOpenChange(false);
