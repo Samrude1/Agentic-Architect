@@ -41,6 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 docs/project-vision.md
+docs/future-project-vision.md
 /src/generated/prisma
 .audit-cache
 .agentic-backup
