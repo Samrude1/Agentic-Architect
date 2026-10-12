@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **React Flow Position Guard**: Added automatic position coordinate resolution ensuring nodes never throw runtime errors due to undefined positions.
 
 ### Changed
-- **Documentation Center (`docs/`)**: Reorganized strategic documentation with numeric prefixes (`01-executive-brief.md`, `02-agentic-suite-overview.md`, `03-executive-report-fullstack-template.md`), added `docs/README.md` reading guide and updated cross-references in root `README.md`.
+- **Documentation Center (`docs/`)**: Restructured documentation into a 3-tier hierarchy: Master Executive Brief (`01-master-brief-agentic-suite.md`), Part 1 Development System (`02-part1-agentic-development-system.md`), and Part 2 Agentic Architect Platform (`03-part2-agentic-architect-platform.md`), with updated `docs/README.md` reading guide and root `README.md` cross-links.
 
 ---
 

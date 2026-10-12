@@ -1,33 +1,39 @@
-# 📚 Projektin Dokumentaatiokeskus (Documentation Center)
+# 📚 Agentic Engineering Suite — Dokumentaatiokeskus
 
-Tämä kansio sisältää **Agentic Architect** -kokonaisuuden strategiset, arkkitehtoniset ja tekniset dokumentit. Tiedostot on numeroitu suositellussa lukujärjestyksessä.
+Tämä kansio sisältää **Agentic Engineering Suite** -kokonaisuuden strategiset, arkkitehtoniset ja tekniset dokumentit. 
+
+Kokonaisuus koostuu kahdesta toisiaan täydentävästä osasta:
+1. **Osa 1 (Kehitysmoottori & Metodologia)**: Ammattilaisen kognitiivinen kehityskehys, 18 taitoa ja muistiprotokolla.
+2. **Osa 2 (Visuaalinen Tuotealusta)**: Moottorin avulla rakennettu *Agentic Architect* -työkalu (4-tasoinen kangas, 3 Data Gatea ja turvalevykirjoitus).
+
+Tiedostot on numeroitu loogisessa lukujärjestyksessä **makrotasolta (johdon visio) mikrotasolle (tekninen syväsukellus)**:
 
 ---
 
 ## 🧭 Suositeltu Lukujärjestys
 
-| Nro | Tiedosto | Kohdeyleisö | Lukuaika | Kuvaus & Pääteemat |
-| :---: | :--- | :--- | :---: | :--- |
-| **01** | [**01-executive-brief.md**](./01-executive-brief.md) | Johto, Tuoteomistajat, Arkkitehdit | ~5 min | **Aloita tästä.** Liiketoiminnallinen arvolupaus, ongelman määrittely ("vibe codingin" riskit), 2 pilaria, tuottavuusloikka ja visuaalisen alustan konsepti. |
-| **02** | [**02-agentic-suite-overview.md**](./02-agentic-suite-overview.md) | Pääarkkitehdit, Tiiminvetäjät, Kehittäjät | ~10 min | **Kokonaisarkkitehtuuri.** Kahden pilarin symbioosi, 4-tasoinen React Flow -kangas, Co-Pilot AI -työkalut, 3 Data Gatea ja turvallinen sandboxed-levykirjoitus. |
-| **03** | [**03-executive-report-fullstack-template.md**](./03-executive-report-fullstack-template.md) | Fullstack-kehittäjät, DevOps, Tietoturva | ~15 min | **Tekninen syväsukellus.** 18 agenttityökalun spesifikaatio, kognitiivinen tilanhallinta, OWASP Top 10 -tietoturva-auditointi (Grade A: 95/100) ja benchmarkit. |
-| 📁 | [**adr/**](./adr/README.md) | Ohjelmistoarkkitehdit & Kehittäjät | — | **Arkkitehtuuripäätökset (ADR).** Formalisoidut teknologiavalinnat, perusteet ja historialliset ratkaisut (esim. Next.js 16, React 19, Prisma v7). |
+| Nro | Tiedosto | Asiakirjan Tyyppi | Kohdeyleisö | Kuvaus & Pääteemat |
+| :---: | :--- | :--- | :--- | :--- |
+| **01** | [**01-master-brief-agentic-suite.md**](./01-master-brief-agentic-suite.md) | **Master Executive Brief** | CEO, CTO, Sijoittajat, Päättäjät | **Kokoava pääteos (Part 1 + Part 2).**<br>• Mikä on Agentic Engineering Suite?<br>• "Vibe codingin" riskit vs. deterministinen arkkitehtuuri.<br>• Miten kehitysmoottori (Osa 1) ja visuaalinen studio (Osa 2) toimivat yhdessä.<br>• Liiketoimintahyödyt, ROI, -70 % token-säästöt ja tiekartta. |
+| **02** | [**02-part1-agentic-development-system.md**](./02-part1-agentic-development-system.md) | **Tekninen Raportti: Osa 1 (Moottori)** | CTO, Lead Architect, Kehittäjät | **Kehitysjärjestelmä & Metodologia.**<br>• `.agents/`-arkkitehtuuri ja tilanhallinta.<br>• "Context Rot" -ongelman ratkaisu (`/resume` & `/save`).<br>• 18 taitoa (`.agents/skills/`), CLI ja autonominen laatusykli.<br>• Shift-Left OWASP -tietoturvastandardit. |
+| **03** | [**03-part2-agentic-architect-platform.md**](./03-part2-agentic-architect-platform.md) | **Tekninen Raportti: Osa 2 (Tuote)** | CTO, Tuotejohto, Arkkitehdit | **Agentic Architect -tuotealusta.**<br>• 4-tasoinen interaktiivinen React Flow -kangas.<br>• 3 Data Gatea (Prisma Schema, Next.js API, React 19 UI).<br>• Live Workspace Bridge & topologiatietoisuus.<br>• Diff-esikatselu ja turvallinen sandboxed-levykirjoitus. |
+| 📁 | [**adr/**](./adr/README.md) | **Arkkitehtuuripäätökset (ADR)** | Arkkitehdit & Insinöörit | Formalisoidut teknologiavalinnat ja perustelut (esim. Next.js 16, React 19, Prisma v7). |
 
 ---
 
 ## 🎯 Lukusuositus Roolin Mukaan
 
 ### 👔 Johdolle, Asiakkaalle & Päättäjille (Executive & Business)
-1. Lue [**01-executive-brief.md**](./01-executive-brief.md) saadaksesi tiiviin yhteenvedon järjestelmän liiketoimintahyödyistä ja ROI:sta.
+1. Aloita ja lue [**01-master-brief-agentic-suite.md**](./01-master-brief-agentic-suite.md). Se antaa täydellisen 10 minuutin tiivistelmän tuotteen strategiasta, ROI:sta ja liiketoiminta-arvosta.
 
 ### 🏛️ Ohjelmistoarkkitehdeille & Tiiminvetäjille (Architects & Leads)
-1. Lue [**01-executive-brief.md**](./01-executive-brief.md) (yleiskuva).
-2. Siirry dokumenttiin [**02-agentic-suite-overview.md**](./02-agentic-suite-overview.md) tutustuaksesi tarkkaan arkkitehtuurimalliin ja datavirtoihin.
-3. Katselmoi arkkitehtuuripäätökset kansiosta [**adr/**](./adr/README.md).
+1. Lue [**01-master-brief-agentic-suite.md**](./01-master-brief-agentic-suite.md) saadaksesi kokonaiskuvan kahden pilarin symbioosista.
+2. Siirry dokumenttiin [**02-part1-agentic-development-system.md**](./02-part1-agentic-development-system.md) tutustuaksesi kehitysjärjestelmän arkkitehtuuriin ja muistiprotokollaan.
+3. Katselmoi tuotearkkitehtuuri dokumentista [**03-part2-agentic-architect-platform.md**](./03-part2-agentic-architect-platform.md) sekä arkkitehtuuripäätökset kansiosta [**adr/**](./adr/README.md).
 
 ### 💻 Koodaajille & Tietoturva-auditoijille (Engineers & SecOps)
-1. Aloita dokumentista [**02-agentic-suite-overview.md**](./02-agentic-suite-overview.md).
-2. Tutki dokumentti [**03-executive-report-fullstack-template.md**](./03-executive-report-fullstack-template.md) (työkalut, testikattavuus ja tietoturvakontrollit).
+1. Lue [**02-part1-agentic-development-system.md**](./02-part1-agentic-development-system.md) (työkalut, testikattavuus ja laatuportit).
+2. Tutki [**03-part2-agentic-architect-platform.md**](./03-part2-agentic-architect-platform.md) (kankaan koodirakenne, Zod-skeemat ja levykirjoitus).
 3. Tarkista tekniset toteutussäännöt ja agenttikomennot juuren [README.md](../README.md) -tiedostosta.
 
 ---

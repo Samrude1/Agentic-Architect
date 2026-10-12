@@ -1,4 +1,4 @@
-# Agentic Architect — Johdon katsaus
+# Agentic Architect — Tuotealustan ja Visuaalisen Kankaan Tekninen Raportti
 
 [![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20Aktiivinen%20kehitys-orange.svg)](https://github.com/Samrude1/Agentic-Architect)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
@@ -9,12 +9,12 @@
 
 > **Tekoälyavusteinen arkkitehtuuri- ja koodinluontityökalu, joka muuttaa liiketoimintavaatimuksen minuuteissa visuaaliseksi järjestelmäarkkitehtuuriksi ja siitä tarkastettavaksi, tuotantotyyliseksi koodiksi — niin, että ihminen hyväksyy jokaisen muutoksen ennen kuin mikään koskee levyyn.**
 
-> 🏛️ **AGENTIC ENGINEERING SUITE — OSA II (2/2): AGENTIC ARCHITECT (TUOTEALUSTA & VISUAALINEN KANGAS)**  
-> **Johdon Katsaus ja Tekninen Syväsukellus (CEO / CTO / Tuotejohto)**  
-> Tämä raportti on itsenäinen erikoisosa kolmiosaisessa julkaisusarjassa:  
-> • *Pääteos (Overview):* Agentic Engineering Suite — Strateginen ja Tekninen Järjestelmäkatsaus  
-> • *Osa I (Kehitysjärjestelmä):* Agentic Fullstack Development System — Insinööristandardit & Kognitiivinen Hallinta  
-> • *Osa II (Tämä raportti):* Agentic Architect — Visuaalinen Kangas & Deterministiset Laatuportit
+> 🏛️ **AGENTIC ENGINEERING SUITE — OSA 2: AGENTIC ARCHITECT (TUOTEALUSTA & VISUAALINEN KANGAS)**  
+> **Tuotearkkitehtuurin ja Teknisen Toteutuksen Raportti (CTO / Tuotejohto / Lead Architect)**  
+> Tämä raportti on itsenäinen tekninen erikoisosa kolmiosaisessa julkaisusarjassa:  
+> • *Pääteos (Overview):* [01-master-brief-agentic-suite.md](./01-master-brief-agentic-suite.md) — Master Executive Brief  
+> • *Osa 1 (Kehitysmoottori):* [02-part1-agentic-development-system.md](./02-part1-agentic-development-system.md) — Kehitysjärjestelmä & Insinööristandardit  
+> • *Osa 2 (Tämä raportti):* Agentic Architect — Visuaalinen Kangas, 3x Data Gates & Deterministinen Levykirjoitus
 
 📎 **Lähdekoodi:** [github.com/Samrude1/Agentic-Architect](https://github.com/Samrude1/Agentic-Architect) &nbsp;·&nbsp; **Arkkitehtuuri & toteutus:** Sami Rautanen ([samirautanen.fi](https://samirautanen.fi)) &nbsp;·&nbsp; **Lisenssi:** MIT
 
@@ -308,8 +308,8 @@ Nykyinen MVP kattaa arviolta **65–70 %** pitkän aikavälin visiosta (Tuotevis
 | Resurssi                      | Kuvaus / Sijainti                                                      |
 | :---------------------------- | :--------------------------------------------------------------------- |
 | Dokumentaatiokeskus (Hakemisto) | [docs/README.md](./README.md) (Suositeltu lukujärjestys & roolioppaat) |
-| Järjestelmäkatsaus            | [02-agentic-suite-overview.md](./02-agentic-suite-overview.md) (Strateginen päädokumentti) |
-| Insinööristandardit & Raportti | [03-executive-report-fullstack-template.md](./03-executive-report-fullstack-template.md) (Tekninen syväsukellus) |
+| Master Executive Brief        | [01-master-brief-agentic-suite.md](./01-master-brief-agentic-suite.md) (Strateginen päädokumentti: Part 1 + Part 2) |
+| Kehitysjärjestelmä & Metodologia | [02-part1-agentic-development-system.md](./02-part1-agentic-development-system.md) (Osa 1: Insinööristandardit & moottori) |
 | Arkkitehtuuripäätökset (ADR)  | [docs/adr/](./adr/README.md) (ADR-0001: Teknologiapinovalinta)         |
 | Tietoturva-auditointi         | [.agents/blueprint/SECURITY_AUDIT.md](../.agents/blueprint/SECURITY_AUDIT.md) (OWASP Top 10 -tarkastus) |
 | Lähdekoodi ja tekninen README | [github.com/Samrude1/Agentic-Architect](https://github.com/Samrude1/Agentic-Architect) |
@@ -322,14 +322,14 @@ Nykyinen MVP kattaa arviolta **65–70 %** pitkän aikavälin visiosta (Tuotevis
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas [TÄMÄ DOKUMENTTI] │
-│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus                │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus                     │
+│  📜 01: Agentic Engineering Suite — Master Executive Brief                             │
 │     Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 03: Agentic Fullstack Development System — Insinööristandardit                     │
+│  📘 02: Part 1 — Agentic Fullstack Development System (Kehitysmoottori)                │
 │     18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)│
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  📗 03: Part 2 — Agentic Architect [TÄMÄ DOKUMENTTI]                                   │
+│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

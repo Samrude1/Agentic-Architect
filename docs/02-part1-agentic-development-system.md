@@ -6,12 +6,12 @@
 [![Efficiency: Token Optimization](https://img.shields.io/badge/LLM%20Cost-70%25%20Token%20Reduction-brightgreen.svg)](#22-kontekstin-hallinta-ja-context-rot--ongelman-ratkaisu)
 [![Stack: Framework Agnostic](https://img.shields.io/badge/Stack-Framework%20Agnostic-orange.svg)](#26-teknologiapino-ja-framework-agnostisuus)
 
-> 🏛️ **AGENTIC ENGINEERING SUITE — OSA I (1/2): KEHITYSJÄRJESTELMÄ & METODOLOGIA**  
+> 🏛️ **AGENTIC ENGINEERING SUITE — OSA 1: KEHITYSJÄRJESTELMÄ & METODOLOGIA**  
 > **Tekninen Arkkitehtuuriraportti (CTO / Lead Architect -taso)**  
-> Tämä raportti on itsenäinen erikoisosa kolmiosaisessa julkaisusarjassa:  
-> • *Pääteos (Overview):* Agentic Engineering Suite — Strateginen ja Tekninen Järjestelmäkatsaus  
-> • *Osa I (Tämä raportti):* Agentic Fullstack Development System — Insinööristandardit & Kognitiivinen Hallinta  
-> • *Osa II (Tuotealusta):* Agentic Architect — Visuaalinen Kangas & Deterministiset Laatuportit
+> Tämä raportti on itsenäinen tekninen erikoisosa kolmiosaisessa julkaisusarjassa:  
+> • *Pääteos (Overview):* [01-master-brief-agentic-suite.md](./01-master-brief-agentic-suite.md) — Master Executive Brief  
+> • *Osa 1 (Tämä raportti):* Agentic Fullstack Development System — Insinööristandardit & Kognitiivinen Hallinta  
+> • *Osa 2 (Tuotealusta):* [03-part2-agentic-architect-platform.md](./03-part2-agentic-architect-platform.md) — Visuaalinen Kangas & Deterministiset Laatuportit
 
 ---
 
@@ -271,22 +271,23 @@ Järjestelmä tarjoaa suoran pohjan tuotantokäyttöön:
 ## 🏛️ Dokumentaatiosarjan Kokonaisuus
 
 * 📚 **[docs/README.md](./README.md)** — *Dokumentaatiokeskus (Lukujärjestys & roolioppaat)*
-* 📗 **[01-executive-brief.md](./01-executive-brief.md)** — *OSA II: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas*
-* 📜 **[02-agentic-suite-overview.md](./02-agentic-suite-overview.md)** — *Päädokumentti: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus*
+* 📜 **[01-master-brief-agentic-suite.md](./01-master-brief-agentic-suite.md)** — *Pääteos: Agentic Engineering Suite — Master Executive Brief*
+* 📘 **[02-part1-agentic-development-system.md](./02-part1-agentic-development-system.md)** — *OSA 1: Agentic Fullstack Development System — Insinööristandardit [TÄMÄ DOKUMENTTI]*
+* 📗 **[03-part2-agentic-architect-platform.md](./03-part2-agentic-architect-platform.md)** — *OSA 2: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas*
 * 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR)*
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas              │
-│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus                     │
+│  📜 01: Agentic Engineering Suite — Master Executive Brief                             │
 │     Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 03: Agentic Fullstack Development System — Insinööristandardit [TÄMÄ DOKUMENTTI]   │
+│  📘 02: Part 1 — Agentic Fullstack Development System [TÄMÄ DOKUMENTTI]                │
 │     18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)│
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  📗 03: Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                  │
+│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

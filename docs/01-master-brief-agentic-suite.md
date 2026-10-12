@@ -7,10 +7,11 @@
 [![Efficiency](https://img.shields.io/badge/Token--optimointi--70%25%20Context%20Rot%20Eliminated-blue.svg)](#12-yksikköekonomia-ja-token-optimointi)
 [![Stack](https://img.shields.io/badge/Pino-Next.js%2016%20%7C%20React%2019%20%7C%20TypeScript%20Strict-black.svg)](https://nextjs.org/)
 
-> 🏛️ **Agentic Engineering Suite — Master Specification (Pääteos)**  
-> Tämä strateginen järjestelmäkatsaus toimii emo- ja yleiskatsausdokumenttina kahdelle itsenäiselle tekniselle erikoisraportille:  
-> • **Osa I (1/2):** *Agentic Fullstack Development System — Insinööristandardit & Kognitiivinen Hallinta*  
-> • **Osa II (2/2):** *Agentic Architect — Visuaalinen Kangas & Deterministiset Laatuportit*
+> 🏛️ **Agentic Engineering Suite — Master Executive Brief (Kokoava Pääteos)**  
+> Tämä strateginen johdon katsaus antaa kokonaiskuvan tekoälyavusteisen ohjelmistotuotannon kokonaisuudesta (Part 1 + Part 2).  
+> Se toimii emo- ja yleiskatsausdokumenttina kahdelle itsenäiselle tekniselle erikoisraportille:  
+> • **Osa 1 (Kehitysjärjestelmä & Metodologia):** *[02-part1-agentic-development-system.md](./02-part1-agentic-development-system.md)*  
+> • **Osa 2 (Visuaalinen Tuotealusta):** *[03-part2-agentic-architect-platform.md](./03-part2-agentic-architect-platform.md)*
 
 ---
 
@@ -205,23 +206,23 @@ Kokonaisuus on rakennettu modernille, tuotantotestatulle web-arkkitehtuurille:
 
 ## 7. Syventävä Dokumentaatio
 
-Kokonaisuuden yksityiskohtaiset tekniset ja toiminnalliset raportit:
+Kokonaisuuden yksityiskohtaiset tekniset raportit:
 
-* 📗 **[01-executive-brief.md](./01-executive-brief.md)** — *OSA II: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas* (Kohderyhmä: Johdon tiivistelmä, tuotejohto, sijoittajat)
-* 📘 **[03-executive-report-fullstack-template.md](./03-executive-report-fullstack-template.md)** — *OSA I: Agentic Fullstack Development System — Insinööristandardit* (Kohderyhmä: CTO, arkkitehdit, tietoturva)
+* 📘 **[02-part1-agentic-development-system.md](./02-part1-agentic-development-system.md)** — *OSA 1: Agentic Fullstack Development System — Insinööristandardit & Metodologia* (Kohderyhmä: CTO, arkkitehdit, tietoturva)
+* 📗 **[03-part2-agentic-architect-platform.md](./03-part2-agentic-architect-platform.md)** — *OSA 2: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas* (Kohderyhmä: CTO, tuotejohto, kehittäjät)
 * 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR) ja teknologiavalinnat*
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — DOKUMENTAATIOSARJAN KOKONAISUUS                       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus (Tämä dokumentti)   │
+│  📜 01: Agentic Engineering Suite — Master Executive Brief [TÄMÄ DOKUMENTTI]           │
 │     Kohderyhmä: CEO, CTO, Hallitus · Yksikköekonomia, laatuportit, arvolupaus          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 03: Agentic Fullstack Development System — Insinööristandardit                     │
+│  📘 02: Part 1 — Agentic Fullstack Development System (Kehitysmoottori)                │
 │     Kohderyhmä: CTO, Lead Architect · 18 agenttityökalua, muistiprotokolla, laatusykli │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas              │
+│  📗 03: Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                  │
 │     Kohderyhmä: CTO, Tuotejohto · 4-tasoinen kangas, 3x data gates, turvalevykirjoitus │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │  🛡️ LIITTEET: Järjestelmätason Tietoturva-auditointi (OWASP Top 10) & ADR-kirjasto     │

@@ -15,9 +15,9 @@
 ### 📑 Executive & Strategic Documentation
 > Katso koko dokumentaation lukujärjestys ja roolikohtaiset oppaat: **[📚 docs/README.md](docs/README.md)**
 
-- 📗 **[01 — Executive Brief (FI)](docs/01-executive-brief.md)** — Tiivistelmä johdolle: 2 pilaria, ROI, ongelman määrittely ja visuaalinen tuotealusta.
-- 🏛️ **[02 — Agentic Suite Overview (FI)](docs/02-agentic-suite-overview.md)** — Kokoava strateginen arkkitehtuuridokumentti: järjestelmän kokonaiskuva ja työnkulut.
-- 📘 **[03 — Development System Report (FI)](docs/03-executive-report-fullstack-template.md)** — Tekninen raportti: 18 agenttityökalua, tilanhallinta, OWASP Top 10 ja benchmarkit.
+- 🏛️ **[01 — Master Executive Brief (FI)](docs/01-master-brief-agentic-suite.md)** — Kokoava strateginen pääteos: Agentic Engineering Suite (Part 1 + Part 2), arvolupaus, ROI ja tiekartta.
+- 📘 **[02 — Part 1: Development System Report (FI)](docs/02-part1-agentic-development-system.md)** — Tekninen raportti: Kognitiivinen kehitysmoottori, 18 agenttityökalua, muistiprotokolla ja OWASP Shift-Left.
+- 📗 **[03 — Part 2: Agentic Architect Platform Report (FI)](docs/03-part2-agentic-architect-platform.md)** — Tekninen raportti: Visuaalinen 4-tasoinen kangas, 3 Data Gatea ja turvallinen levykirjoitus.
 - 🛡️ **[Security Audit Report](.agents/blueprint/SECURITY_AUDIT.md)** — OWASP Top 10 compliance (Grade A: 95/100), sandbox path containment ja nolla CVE-haavoittuvuutta.
 
 ---
