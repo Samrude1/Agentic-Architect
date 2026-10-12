@@ -36,6 +36,8 @@ export interface WorkspaceHeaderProps {
   techProfile: TechStackProfile | null;
   isPending: boolean;
   savedSuccess: boolean;
+  isOptimizing?: boolean;
+  isAuditingSecurity?: boolean;
   onExportClick: () => void;
   onSecurityCheck: () => void;
   onOptimizationCheck: () => void;
@@ -52,6 +54,8 @@ export function WorkspaceHeader({
   techProfile,
   isPending,
   savedSuccess,
+  isOptimizing = false,
+  isAuditingSecurity = false,
   onExportClick,
   onSecurityCheck,
   onOptimizationCheck,
@@ -192,11 +196,18 @@ export function WorkspaceHeader({
                     setShowToolsMenu(false);
                     onSecurityCheck();
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-left"
+                  disabled={isAuditingSecurity}
+                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-left disabled:opacity-60"
                 >
-                  <ShieldCheck className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  {isAuditingSecurity ? (
+                    <Loader2 className="h-3.5 w-3.5 text-purple-500 animate-spin shrink-0" />
+                  ) : (
+                    <ShieldCheck className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  )}
                   <div>
-                    <div className="font-semibold text-foreground">Security Check</div>
+                    <div className="font-semibold text-foreground">
+                      {isAuditingSecurity ? "Tarkistetaan..." : "Security Check"}
+                    </div>
                     <div className="text-[10px] text-muted-foreground">OWASP Top 10 tarkastus</div>
                   </div>
                 </button>
@@ -206,11 +217,18 @@ export function WorkspaceHeader({
                     setShowToolsMenu(false);
                     onOptimizationCheck();
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-left"
+                  disabled={isOptimizing}
+                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-left disabled:opacity-60"
                 >
-                  <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                  {isOptimizing ? (
+                    <Loader2 className="h-3.5 w-3.5 text-amber-500 animate-spin shrink-0" />
+                  ) : (
+                    <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                  )}
                   <div>
-                    <div className="font-semibold text-foreground">Optimize Code</div>
+                    <div className="font-semibold text-foreground">
+                      {isOptimizing ? "Optimoidaan..." : "Optimize Code"}
+                    </div>
                     <div className="text-[10px] text-muted-foreground">Suorituskyky & Scorecard</div>
                   </div>
                 </button>
@@ -248,24 +266,46 @@ export function WorkspaceHeader({
 
           <Button
             onClick={onSecurityCheck}
+            disabled={isAuditingSecurity}
             variant="outline"
             size="sm"
-            className="h-8 px-2 xl:px-2.5 border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 font-medium"
+            className={`h-8 px-2 xl:px-2.5 border-purple-500/30 font-medium transition-all ${
+              isAuditingSecurity
+                ? "bg-purple-500/15 text-purple-600 dark:text-purple-400 animate-pulse border-purple-500/60"
+                : "text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
+            }`}
             title="OWASP Tietoturvatarkastus"
           >
-            <ShieldCheck className="h-3.5 w-3.5 text-purple-500" />
-            <span className="hidden xl:inline ml-1.5">Security</span>
+            {isAuditingSecurity ? (
+              <Loader2 className="h-3.5 w-3.5 text-purple-500 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-3.5 w-3.5 text-purple-500" />
+            )}
+            <span className="hidden xl:inline ml-1.5">
+              {isAuditingSecurity ? "Tarkistetaan..." : "Security"}
+            </span>
           </Button>
 
           <Button
             onClick={onOptimizationCheck}
+            disabled={isOptimizing}
             variant="outline"
             size="sm"
-            className="h-8 px-2 xl:px-2.5 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-medium"
+            className={`h-8 px-2 xl:px-2.5 border-amber-500/30 font-medium transition-all ${
+              isOptimizing
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 animate-pulse border-amber-500/60 shadow-sm shadow-amber-500/20"
+                : "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+            }`}
             title="Koodin optimointi & Scorecard"
           >
-            <Zap className="h-3.5 w-3.5 text-amber-500" />
-            <span className="hidden xl:inline ml-1.5">Optimize</span>
+            {isOptimizing ? (
+              <Loader2 className="h-3.5 w-3.5 text-amber-500 animate-spin" />
+            ) : (
+              <Zap className="h-3.5 w-3.5 text-amber-500" />
+            )}
+            <span className="hidden xl:inline ml-1.5">
+              {isOptimizing ? "Optimoidaan..." : "Optimize"}
+            </span>
           </Button>
 
           <Button

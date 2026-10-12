@@ -5,7 +5,7 @@ This document tracks verified implementation progress, active feature matrix, te
 ---
 
 ## 1. Executive Status
-- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Smart Tech Stack & .env Inference, Confirmation Dialogs, Live Workspace Bridge (Ihminen ⟷ Agentti) & Automated Testing Suite (52 Vitest tests) Complete
+- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Codebase Optimization Engine (Bloated Files > 1k lines & Spaghetti Detection), Smart Tech Stack & .env Inference, Confirmation Dialogs, Live Workspace Bridge (Ihminen ⟷ Agentti) & Automated Testing Suite (54 Vitest tests) Complete
 - **Estimated Completion**: 100% (Production Ready)
 - **Last Updated**: 2026-10-12
 - **Key Focus**:
@@ -19,10 +19,10 @@ This document tracks verified implementation progress, active feature matrix, te
   - Canvas Diagram Export: One-click export to PNG (2x retina), SVG vector, and Mermaid.js markdown syntax (`.mmd` & `.md`).
   - Smart Tech Inference: Auto-detects lightweight apps (no DB/API keys needed) vs. heavy SaaS (PostgreSQL, Stripe, Resend).
   - Environment Guidance: Auto-generates `.env.local.example` with exact API key sourcing instructions and disk-writer.
-  - Quality Suite: One-click "Security Check" and "Optimize Code" with interactive audit scorecard modal.
+  - Quality Suite: One-click "Security Check" (OWASP) and "Optimize Code" (Bloated files > 1,000 lines, spaghetti code, composite indexes, caching, memoization).
   - Confirmation Dialog ("Oletko varma?"): Prevents accidental background triggers or file overwrites.
   - Security & Path bounds validation enforced across filesystem writes.
-  - Vitest automated testing suite with 50 passing tests across 11 test files (0 failures).
+  - Vitest automated testing suite with 54 passing tests across 12 test files (0 failures).
 
 ---
 
@@ -40,10 +40,11 @@ This document tracks verified implementation progress, active feature matrix, te
 | **Export Formats** | `mermaid-export.ts`, `export-modal.tsx` | 🟩 Complete | Canvas diagram export as PNG (2x), SVG, and Mermaid.js (`.mmd` & `.md`) |
 | **Tech Inference & .env** | `tech-stack.ts`, `env-dialog.tsx` | 🟩 Complete | Auto-detects app tier (Lightweight/Standard/Heavy), DB need, and generates `.env.local.example` |
 | **Quality Suite (Audit)** | `audit.ts`, `audit-modal.tsx` | 🟩 Complete | 1-click Security Check (OWASP) & Optimize Code with scorecard modal |
+| **Codebase Optimizer** | `audit.ts`, `playground-workspace.tsx` | 🟩 Complete | Scans disk for files > 1,000 lines, spaghetti code, indexes, Next.js cache |
 | **Safety / Confirmation** | `confirm-action-dialog.tsx` | 🟩 Complete | "Oletko varma?" confirmation gate before heavy actions/disk writes |
 | **Project CRUD** | `project.ts`, `delete-project-button.tsx` | 🟩 Complete | Save/load/delete projects in SQLite DB |
 | **Security & Paths** | `.env.local`, `codegen.ts` | 🟩 Complete | API key isolated in `.env.local`, strict path bounds validation |
-| **Automated Testing** | Vitest (`tests/unit/`) | 🟩 Complete | 52 unit & security tests passing across 12 test files |
+| **Automated Testing** | Vitest (`tests/unit/`) | 🟩 Complete | 54 unit & security tests passing across 12 test files |
 | **Workspace Modularization** | `workspace/*.tsx` | 🟩 Complete | Gate1/Gate2/Gate3 tab components & HomebasePathCard extracted |
 | **Live Workspace Bridge** | `chat-sidebar.tsx`, `/api/chat`, `workspace-context.ts` | 🟩 Complete | Bi-directional state & code updates (Ihminen ⟷ Agentti) |
 | **Topology & Graph Resilience**| `route.ts`, `playground-workspace.tsx` | 🟩 Complete | Full edge topology mapping, partial graph update merging & position guard |

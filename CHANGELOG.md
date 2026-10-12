@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team collaboration via shared project links
 - Cloud deployment packaging (Vercel / Railway)
 
+## [1.3.0] - 2026-10-12
+
+> **Codebase Optimization Suite & Platform Stability** — Automated deep codebase scanner, live progress audit banner, interactive confirmation gate, Co-Pilot AI optimization tool, React 19 render cycle fixes, and Mermaid export guards.
+
+### Added
+- **Automated Codebase Optimization Scanner (`src/app/actions/audit.ts`)**: Direct local static code analysis inspecting the target project disk for bloated files (> 1,000 lines), spaghetti anti-patterns (nested callbacks, multi-responsibility files), missing composite database indexes (`@@index([userId, status])`), Next.js cache revalidation, and missing React memoization in ~140ms.
+- **Interactive Confirmation Gate (`ConfirmActionDialog`, `workspace-header.tsx`, `playground-workspace.tsx`)**: Reusable modal dialog preventing accidental triggers by explicitly prompting the user before launching code audits or optimizations.
+- **Live Progress Audit Banner (`workspace-header.tsx`)**: Prominent top status banner with animated spinner providing real-time feedback during ongoing code audits.
+- **AI Co-Pilot Code Optimization Tool (`apply_code_optimization` in `/api/chat`, `ChatSidebar.tsx`)**: Enables Co-Pilot to directly inspect, optimize, and stage refactored code across Data Gates with user approval.
+
+### Fixed
+- **React 19 Render Cycle Crash (`playground-workspace.tsx`)**: Eliminated illegal `startTransition` calls inside state updater callbacks (`handleArchitectureUpdate`), preventing infinite render loops and Node.js process out-of-memory crashes.
+- **Mermaid Export Null-Safety Guard (`src/lib/mermaid-export.ts`)**: Hardened `sanitizeNodeId(id)` against undefined/null IDs to eliminate `TypeError: Cannot read properties of undefined (reading 'replace')` in `ExportModal`.
+- **Optimization Action Syntax (`src/app/actions/audit.ts`)**: Cleaned syntax errors and duplicate braces in server actions.
+
 ---
 
 ## [1.2.0] - 2026-10-12

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +50,15 @@ export function ExportModal({
     .replace(/[^a-z0-9_-]/gi, "-")
     .replace(/-+/g, "-");
 
-  const mermaidCode = canvasToMermaid(nodes, edges, { title: projectName });
+  const mermaidCode = useMemo(() => {
+    if (!open) return "";
+    try {
+      return canvasToMermaid(nodes, edges, { title: projectName });
+    } catch (err) {
+      console.warn("Failed to generate Mermaid diagram:", err);
+      return "";
+    }
+  }, [open, nodes, edges, projectName]);
 
   const handleCopyMermaid = () => {
     navigator.clipboard.writeText(mermaidCode);

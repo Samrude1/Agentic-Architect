@@ -37,7 +37,8 @@ function sanitizeMermaidText(text: unknown): string {
 /**
  * Sanitizes a node ID for use as a Mermaid node identifier (alphanumeric + underscores).
  */
-function sanitizeNodeId(id: string): string {
+function sanitizeNodeId(id?: string | null): string {
+  if (!id || typeof id !== "string") return "n_node";
   const cleaned = id.replace(/[^a-zA-Z0-9_]/g, "_");
   return cleaned.length > 0 ? `n_${cleaned}` : "n_node";
 }
@@ -137,6 +138,7 @@ export function canvasToMermaid(
   if (edges && edges.length > 0) {
     lines.push("  %% Connectors & Signal Flows");
     for (const edge of edges) {
+      if (!edge || !edge.source || !edge.target) continue;
       const sourceId = sanitizeNodeId(edge.source);
       const targetId = sanitizeNodeId(edge.target);
       const edgeLabel = edge.label ? sanitizeMermaidText(edge.label) : "";

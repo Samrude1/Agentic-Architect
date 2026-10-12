@@ -167,7 +167,9 @@ ${report.findings
   const handleSendToAgent = () => {
     if (!report) return;
 
-    const promptText = `🛡️ Suorita tietoturvakorjaus: Päivitä arkkitehtuurikaavio ja koodit (Gate 1 Prisma & Gate 2 API) vastaamaan raportin suosituksia.`;
+    const promptText = isSecurity
+      ? `🛡️ Suorita tietoturvakorjaus: Päivitä arkkitehtuurikaavio ja koodit (Gate 1 Prisma & Gate 2 API) vastaamaan raportin suosituksia.`
+      : `⚡ Suorita koodin optimointi: Päivitä koodipohja ja arkkitehtuuri (Gate 1, 2 ja 3) vastaamaan optimointiraportin suosituksia (yhdistelmäindeksit, välimuistitus, ei spagettia eikä turvonneita tiedostoja).`;
 
     onSendToAgent?.(promptText);
     onOpenChange(false);

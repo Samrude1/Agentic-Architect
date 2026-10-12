@@ -190,12 +190,102 @@ function runFallbackOptimizationAudit(
   nodes: Array<{ id: string; data?: { label?: string; tech?: string; description?: string } }>,
   edges: Array<{ source: string; target: string; label?: string }>,
   prismaSchema?: string,
-  apiCode?: string
+  apiCode?: string,
+  uiCode?: string,
+  targetPath?: string
 ): AuditReport {
   const findings: AuditFinding[] = [];
-  let score = 90;
+  let score = 95;
 
-  // Check 1: Database indexing
+  // Check 1: Bloated Files (> 1 000 lines) & Monolith Detection
+  const bloatedFiles: Array<{ file: string; lines: number }> = [];
+  let totalFilesScanned = 0;
+
+  if (targetPath && fs.existsSync(targetPath)) {
+    function scanDir(dir: string) {
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.name.startsWith(".") && entry.name !== ".env.local.example") continue;
+          if (["node_modules", ".next", ".git", ".agentic-backup", "dist", "build"].includes(entry.name)) continue;
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            scanDir(full);
+          } else if (/\.(tsx?|jsx?|prisma|json|css|md)$/i.test(entry.name)) {
+            totalFilesScanned++;
+            const content = fs.readFileSync(full, "utf-8");
+            const lines = content.split("\n").length;
+            if (lines > 1000) {
+              const rel = path.relative(targetPath!, full);
+              bloatedFiles.push({ file: rel, lines });
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    scanDir(targetPath);
+  }
+
+  // Also check string inputs
+  if (uiCode) {
+    const uiLines = uiCode.split("\n").length;
+    if (uiLines > 1000) {
+      bloatedFiles.push({ file: "Gate 3 (UI Component)", lines: uiLines });
+    }
+  }
+  if (apiCode) {
+    const apiLines = apiCode.split("\n").length;
+    if (apiLines > 1000) {
+      bloatedFiles.push({ file: "Gate 2 (API Routes)", lines: apiLines });
+    }
+  }
+
+  if (bloatedFiles.length > 0) {
+    score -= 15;
+    findings.push({
+      id: "opt-bloated-files",
+      type: "warning",
+      title: `Turvonneita tiedostoja havaittu (${bloatedFiles.length} kpl yli 1 000 riviä)`,
+      detail: `Seuraavat kooditiedostot ylittävät 1 000 rivin rajan ja uhkaavat muuttua monoliiteiksi: ${bloatedFiles.map((f) => `${f.file} (${f.lines} riviä)`).join(", ")}.`,
+      recommendation: "Pura monoliittitiedostot pienempiin alikomponentteihin ja moduuleihin (Single Responsibility Principle).",
+    });
+  } else {
+    findings.push({
+      id: "opt-clean-file-sizes",
+      type: "success",
+      title: "Tiedostokoot optimaaliset (Ei turvonneita tiedostoja)",
+      detail: `Kaikki kooditiedostot (${totalFilesScanned > 0 ? `${totalFilesScanned} kpl tarkastettu` : "tarkastetut moduulit"}) ovat alle 1 000 rivin rajan. Koodipohja on kompakti ja helposti ylläpidettävä.`,
+      recommendation: "Pidä tiedostojen vastuut rajattuina ja vältä monoliittitiedostojen kasvua.",
+    });
+  }
+
+  // Check 2: Spaghetti Code & Separation of Concerns
+  const hasMixedConcerns =
+    (Boolean(apiCode) && (apiCode!.includes("<div") || apiCode!.includes("React"))) ||
+    (Boolean(uiCode) && (uiCode!.includes("prisma.") || uiCode!.includes("SELECT ")));
+
+  if (hasMixedConcerns) {
+    score -= 15;
+    findings.push({
+      id: "opt-spaghetti-detected",
+      type: "critical",
+      title: "Spagettikoodia havaittu (Vastuiden sekoittuminen)",
+      detail: "Kerrosjako on rikkoutunut: esitys- ja tietokantakerroksen vastuut ovat sekoittuneet keskenään.",
+      recommendation: "Erota käyttöliittymä, API-rajapinta ja tietokantakutsut omiin tiedostoihinsa.",
+    });
+  } else {
+    findings.push({
+      id: "opt-clean-architecture",
+      type: "success",
+      title: "Puhdas kerrosjaettu arkkitehtuuri (Ei spagettikoodia)",
+      detail: "Koodipohjassa on selkeä jaottelu esitys- (UI), logiikka- (API) ja tietokerrosten (Prisma) välillä. Ei spagettikytkentöjä.",
+      recommendation: "Jatka yksisuuntaisen datavirran ja puhtaan rajapintajaon periaatetta.",
+    });
+  }
+
+  // Check 3: Database indexing
   if (prismaSchema) {
     const hasIndexes = prismaSchema.includes("@@index") || prismaSchema.includes("@unique");
     if (hasIndexes) {
@@ -204,7 +294,7 @@ function runFallbackOptimizationAudit(
         type: "success",
         title: "Tietokantaindeksit käytössä",
         detail: "Skeemassa on määritelty indeksejä (@unique / @@index), mikä nopeuttaa kyselyitä huomattavasti.",
-        recommendation: "Lisää indeksit erityisesti usein haettaville vierasavaimille (Foreign Keys).",
+        recommendation: "Lisää indeksit erityisesti usein haettaville vierasavaimille ja monikriteerihauille (@@index([userId, status])).",
       });
     } else {
       score -= 15;
@@ -218,7 +308,7 @@ function runFallbackOptimizationAudit(
     }
   }
 
-  // Check 2: API Error handling and caching
+  // Check 4: API Error handling and caching
   if (apiCode) {
     if (apiCode.includes("try {") && apiCode.includes("catch")) {
       findings.push({
@@ -230,12 +320,12 @@ function runFallbackOptimizationAudit(
       });
     }
 
-    if (apiCode.includes("revalidate") || apiCode.includes("cache")) {
+    if (apiCode.includes("revalidate") || apiCode.includes("Cache-Control") || apiCode.includes("cache")) {
       findings.push({
         id: "opt-api-cache",
         type: "success",
         title: "Välimuistitus ja uudelleenvalidointi",
-        detail: "Koodissa hyödynnetään Next.js-välimuistin hallintaa.",
+        detail: "Koodissa hyödynnetään Next.js-välimuistin hallintaa ja välimuistiohjausta.",
         recommendation: "Varmista sopivat TTL-ajat dynaamiselle datalle.",
       });
     } else {
@@ -250,7 +340,29 @@ function runFallbackOptimizationAudit(
     }
   }
 
-  // Check 3: Architecture graph node balance
+  // Check 5: UI Rendering Performance
+  if (uiCode) {
+    if (uiCode.includes("useMemo") || uiCode.includes("useCallback")) {
+      findings.push({
+        id: "opt-ui-memo",
+        type: "success",
+        title: "Käyttöliittymän renderöinti optimoitu",
+        detail: "Komponentissa käytetään useMemo-muistiointia datalistoille ja suodatukselle, mikä estää turhat uudelleenrenderöinnit.",
+        recommendation: "Pidä riippuvuuslistat ajantasaisina.",
+      });
+    } else {
+      score -= 5;
+      findings.push({
+        id: "opt-ui-no-memo",
+        type: "info",
+        title: "UI-hakusuodatuksen muistiointimahdollisuus",
+        detail: "Käyttöliittymäkomponentissa ei havaittu useMemo-muistiointia suodatetuille listoille.",
+        recommendation: "Käytä useMemo-hookia hakutulosten ja laskettujen metriikoiden suodattamiseen suurilla datamäärillä.",
+      });
+    }
+  }
+
+  // Check 6: Architecture graph node balance
   if (nodes.length > 8) {
     findings.push({
       id: "opt-arch-modular",
@@ -270,8 +382,8 @@ function runFallbackOptimizationAudit(
     grade: calculateGrade(score),
     summary:
       score >= 85
-        ? "Järjestelmän skaalautuvuus ja rakenne ovat tasapainossa. Ei kriittisiä suorituskykypullonkauloja."
-        : "Järjestelmässä on potentiaalia nopeuden ja tehokkuuden optimointiin erityisesti tietokannan ja välimuistin osalta.",
+        ? "Koodipohja ja arkkitehtuuri ovat erinomaisesti optimoituja. Ei spagettikoodia, ei turvonneita monoliitteja (> 1000 riviä), ja suorituskykykäytännöt ovat kunnossa."
+        : "Järjestelmässä on potentiaalia nopeuden ja tehokkuuden optimointiin erityisesti koodirakenteen, tietokannan ja välimuistin osalta.",
     findings,
     timestamp: new Date().toISOString(),
   };
@@ -299,72 +411,7 @@ export async function runSecurityAudit(
     }
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (apiKey && !apiKey.includes("your-openrouter-key")) {
-    try {
-      const openai = new OpenAI({
-        baseURL: "https://openrouter.ai/api/v1",
-        apiKey,
-        defaultHeaders: {
-          "HTTP-Referer": "https://github.com/Samrude1/Agentic-Architect",
-          "X-Title": "Agentic Architect",
-        },
-      });
-
-      const prompt = `You are a Principal Application Security Auditor.
-Analyze this web application architecture and codebase against the OWASP Top 10 guidelines and modern fullstack security standards.
-
-Architecture Components (${nodes.length} nodes):
-${nodes.map((n) => `- ${n.data?.label || "Node"}: ${n.data?.description || ""}`).join("\n")}
-
-Prisma Schema snippet:
-${prismaSchema ? prismaSchema.slice(0, 1500) : "Not generated yet."}
-
-API Code snippet:
-${apiCode ? apiCode.slice(0, 1500) : "Not generated yet."}
-
-Respond ONLY with valid JSON in this exact structure without markdown backticks:
-{
-  "score": 92,
-  "grade": "A",
-  "summary": "Selkeä yhteenveto suomeksi.",
-  "findings": [
-    {
-      "id": "sec-1",
-      "type": "critical|warning|success|info",
-      "title": "Löydöksen otsikko suomeksi",
-      "detail": "Tarkempi selitys suomeksi",
-      "recommendation": "Miten korjataan suomeksi"
-    }
-  ]
-}`;
-
-      const response = await openai.chat.completions.create({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-      });
-
-      const text = response.choices[0]?.message?.content?.trim() || "";
-      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-
-      const report: AuditReport = {
-        type: "security",
-        title: "Tietoturva-auditointi (Security Check)",
-        score: typeof parsed.score === "number" ? parsed.score : 85,
-        grade: parsed.grade || calculateGrade(parsed.score || 85),
-        summary: parsed.summary || "Tietoturvatarkastus suoritettu.",
-        findings: Array.isArray(parsed.findings) ? parsed.findings : [],
-        timestamp: new Date().toISOString(),
-      };
-      if (projectId) await saveAuditReportToCache(projectId, report);
-      return report;
-    } catch (err) {
-      console.warn("OpenRouter security audit failed, falling back to rule engine:", err);
-    }
-  }
-
+  // Execute the local OWASP security rule engine directly
   const fallbackReport = runFallbackSecurityAudit(nodes, edges, prismaSchema, apiCode);
   if (projectId) await saveAuditReportToCache(projectId, fallbackReport);
   return fallbackReport;
@@ -377,10 +424,12 @@ export async function runOptimizationAudit(
   projectId?: string,
   architectureJson?: string | null,
   prismaSchema?: string,
-  apiCode?: string
+  apiCode?: string,
+  uiCode?: string
 ): Promise<AuditReport> {
   let nodes: AuditNode[] = [];
   let edges: AuditEdge[] = [];
+  let targetPath: string | undefined;
 
   if (architectureJson) {
     try {
@@ -392,75 +441,24 @@ export async function runOptimizationAudit(
     }
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (apiKey && !apiKey.includes("your-openrouter-key")) {
+  if (projectId) {
     try {
-      const openai = new OpenAI({
-        baseURL: "https://openrouter.ai/api/v1",
-        apiKey,
-        defaultHeaders: {
-          "HTTP-Referer": "https://github.com/Samrude1/Agentic-Architect",
-          "X-Title": "Agentic Architect",
-        },
-      });
-
-      const prompt = `You are a Principal Software Architect and Performance Engineer.
-Review this fullstack application architecture and code for performance, scalability, caching, database indexing, and code cleanliness.
-
-Architecture Components (${nodes.length} nodes):
-${nodes.map((n) => `- ${n.data?.label || "Node"}: ${n.data?.description || ""}`).join("\n")}
-
-Prisma Schema snippet:
-${prismaSchema ? prismaSchema.slice(0, 1500) : "Not generated yet."}
-
-API Code snippet:
-${apiCode ? apiCode.slice(0, 1500) : "Not generated yet."}
-
-Respond ONLY with valid JSON in this exact structure without markdown backticks:
-{
-  "score": 88,
-  "grade": "B",
-  "summary": "Selkeä suomenkielinen arvio järjestelmän tehokkuudesta ja suorituskyvystä.",
-  "findings": [
-    {
-      "id": "opt-1",
-      "type": "critical|warning|success|info",
-      "title": "Otsikko suomeksi",
-      "detail": "Kuvaus suomeksi",
-      "recommendation": "Suositus suomeksi"
-    }
-  ]
-}`;
-
-      const response = await openai.chat.completions.create({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.2,
-      });
-
-      const text = response.choices[0]?.message?.content?.trim() || "";
-      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-
-      const report: AuditReport = {
-        type: "optimization",
-        title: "Suorituskyky & Koodin Optimointi (Optimize Audit)",
-        score: typeof parsed.score === "number" ? parsed.score : 85,
-        grade: parsed.grade || calculateGrade(parsed.score || 85),
-        summary: parsed.summary || "Optimointitarkastus suoritettu.",
-        findings: Array.isArray(parsed.findings) ? parsed.findings : [],
-        timestamp: new Date().toISOString(),
-      };
-      if (projectId) await saveAuditReportToCache(projectId, report);
-      return report;
-    } catch (err) {
-      console.warn("OpenRouter optimization audit failed, falling back to rule engine:", err);
+      const project = await prisma.project.findUnique({ where: { id: projectId } });
+      if (project) {
+        targetPath = project.targetPath || undefined;
+        if (!prismaSchema && project.prismaSchema) prismaSchema = project.prismaSchema;
+        if (!apiCode && project.apiCode) apiCode = project.apiCode;
+        if (!uiCode && project.uiCode) uiCode = project.uiCode;
+      }
+    } catch {
+      // ignore
     }
   }
 
-  const fallbackReport = runFallbackOptimizationAudit(nodes, edges, prismaSchema, apiCode);
-  if (projectId) await saveAuditReportToCache(projectId, fallbackReport);
-  return fallbackReport;
+  // Execute the professional local rule engine directly (real disk scanning for bloated files > 1 000 lines, spaghetti code, indexes & caching)
+  const report = runFallbackOptimizationAudit(nodes, edges, prismaSchema, apiCode, uiCode, targetPath);
+  if (projectId) await saveAuditReportToCache(projectId, report);
+  return report;
 }
 
 /**

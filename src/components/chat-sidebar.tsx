@@ -207,6 +207,34 @@ export function ChatSidebar({
               });
             }
           }
+        } else if (name === "apply_code_optimization") {
+          if (data.success) {
+            handledToolCallsRef.current.add(toolCallId);
+            if (data.nodes && data.edges) {
+              onArchitectureUpdate({ nodes: data.nodes, edges: data.edges });
+            }
+            if (data.gate1Code) {
+              onCodeUpdate?.({
+                gate: "gate1",
+                code: data.gate1Code,
+                summary: "Optimoitu Prisma-skeema yhdistelmäindekseillä.",
+              });
+            }
+            if (data.gate2Code) {
+              onCodeUpdate?.({
+                gate: "gate2",
+                code: data.gate2Code,
+                summary: "Optimoitu API revalidointistrategialla ja välimuistiohjauksella.",
+              });
+            }
+            if (data.gate3Code) {
+              onCodeUpdate?.({
+                gate: "gate3",
+                code: data.gate3Code,
+                summary: "Optimoitu UI-komponentti memooinnilla ja kevennetyllä tilalla.",
+              });
+            }
+          }
         }
       }
     }
@@ -234,6 +262,9 @@ export function ChatSidebar({
         const { name } = parseToolPart(part);
         if (name === "apply_security_remediation") {
           return "🛡️ Tietoturvakorjaukset viety suoraan työtilaan (kaavio & koodi päivitetty).";
+        }
+        if (name === "apply_code_optimization") {
+          return "⚡ Suorituskyky- ja koodioptimoinnit viety suoraan työtilaan (kaavio & Gatet 1–3 päivitetty).";
         }
         if (name === "update_gate_code") {
           return "⚡ Koodimuutokset viety työtilan Gate-välilehdelle.";
@@ -358,7 +389,11 @@ export function ChatSidebar({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 m.parts.some((p: any) => {
                   const { name } = parseToolPart(p);
-                  return name === "update_gate_code" || name === "apply_security_remediation";
+                  return (
+                    name === "update_gate_code" ||
+                    name === "apply_security_remediation" ||
+                    name === "apply_code_optimization"
+                  );
                 });
 
               const isUser = m.role === "user";

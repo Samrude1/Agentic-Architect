@@ -4,7 +4,7 @@
 [![Status](https://img.shields.io/badge/Status-Production--Ready%20Architecture-emerald.svg)](https://github.com/Samrude1/Agentic-Architect)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-52%20Passing%20(100%25)-brightgreen.svg)](./tests/)
+[![Tests](https://img.shields.io/badge/Tests-54%20Passing%20(100%25)-brightgreen.svg)](./tests/)
 [![Security](https://img.shields.io/badge/Security-OWASP%20Grade%20A-brightgreen.svg)](./.agents/blueprint/SECURITY_AUDIT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 

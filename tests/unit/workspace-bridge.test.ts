@@ -111,4 +111,87 @@ describe("Live Workspace Bridge & /api/chat Route", () => {
     expect(textStream).toContain("update_architecture");
     expect(textStream).toContain("TaskMaster");
   });
+
+  it("analyzes codebase for spaghetti code and bloated files when requested", async () => {
+    const mockContext: WorkspaceContext = {
+      activeTab: "canvas",
+      projectName: "PulseDesk",
+      nodes: [
+        { id: "1", position: { x: 100, y: 100 }, data: { label: "PulseDesk UI", tech: "React" } },
+        { id: "6", position: { x: 100, y: 500 }, data: { label: "PostgreSQL Database", tech: "PostgreSQL" } },
+      ],
+      edges: [{ id: "e1", source: "1", target: "6" }],
+      gateStatus: {
+        hasSchema: true,
+        hasApi: true,
+        hasUi: true,
+      },
+    };
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: "Analysoi PulseDeskin koodipohja ja havaitse spagettikoodit ja bloated files.",
+          },
+        ],
+        workspaceContext: mockContext,
+      }),
+    });
+
+    const response = await POST(mockRequest);
+    expect(response.status).toBe(200);
+
+    const textStream = await response.text();
+    expect(textStream).toContain("Optimointianalyysi");
+    expect(textStream).toContain("Paisuneet tiedostot");
+    expect(textStream).toContain("Spagettikoodi");
+    expect(textStream).toContain("Parannusehdotukset");
+  });
+
+  it("applies code optimization across all gates when confirmed by user", async () => {
+    const mockContext: WorkspaceContext = {
+      activeTab: "canvas",
+      projectName: "PulseDesk",
+      nodes: [
+        { id: "1", position: { x: 100, y: 100 }, data: { label: "PulseDesk UI", tech: "React" } },
+        { id: "6", position: { x: 100, y: 500 }, data: { label: "PostgreSQL Database", tech: "PostgreSQL" } },
+      ],
+      edges: [{ id: "e1", source: "1", target: "6" }],
+      gateStatus: {
+        hasSchema: true,
+        hasApi: true,
+        hasUi: true,
+      },
+    };
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: "Kyllä, toteuta optimointi.",
+          },
+        ],
+        workspaceContext: mockContext,
+      }),
+    });
+
+    const response = await POST(mockRequest);
+    expect(response.status).toBe(200);
+
+    const textStream = await response.text();
+    expect(textStream).toContain("apply_code_optimization");
+    expect(textStream).toContain("gate1Code");
+    expect(textStream).toContain("userId, status");
+    expect(textStream).toContain("gate2Code");
+    expect(textStream).toContain("revalidatePath");
+    expect(textStream).toContain("gate3Code");
+    expect(textStream).toContain("useMemo");
+  });
 });

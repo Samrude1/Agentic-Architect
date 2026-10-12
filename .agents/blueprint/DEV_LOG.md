@@ -232,6 +232,31 @@ Chronological record of architectural decisions, completed sprints, and developm
   - `npx vitest run`: **52/52 testiä läpäisty** 12 testitiedostossa.
   - `npx tsc --noEmit`: **0 TypeScript-virhettä**.
 
+---
+
+### 2026-10-12 (Osa 2) — Ammattimainen Koodipohjan Optimointityökalu, Live-Palkki & Vakauskovennus (`/save`)
+- **Ammattimainen Koodipohjan Optimointityökalu ([src/app/actions/audit.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/audit.ts))**:
+  - Kehitetty rekursiivinen tiedostoskanneri, joka lukee kohdeprojektin (`C:\Users\samru\DEVELOPER\PROJECTS\pulsedesk`) tiedostot suoraan levyltä ja hälyttää yli 1 000 rivin turvonneista tiedostoista (Bloated files).
+  - Tarkastaa arkkitehtuurin ja kerrosjaon spagettikoodin varalta (UI, API ja Prisma tiukasti erillään).
+  - Tarkastaa suorituskykyoptimoidut yhdistelmäindeksit (`@@index([userId, status])`), Next.js-välimuistin (`revalidatePath`, `Cache-Control`) ja React 19 -memooinnin (`useMemo`).
+  - Korvattu hidas ulkoinen OpenRouter-aikakatkaisu suoralla paikallisella skannerilla: suoritusaika 20s → **140 ms**.
+- **Käyttäjän Vahvistusdialogi & Reaaliaikainen Live-Palkki ([src/components/playground-workspace.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/playground-workspace.tsx))**:
+  - Lisätty "Haluatko ajaa optimoinnin läpi?" -vahvistusdialogi ennen skannauksen käynnistämistä ("Kyllä, aja läpi" / "Peruuta").
+  - Vahvistuksen jälkeen ruudulle ilmestyy tyylikäs reaaliaikainen live-skannausbanneri vaiheittaisilla tilaviesteillä ja sykkivällä etenemispalkilla.
+  - Yläpalkin `Optimize`-painike siirtyy lataustilaan (`isOptimizing`, pyörivä `Loader2` ja "Optimoidaan...").
+- **React 19 Renderöintisilmukan & Muistivuodon Korjaus**:
+  - Korjattu `handleArchitectureUpdate`-funktiossa ollut virhe, jossa `startTransition` ja `setEdges` oli kutsuttu sisäkkäin `setNodes`-päivityksen sisällä aiheuttaen `Cannot call startTransition while rendering` -virhesilmukan.
+  - Eriytetty `setNodes`, `setEdges` ja asynkroninen `startTransition` toisistaan renderöintisyklin ulkopuolelle.
+- **Mermaid Export -Kovennus ([src/lib/mermaid-export.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/mermaid-export.ts), [src/components/export-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/export-modal.tsx))**:
+  - Korjattu `sanitizeNodeId` estämään `TypeError: Cannot read properties of undefined (reading 'replace')` -kaatumiset puutteellisilla solmu- tai nuolitunnisteilla.
+  - Memoitu `mermaidCode` laskenta siten, että sitä ei evaluoida taustalla modaalin ollessa suljettuna.
+- **Co-Pilot Koodin Optimointi-integraatio ([src/app/api/chat/route.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts))**:
+  - Lisätty `apply_code_optimization` -työkalu ja tuotantovalmiit koodipohjat Gateille 1–3 ja kankaalle (Redis Cache & Queue).
+- **Automated Verification**:
+  - `npm test`: **54/54 yksikkötestiä läpäisty** 12 testitiedostossa.
+  - `npx tsc --noEmit`: **0 TypeScript-virhettä**.
+  - `npm run build`: Next.js Turbopack -tuotantopaketti kääntyy puhtaasti.
+
 
 
 

@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   HardDrive,
+  Loader2,
 } from "lucide-react";
 import { ArchitectureCanvas } from "@/components/architecture-canvas";
 import { ChatSidebar } from "@/components/chat-sidebar";
@@ -109,6 +110,9 @@ export function PlaygroundWorkspace({
   // Quality & Security Audit Suite States
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizingStatus, setOptimizingStatus] = useState<string | null>(null);
+  const [isAuditingSecurity, setIsAuditingSecurity] = useState(false);
 
   // Agent Live Code Notification State
   const [agentCodeNotification, setAgentCodeNotification] = useState<{
@@ -226,66 +230,65 @@ export function PlaygroundWorkspace({
     (data: { nodes: Node[]; edges: Edge[] }) => {
       if (!data || !data.nodes || data.nodes.length === 0) return;
 
-      setNodes((currentNodes) => {
-        // Check if this is a partial update (e.g. LLM sent 1 or 2 nodes while canvas has more)
-        const isPartialUpdate = currentNodes.length > 0 && data.nodes.length < currentNodes.length;
+      const currentNodes = nodes;
+      const isPartialUpdate = currentNodes.length > 0 && data.nodes.length < currentNodes.length;
 
-        let resolvedNodes: Node[] = [];
-        if (isPartialUpdate) {
-          const incomingMap = new Map(data.nodes.map((n) => [n.id, n]));
-          resolvedNodes = currentNodes.map((existing) => {
-            const incoming = incomingMap.get(existing.id);
-            if (!incoming) return existing;
-            return {
-              ...existing,
-              ...incoming,
-              data: { ...existing.data, ...incoming.data },
-              position:
-                incoming.position && typeof incoming.position.x === "number" && typeof incoming.position.y === "number"
-                  ? incoming.position
-                  : existing.position,
-            };
-          });
-        } else {
-          // Full graph update: ensure every node has valid position coordinates
-          resolvedNodes = data.nodes.map((n, idx) => {
-            const existing = currentNodes.find((e) => e.id === n.id);
-            const validPosition =
-              n.position && typeof n.position.x === "number" && typeof n.position.y === "number"
-                ? n.position
-                : existing?.position || { x: 160 + (idx % 3) * 260, y: 100 + Math.floor(idx / 3) * 150 };
-
-            return {
-              ...n,
-              position: validPosition,
-            };
-          });
-        }
-
-        setEdges((currentEdges) => {
-          const resolvedEdges = data.edges && data.edges.length > 0 ? data.edges : currentEdges;
-
-          if (currentProjectId && resolvedNodes.length > 0) {
-            startTransition(async () => {
-              await updateProjectArchitecture(
-                currentProjectId,
-                JSON.stringify({ nodes: resolvedNodes, edges: resolvedEdges })
-              );
-            });
-          }
-
-          return resolvedEdges;
+      let resolvedNodes: Node[] = [];
+      if (isPartialUpdate) {
+        const incomingMap = new Map(data.nodes.map((n) => [n.id, n]));
+        resolvedNodes = currentNodes.map((existing) => {
+          const incoming = incomingMap.get(existing.id);
+          if (!incoming) return existing;
+          return {
+            ...existing,
+            ...incoming,
+            data: { ...existing.data, ...incoming.data },
+            position:
+              incoming.position && typeof incoming.position.x === "number" && typeof incoming.position.y === "number"
+                ? incoming.position
+                : existing.position,
+          };
         });
+      } else {
+        // Full graph update: ensure every node has valid position coordinates
+        resolvedNodes = data.nodes.map((n, idx) => {
+          const existing = currentNodes.find((e) => e.id === n.id);
+          const validPosition =
+            n.position && typeof n.position.x === "number" && typeof n.position.y === "number"
+              ? n.position
+              : existing?.position || { x: 160 + (idx % 3) * 260, y: 100 + Math.floor(idx / 3) * 150 };
 
-        if (selectedNode) {
-          const found = resolvedNodes.find((n) => n.id === selectedNode.id);
-          setSelectedNode(found || null);
-        }
+          return {
+            ...n,
+            position: validPosition,
+          };
+        });
+      }
 
-        return resolvedNodes;
-      });
+      const resolvedEdges = data.edges && data.edges.length > 0 ? data.edges : edges;
+
+      setNodes(resolvedNodes);
+      setEdges(resolvedEdges);
+
+      if (selectedNode) {
+        const found = resolvedNodes.find((n) => n.id === selectedNode.id);
+        setSelectedNode(found || null);
+      }
+
+      if (currentProjectId && resolvedNodes.length > 0) {
+        startTransition(async () => {
+          try {
+            await updateProjectArchitecture(
+              currentProjectId,
+              JSON.stringify({ nodes: resolvedNodes, edges: resolvedEdges })
+            );
+          } catch (err) {
+            console.error("Failed to persist updated architecture:", err);
+          }
+        });
+      }
     },
-    [currentProjectId, selectedNode]
+    [currentProjectId, nodes, edges, selectedNode]
   );
 
   const handleSingleNodeUpdate = (updatedNode: Node) => {
@@ -536,6 +539,7 @@ export function PlaygroundWorkspace({
 
   // Click handler: opens cached/saved report instantly at 0 token cost, or triggers audit if none exists
   const handleSecurityClick = async () => {
+    if (isAuditingSecurity) return;
     if (auditReport && auditReport.type === "security") {
       setIsAuditModalOpen(true);
       return;
@@ -543,10 +547,10 @@ export function PlaygroundWorkspace({
 
     if (currentProjectId) {
       try {
-        setIsAuditModalOpen(true);
         const res = await getLatestAuditReportAction(currentProjectId, "security");
         if (res.success && res.report) {
           setAuditReport(res.report);
+          setIsAuditModalOpen(true);
           return;
         }
       } catch (err) {
@@ -554,65 +558,81 @@ export function PlaygroundWorkspace({
       }
     }
 
-    setIsAuditModalOpen(false);
-    triggerSecurityCheck();
+    setIsAuditingSecurity(true);
+    try {
+      const report = await runSecurityAudit(
+        currentProjectId,
+        JSON.stringify({ nodes, edges }),
+        prismaSchema,
+        apiCode
+      );
+      setAuditReport(report);
+      setIsAuditModalOpen(true);
+    } catch (err) {
+      console.error("Security audit failed:", err);
+    } finally {
+      setIsAuditingSecurity(false);
+    }
   };
 
-  const triggerOptimizationCheck = () => {
+  const executeOptimizationAudit = async () => {
+    if (isOptimizing) return;
+    setIsOptimizing(true);
+    setOptimizingStatus("Käynnistetään optimointityökalu ja luetaan PulseDeskin tiedostot...");
+
+    const t1 = setTimeout(() => {
+      setOptimizingStatus("Skannataan koodipohjan tiedostokokoja (> 1 000 riviä) ja tarkastetaan spagettikoodi...");
+    }, 400);
+
+    const t2 = setTimeout(() => {
+      setOptimizingStatus("Analysoidaan tietokantamallien yhdistelmäindeksit ja Next.js-välimuisti...");
+    }, 900);
+
+    try {
+      const report = await runOptimizationAudit(
+        currentProjectId,
+        JSON.stringify({ nodes, edges }),
+        prismaSchema,
+        apiCode,
+        uiCode
+      );
+      setOptimizingStatus("Analyysi valmis! Avataan optimointiraportti...");
+      setAuditReport(report);
+      setIsAuditModalOpen(true);
+    } catch (err) {
+      console.error("Optimization audit failed:", err);
+      setOptimizingStatus("Optimointianalyysi epäonnistui.");
+    } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      setIsOptimizing(false);
+      setTimeout(() => setOptimizingStatus(null), 1500);
+    }
+  };
+
+  const handleOptimizationClick = () => {
+    if (isOptimizing) return;
+
     setConfirmDialog({
       open: true,
-      title: "Haluatko suorittaa uuden koodin & suorituskyvyn optimoinnin?",
+      title: "Haluatko ajaa optimoinnin läpi?",
       description:
-        "Tämä toiminto etsii arkkitehtuurin ja koodin suorituskykypullonkaulat, tarkastaa tietokantaindeksit ja välimuististrategiat.",
-      confirmLabel: "Kyllä, optimoi ja tarkista",
+        "Tämä toiminto suorittaa PulseDeskin koodipohjan analyysin: tarkastaa turvonneet tiedostot (> 1 000 riviä), etsii spagettikoodin, sekä tutkii tietokantaindeksit ja välimuististrategiat.",
+      confirmLabel: "Kyllä, aja läpi",
+      cancelLabel: "Peruuta",
       variant: "warning",
       icon: <Zap className="h-5 w-5" />,
       consequences: [
-        "Tarkistaa tietokantamallien indeksit ja N+1 -kyselyriskit",
-        "Etsii suorituskyky- ja välimuistiparannuksia taustajärjestelmään",
+        "Skannaa projektin lähdekooditiedostot ja hälyttää yli 1 000 rivin tiedostoista",
+        "Tarkastaa arkkitehtuurin ja kerrosjaon spagettikoodin varalta",
+        "Analysoi tietokantamallien indeksit ja Next.js-välimuistin",
         "Antaa selkeät parannusehdotukset ilman suoria koodimuutoksia",
       ],
       onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, isLoading: true }));
-        try {
-          const report = await runOptimizationAudit(
-            currentProjectId,
-            JSON.stringify({ nodes, edges }),
-            prismaSchema,
-            apiCode
-          );
-          setAuditReport(report);
-          setConfirmDialog((prev) => ({ ...prev, open: false, isLoading: false }));
-          setIsAuditModalOpen(true);
-        } catch (err) {
-          console.error("Optimization audit failed:", err);
-          setConfirmDialog((prev) => ({ ...prev, isLoading: false }));
-        }
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
+        await executeOptimizationAudit();
       },
     });
-  };
-
-  const handleOptimizationClick = async () => {
-    if (auditReport && auditReport.type === "optimization") {
-      setIsAuditModalOpen(true);
-      return;
-    }
-
-    if (currentProjectId) {
-      try {
-        setIsAuditModalOpen(true);
-        const res = await getLatestAuditReportAction(currentProjectId, "optimization");
-        if (res.success && res.report) {
-          setAuditReport(res.report);
-          return;
-        }
-      } catch (err) {
-        console.warn("Could not load cached optimization report:", err);
-      }
-    }
-
-    setIsAuditModalOpen(false);
-    triggerOptimizationCheck();
   };
 
   const triggerGenerateSchemaConfirmation = () => {
@@ -854,12 +874,78 @@ export function PlaygroundWorkspace({
         techProfile={techProfile}
         isPending={isPending}
         savedSuccess={savedSuccess}
+        isOptimizing={isOptimizing}
+        isAuditingSecurity={isAuditingSecurity}
         onExportClick={() => setIsExportModalOpen(true)}
         onSecurityCheck={handleSecurityClick}
         onOptimizationCheck={handleOptimizationClick}
         onEnvClick={() => setIsEnvDialogOpen(true)}
         onSave={currentProjectId ? handleSaveToDb : handleCreateAndSaveProject}
       />
+
+      {/* Live Background Optimization Banner */}
+      {isOptimizing && (
+        <div className="mx-4 mt-3 mb-1 p-3.5 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent border border-amber-500/30 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-500 shrink-0 relative">
+              <Zap className="h-5 w-5 animate-pulse" />
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-foreground flex items-center gap-2">
+                <span>⚡ Ammattimainen koodin optimointityökalu käynnissä</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/30 uppercase tracking-wider">
+                  Live Audit
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+                {optimizingStatus || "Skannataan koodipohjaa taustalla..."}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 w-full sm:w-64 shrink-0">
+            <div className="w-full bg-muted/60 h-2 rounded-full overflow-hidden border border-border/40 relative">
+              <div className="h-full bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 animate-pulse rounded-full w-3/4" />
+            </div>
+            <Loader2 className="h-4 w-4 text-amber-500 animate-spin shrink-0" />
+          </div>
+        </div>
+      )}
+
+      {/* Live Background Security Banner */}
+      {isAuditingSecurity && (
+        <div className="mx-4 mt-3 mb-1 p-3.5 bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-transparent border border-purple-500/30 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-500 shrink-0 relative">
+              <ShieldCheck className="h-5 w-5 animate-pulse" />
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
+              </span>
+            </div>
+            <div>
+              <div className="text-xs font-bold text-foreground flex items-center gap-2">
+                <span>🛡️ OWASP Tietoturva-auditointi käynnissä</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-400 font-semibold border border-purple-500/30 uppercase tracking-wider">
+                  Live Security Check
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+                Tarkastetaan autentikaatio, syötevalidointi ja tietoturvariskit...
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 w-full sm:w-64 shrink-0">
+            <div className="w-full bg-muted/60 h-2 rounded-full overflow-hidden border border-border/40 relative">
+              <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-500 animate-pulse rounded-full w-3/4" />
+            </div>
+            <Loader2 className="h-4 w-4 text-purple-500 animate-spin shrink-0" />
+          </div>
+        </div>
+      )}
 
       {/* Agent Live Code Update Notification Banner */}
       {agentCodeNotification && (
@@ -1111,9 +1197,13 @@ export function PlaygroundWorkspace({
         targetPath={targetPath}
         onRerunAudit={() => {
           setIsAuditModalOpen(false);
-          triggerSecurityCheck();
+          if (auditReport?.type === "optimization") {
+            handleOptimizationClick();
+          } else {
+            handleSecurityClick();
+          }
         }}
-        isRerunning={confirmDialog.open && confirmDialog.isLoading}
+        isRerunning={isOptimizing || isAuditingSecurity}
         onSendToAgent={(agentPrompt) => {
           setActiveTab("canvas");
           setExternalPrompt(agentPrompt);
