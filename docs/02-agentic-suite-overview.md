@@ -207,17 +207,21 @@ Kokonaisuus on rakennettu modernille, tuotantotestatulle web-arkkitehtuurille:
 
 Kokonaisuuden yksityiskohtaiset tekniset ja toiminnalliset raportit:
 
+* 📗 **[01-executive-brief.md](./01-executive-brief.md)** — *OSA II: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas* (Kohderyhmä: Johdon tiivistelmä, tuotejohto, sijoittajat)
+* 📘 **[03-executive-report-fullstack-template.md](./03-executive-report-fullstack-template.md)** — *OSA I: Agentic Fullstack Development System — Insinööristandardit* (Kohderyhmä: CTO, arkkitehdit, tietoturva)
+* 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR) ja teknologiavalinnat*
+
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — DOKUMENTAATIOSARJAN KOKONAISUUS                       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 PÄÄDOKUMENTTI: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus          │
+│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus (Tämä dokumentti)   │
 │     Kohderyhmä: CEO, CTO, Hallitus · Yksikköekonomia, laatuportit, arvolupaus          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 OSA I (1/2): Agentic Fullstack Development System — Insinööristandardit            │
+│  📘 03: Agentic Fullstack Development System — Insinööristandardit                     │
 │     Kohderyhmä: CTO, Lead Architect · 18 agenttityökalua, muistiprotokolla, laatusykli │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 OSA II (2/2): Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas     │
+│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas              │
 │     Kohderyhmä: CTO, Tuotejohto · 4-tasoinen kangas, 3x data gates, turvalevykirjoitus │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │  🛡️ LIITTEET: Järjestelmätason Tietoturva-auditointi (OWASP Top 10) & ADR-kirjasto     │

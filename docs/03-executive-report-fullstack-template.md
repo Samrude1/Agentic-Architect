@@ -270,18 +270,23 @@ Järjestelmä tarjoaa suoran pohjan tuotantokäyttöön:
 
 ## 🏛️ Dokumentaatiosarjan Kokonaisuus
 
+* 📚 **[docs/README.md](./README.md)** — *Dokumentaatiokeskus (Lukujärjestys & roolioppaat)*
+* 📗 **[01-executive-brief.md](./01-executive-brief.md)** — *OSA II: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas*
+* 📜 **[02-agentic-suite-overview.md](./02-agentic-suite-overview.md)** — *Päädokumentti: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus*
+* 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR)*
+
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 PÄÄDOKUMENTTI: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus          │
+│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas              │
+│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus                     │
 │     Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 OSA I (1/2): Agentic Fullstack Development System — Insinööristandardit [TÄMÄ OSA]  │
+│  📘 03: Agentic Fullstack Development System — Insinööristandardit [TÄMÄ DOKUMENTTI]   │
 │     18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)│
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 OSA II (2/2): Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas     │
-│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

@@ -13,10 +13,12 @@
 ---
 
 ### 📑 Executive & Strategic Documentation
-- 🏛️ **[Agentic Engineering Suite Overview (FI)](docs/AGENTIC_SUITE_OVERVIEW.md)** — Kokoava strateginen päädokumentti: 2 pilaria, token-optimointi ja arkkitehtuurin deterministisyys.
-- 📘 **[Pilari I: Development System Report (FI)](docs/EXECUTIVE_REPORT_FULLSTACK_TEMPLATE.md)** — Kehitysjärjestelmä, 18 agenttityökalua, kognitiivinen tilanhallinta ja OWASP Shift-Left.
-- 📗 **[Pilari II: Agentic Architect Executive Brief (FI)](docs/EXECUTIVE_BRIEF.md)** — Visuaalinen 4-tasoinen kangas, 3 Data Gatea, turvallinen levykirjoitus ja tekninen syväsukellus.
-- 🛡️ **[Security Audit Report](.agents/blueprint/SECURITY_AUDIT.md)** — OWASP Top 10 compliance (Grade A: 95/100), sandbox path containment, and zero CVEs.
+> Katso koko dokumentaation lukujärjestys ja roolikohtaiset oppaat: **[📚 docs/README.md](docs/README.md)**
+
+- 📗 **[01 — Executive Brief (FI)](docs/01-executive-brief.md)** — Tiivistelmä johdolle: 2 pilaria, ROI, ongelman määrittely ja visuaalinen tuotealusta.
+- 🏛️ **[02 — Agentic Suite Overview (FI)](docs/02-agentic-suite-overview.md)** — Kokoava strateginen arkkitehtuuridokumentti: järjestelmän kokonaiskuva ja työnkulut.
+- 📘 **[03 — Development System Report (FI)](docs/03-executive-report-fullstack-template.md)** — Tekninen raportti: 18 agenttityökalua, tilanhallinta, OWASP Top 10 ja benchmarkit.
+- 🛡️ **[Security Audit Report](.agents/blueprint/SECURITY_AUDIT.md)** — OWASP Top 10 compliance (Grade A: 95/100), sandbox path containment ja nolla CVE-haavoittuvuutta.
 
 ---
 

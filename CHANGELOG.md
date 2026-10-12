@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Node Inspector Crash on Single-Node Audit (`playground-workspace.tsx`, `route.ts`)**: Implemented partial graph merging so that running single-node audits merges updates into existing nodes rather than wiping out the rest of the canvas.
 - **React Flow Position Guard**: Added automatic position coordinate resolution ensuring nodes never throw runtime errors due to undefined positions.
 
+### Changed
+- **Documentation Center (`docs/`)**: Reorganized strategic documentation with numeric prefixes (`01-executive-brief.md`, `02-agentic-suite-overview.md`, `03-executive-report-fullstack-template.md`), added `docs/README.md` reading guide and updated cross-references in root `README.md`.
+
 ---
 
 ## [1.1.0] - 2026-10-02

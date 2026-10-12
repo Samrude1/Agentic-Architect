@@ -303,15 +303,16 @@ Nykyinen MVP kattaa arviolta **65–70 %** pitkän aikavälin visiosta (Tuotevis
 
 ---
 
-## 📬 Lisätietoja
+## 📬 Lisätietoja & Linkit
 
 | Resurssi                      | Kuvaus / Sijainti                                                      |
 | :---------------------------- | :--------------------------------------------------------------------- |
+| Dokumentaatiokeskus (Hakemisto) | [docs/README.md](./README.md) (Suositeltu lukujärjestys & roolioppaat) |
+| Järjestelmäkatsaus            | [02-agentic-suite-overview.md](./02-agentic-suite-overview.md) (Strateginen päädokumentti) |
+| Insinööristandardit & Raportti | [03-executive-report-fullstack-template.md](./03-executive-report-fullstack-template.md) (Tekninen syväsukellus) |
+| Arkkitehtuuripäätökset (ADR)  | [docs/adr/](./adr/README.md) (ADR-0001: Teknologiapinovalinta)         |
+| Tietoturva-auditointi         | [.agents/blueprint/SECURITY_AUDIT.md](../.agents/blueprint/SECURITY_AUDIT.md) (OWASP Top 10 -tarkastus) |
 | Lähdekoodi ja tekninen README | [github.com/Samrude1/Agentic-Architect](https://github.com/Samrude1/Agentic-Architect) |
-| Arkkitehtuuripäätökset (ADR)  | `docs/adr/` (ADR-0001: Teknologiapinovalinta)                          |
-| Tietoturva-auditointi         | `SECURITY_AUDIT.md` (OWASP Top 10 -tarkastus)                          |
-| Koodikatselmointiraportti     | `CODE_REVIEW.md` (Laatu- ja rakennekatselmointi)                       |
-| Tuotevisio                    | `future-project-vision.md` (Pitkän aikavälin etenemismalli)            |
 
 ---
 
@@ -321,14 +322,14 @@ Nykyinen MVP kattaa arviolta **65–70 %** pitkän aikavälin visiosta (Tuotevis
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │  🏛️ AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                          │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 PÄÄDOKUMENTTI: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus          │
+│  📗 01: Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas [TÄMÄ DOKUMENTTI] │
+│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus                │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  📜 02: Agentic Engineering Suite — Strateginen Järjestelmäkatsaus                     │
 │     Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 OSA I (1/2): Agentic Fullstack Development System — Insinööristandardit            │
+│  📘 03: Agentic Fullstack Development System — Insinööristandardit                     │
 │     18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)│
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 OSA II (2/2): Agentic Architect — Visuaalinen Tuotealusta & Arkkitehtuurikangas     │
-│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus [TÄMÄ OSA]    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
