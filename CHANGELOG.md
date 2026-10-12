@@ -19,6 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-10-12
+
+> **Live Workspace Bridge & Co-Pilot Topology Awareness** — Bi-directional state bridge (Ihminen ⟷ Agentti), real-time edge topology awareness, resilient partial graph merging, position guards, and staged gate callout banners.
+
+### Added
+- **Live Workspace Bridge (`src/types/workspace-context.ts`, `ChatSidebar.tsx`, `route.ts`)**: Bi-directional context passing where Co-Pilot receives real-time active tab, staged code, audit findings, and can directly mutate Data Gates (`update_gate_code`).
+- **Full Architecture Topology Awareness (`/api/chat`)**: Co-Pilot receives live source-to-target connection graphs (`[Source] --[edge]--> [Target]`), eliminating guesswork and enabling precise architectural diagnosis.
+- **Staged Gate Action Callout Banners (`workspace/gate*.tsx`)**: Eye-catching callout banners on Gate 1 (Prisma), Gate 2 (API), and Gate 3 (UI) tabs indicating AI staged changes with a 1-click `[💾 Tallenna muutokset levylle]` button opening Diff preview.
+- **Auto-Resume Project on Playground Reload (`src/app/playground/page.tsx`)**: Visiting `/playground` without parameters now automatically redirects to the active project rather than loading an empty canvas.
+
+### Fixed
+- **Layer 3 Node Misidentification Bug (`buildSecureArchitecture`)**: Fixed condition that previously renamed all nodes at `y === 500` to `PostgreSQL Database`, properly distinguishing PostgreSQL (database), Redis (cache & queue), and External Webhooks.
+- **Node Inspector Crash on Single-Node Audit (`playground-workspace.tsx`, `route.ts`)**: Implemented partial graph merging so that running single-node audits merges updates into existing nodes rather than wiping out the rest of the canvas.
+- **React Flow Position Guard**: Added automatic position coordinate resolution ensuring nodes never throw runtime errors due to undefined positions.
+
+---
+
 ## [1.1.0] - 2026-10-02
 
 > **Agent Experience & AI SDK 4/7 Streaming Upgrade** — Real-time streaming fix, Co-Pilot interactive UX, canvas completion banners, and responsive layout polish.

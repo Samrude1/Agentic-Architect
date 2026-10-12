@@ -19,7 +19,7 @@ This repository is a professional **Fullstack Web Application** development temp
    - Structured, streaming-first AI integration with token cost safeguards.
 3. **Context and Token Management**:
    - Keep sessions focused and compact.
-   - When the developer ends the session, execute `/save` (`app-memory`).
+   - When the developer ends the session, execute `/save` (`app-memory`), which updates `.agents/blueprint/` (SESSION_STATE, DEV_LOG, PROJECT_STATUS) **and synchronizes general project documentation (root `README.md` and `CHANGELOG.md`)**.
    - When starting a fresh session, execute `/resume` (`app-memory`) and read only the 2–4 key files specified in `SESSION_STATE.md`.
 
 ---

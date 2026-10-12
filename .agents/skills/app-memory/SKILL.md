@@ -36,7 +36,17 @@ Append a chronological diary entry summarizing architectural decisions and miles
 ### Step 4: Update `.agents/blueprint/PROJECT_STATUS.md`
 Update feature matrix statuses and estimated completion percentage.
 
-### Step 5: Developer Sign-off
+### Step 5: Synchronize General Documentation (`README.md` & `CHANGELOG.md`)
+Always synchronize public-facing project documentation before concluding the session:
+1. **Root `README.md`**:
+   - Update test passing badges and counts (e.g., `XX Passing (100%)`).
+   - Synchronize **Key Features** with any newly implemented capabilities.
+   - Update **Roadmap & Maturity Status** table.
+   - Verify environment variable tables and CLI commands are accurate.
+2. **`CHANGELOG.md`**:
+   - Add concise bullet points for newly Added, Fixed, Changed, or Security items following Keep a Changelog format.
+
+### Step 6: Developer Sign-off
 Deliver a clean sign-off message:
 > ✅ **Session safely saved!**
 > - **Next in queue**: [Brief description of the next task]
