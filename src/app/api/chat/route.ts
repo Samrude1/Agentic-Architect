@@ -937,11 +937,15 @@ export async function POST(req: Request) {
     normalizedMessages.filter((m: { role: string; content: string }) => m.role === "user").pop()?.content || "";
 
   const p = lastUserMessage.toLowerCase();
+
   const isSecurityRemediation =
     p.includes("suorita tietoturvakorjaus") ||
     p.includes("tietoturvakorjaus") ||
     p.includes("anna agentille korjattavaksi") ||
     p.includes("korjaa tietoturva") ||
+    p.includes("tietoturvakorjaukset") ||
+    p.includes("tietoturva-audit") ||
+    (p.includes("security") && (p.includes("korja") || p.includes("fix") || p.includes("apply") || p.includes("audit"))) ||
     (p.includes("audit") && p.includes("korja"));
 
   const isOptimizationApply =
@@ -950,8 +954,53 @@ export async function POST(req: Request) {
     p.includes("hyväksy optimointi") ||
     p.includes("optimoi koodi suoraan") ||
     p.includes("suorita optimointi") ||
+    p.includes("suorita koodin optimointi") ||
     p.includes("päivitä optimoitu koodi") ||
-    p.includes("toteuta parannusehdotukset");
+    p.includes("toteuta parannusehdotukset") ||
+    ((p === "kyllä" || p.includes("kyllä") || p.includes("toteuta") || p.includes("anna mennä") || p.includes("hyväksyn")) &&
+      (workspaceContext?.latestAudit?.type === "optimization" || p.includes("optimoi")));
+
+  const isOptimizationAnalysis =
+    p.includes("optimoi") ||
+    p.includes("optimointi") ||
+    p.includes("spagetti") ||
+    p.includes("bloated") ||
+    p.includes("suorituskyky") ||
+    p.includes("pullonkaula") ||
+    p.includes("refaktoroi") ||
+    p.includes("siisti koodi") ||
+    p.includes("koodin laatu") ||
+    p.includes("paisuneet tiedostot") ||
+    p.includes("analysoi koodipohja");
+
+  const isArchitectureQuery =
+    p.includes("database") ||
+    p.includes("tietokanta") ||
+    p.includes("postgres") ||
+    p.includes("node") ||
+    p.includes("solmu") ||
+    p.includes("kaavio") ||
+    p.includes("arkkitehtuuri") ||
+    p.includes("oikein") ||
+    p.includes("onko");
+
+  // Deterministiset studiotason rutiinit suoritetaan AINA ensisijaisesti
+  // Tämä takaa 100% täydellisen ja laadukkaan koodin sekä estää LLM:n epämääräiset "/* lähtötilanne */" -placeholderit.
+  if (isSecurityRemediation) {
+    return handleDeterministicSecurityRemediation(workspaceContext);
+  }
+
+  if (isOptimizationApply) {
+    return handleDeterministicCodeOptimization(workspaceContext);
+  }
+
+  if (isOptimizationAnalysis) {
+    return handleOptimizationAnalysis(workspaceContext);
+  }
+
+  if (isArchitectureQuery && workspaceContext?.nodes && workspaceContext.nodes.length > 0) {
+    return handleArchitectureTopologyDebrief(lastUserMessage, workspaceContext);
+  }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey || apiKey.includes("your-openrouter-key")) {

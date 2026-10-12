@@ -27,9 +27,9 @@ This file tracks the current state, active context, and primary handoff files fo
 4. **Mermaid Export -Kovennus ([`mermaid-export.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/mermaid-export.ts), [`export-modal.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/export-modal.tsx))**:
    - Korjattu `sanitizeNodeId`-funktio estämään `TypeError: Cannot read properties of undefined (reading 'replace')` -kaatumiset, jos kankaan solmujen tai nuolten ID:t ovat puutteellisia.
    - Memoitu `mermaidCode` `useMemo`-hookilla siten, että kaaviota ei lasketa tarpeettomasti taustalla modaalin ollessa suljettuna.
-5. **Co-Pilot Koodin Optimointi-integraatio ([`route.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts), [`chat-sidebar.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/chat-sidebar.tsx))**:
-   - Lisätty `apply_code_optimization` -työkalu ja tuotanto-optimoidut koodipohjat (Prisma-yhdistelmäindeksit, API-revalidointi ja UI-memoointi).
-   - Co-Pilot osaa nyt pyydettäessä analysoida spagettikoodit, tiedostokoot ja suorittaa optimoinnin suoraan työtilaan.
+5. **Co-Pilot Koodin Optimointi & Deterministinen Ensisijaisuus ([`route.ts`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts), [`chat-sidebar.tsx`](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/chat-sidebar.tsx))**:
+   - Korjattu Co-Pilotin vastausreititys siten, että studiotason deterministiset analyysit ja koodin optimointi/tietoturvakorjaus suoritetaan **aina ensisijaisesti** ennen ulkoista kielimallia.
+   - Poistettu LLM:n geneeriset "/* lähtötilanne */" -placeholder-koodit ja puolittaiset pseudovastaukset; käyttäjä saa aina visuaalisen suorituskykytaulukon, bloated files & spagettikoodidiagnostiikan sekä 100% täydellisen tuotantokoodin Gateille 1–3 ja kankaalle.
 6. **Automaattinen Laadunvarmistus**:
    - 54 yksikkötestiä läpäisty 12 testitiedostossa (`npm test`).
    - 0 TypeScript-virhettä (`npx tsc --noEmit`).

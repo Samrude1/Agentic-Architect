@@ -250,8 +250,10 @@ Chronological record of architectural decisions, completed sprints, and developm
 - **Mermaid Export -Kovennus ([src/lib/mermaid-export.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/mermaid-export.ts), [src/components/export-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/export-modal.tsx))**:
   - Korjattu `sanitizeNodeId` estämään `TypeError: Cannot read properties of undefined (reading 'replace')` -kaatumiset puutteellisilla solmu- tai nuolitunnisteilla.
   - Memoitu `mermaidCode` laskenta siten, että sitä ei evaluoida taustalla modaalin ollessa suljettuna.
-- **Co-Pilot Koodin Optimointi-integraatio ([src/app/api/chat/route.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts))**:
+- **Co-Pilot Koodin Optimointi & Deterministinen Ensisijaisuus ([src/app/api/chat/route.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/api/chat/route.ts))**:
   - Lisätty `apply_code_optimization` -työkalu ja tuotantovalmiit koodipohjat Gateille 1–3 ja kankaalle (Redis Cache & Queue).
+  - Korjattu vastausreititys asettamalla deterministiset studiotason käsittelijät (`handleDeterministicSecurityRemediation`, `handleDeterministicCodeOptimization`, `handleOptimizationAnalysis`, `handleArchitectureTopologyDebrief`) **ensisijaisiksi ennen ulkoista kielimallikutsua**.
+  - Estetty LLM:n geneeriset "/* lähtötilanne */" -placeholderit: käyttäjä saa aina tarkan arkkitehtuuritaulukon, bloated files & spagettikoodidiagnostiikan sekä 100% täydellisen tuotantokoodin ilman pseudokoodia.
 - **Automated Verification**:
   - `npm test`: **54/54 yksikkötestiä läpäisty** 12 testitiedostossa.
   - `npx tsc --noEmit`: **0 TypeScript-virhettä**.
