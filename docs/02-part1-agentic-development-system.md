@@ -45,17 +45,17 @@
 Järjestelmä pakottaa tekoälyn noudattamaan versionhallittuja arkkitehtuurisopimuksia, automaattisia laatuportteja ja OWASP-tietoturvastandardeja jokaisella koodirivillä.
 
 ```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        LIIKETOIMINNAN YDINTULOKSET                     │
-├────────────────────────────────────────────────────────────────────────┤
-│ 🚀 Time-to-Market:      Uudet ominaisuudet ja MVP-tuotteet 3-5x nopeammin│
-│ 💰 Kustannussäästö:     -70 % tekoälyn token-kustannuksista, vähemmän  │
-│                         teknistä velkaa ja korjauskuluja               │
-│ 🛡️ Riskinhallinta:      Nollatoleranssi kovakoodatuille salaisuuksille  │
-│                         ja tietoturva-aukoille (Shift-Left Security)   │
-│ 📈 Skaalautuvuus:       Dokumentoitu, modulaarinen arkkitehtuuri, joka │
-│                         on suoraan uuden tiimiläisen jatkokehitettävissä│
-└────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         LIIKETOIMINNAN YDINTULOKSET                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 1. Time-to-Market:      Uudet ominaisuudet ja MVP-tuotteet 3-5x nopeammin    │
+│ 2. Kustannussäästö:     -70 % tekoälyn token-kustannuksista, vähemmän        │
+│                         teknistä velkaa ja korjauskuluja                     │
+│ 3. Riskinhallinta:      Nollatoleranssi kovakoodatuille salaisuuksille       │
+│                         ja tietoturva-aukoille (Shift-Left Security)         │
+│ 4. Skaalautuvuus:       Dokumentoitu, modulaarinen arkkitehtuuri, joka       │
+│                         on suoraan uuden tiimiläisen jatkokehitettävissä     │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -98,15 +98,15 @@ Järjestelmä poistaa yksittäisen kehittäjän pullonkaulat:
 ### 1.4 Strateginen Vertailumatriisi
 
 ```text
-┌─────────────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
-│ MITTARI                 │ PERINTEINEN DEV-TIIMI    │ HALLITSEMATON AI-KOODAUS │ AGENTIC FULLSTACK SYSTEM │
-├─────────────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┤
-│ Resurssitarve           │ 3–5 kehittäjää           │ 1 kehittäjä              │ 1 lead-arkkitehti + agentit │
-│ Kehityssykli            │ Viikkoja / kuukausia     │ Päiviä (korkea hauraus)  │ Tunteja / päiviä (vakaa) │
-│ Arkkitehtuurikoheesio   │ Vaihteleva               │ Matala (spagetti)        │ Deterministinen & tiukka │
-│ Tietoturvataso          │ Vaihteleva               │ Korkea haavoittuvuus     │ OWASP Top 10 -valvottu   │
-│ Tuotantodokumentaatio   │ Vaatii erillisen ajan    │ Puutteellinen            │ Automaattinen & synkassa │
-└─────────────────────────┴──────────────────────────┴──────────────────────────┴──────────────────────────┘
+┌───────────────────────┬───────────────────────┬──────────────────────────┬─────────────────────────────┐
+│ MITTARI               │ PERINTEINEN DEV-TIIMI │ HALLITSEMATON AI-KOODAUS │ AGENTIC FULLSTACK SYSTEM    │
+├───────────────────────┼───────────────────────┼──────────────────────────┼─────────────────────────────┤
+│ Resurssitarve         │ 3–5 kehittäjää        │ 1 kehittäjä              │ 1 lead-arkkitehti + agentit │
+│ Kehityssykli          │ Viikkoja / kuukausia  │ Päiviä (korkea hauraus)  │ Tunteja / päiviä (vakaa)    │
+│ Arkkitehtuurikoheesio │ Vaihteleva            │ Matala (spagetti)        │ Deterministinen & tiukka    │
+│ Tietoturvataso        │ Vaihteleva            │ Korkea haavoittuvuus     │ OWASP Top 10 -valvottu      │
+│ Tuotantodokumentaatio │ Vaatii erillisen ajan │ Puutteellinen            │ Automaattinen & synkassa    │
+└───────────────────────┴───────────────────────┴──────────────────────────┴─────────────────────────────┘
 ```
 
 ---
@@ -277,18 +277,18 @@ Järjestelmä tarjoaa suoran pohjan tuotantokäyttöön:
 * 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR)*
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│  🏛️ AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                          │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 01: Agentic Engineering Suite — Master Executive Brief                             │
-│     Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)       │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 02: Part 1 — Agentic Fullstack Development System [TÄMÄ DOKUMENTTI]                │
-│     18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)│
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 03: Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                  │
-│     4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product) │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│  AGENTIC ENGINEERING SUITE — JULKAISUSARJA                                                 │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│  [01] Agentic Engineering Suite — Master Executive Brief                                   │
+│       Yksikköekonomia, laatuportit, arvolupaus, teknologiamatriisi (CEO/CTO/Board)         │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│  [02] Part 1 — Agentic Fullstack Development System [TÄMÄ DOKUMENTTI]                      │
+│       18 agenttityökalua, kognitiivinen muisti, OWASP-turvallisuus, laatusykli (CTO/Lead)  │
+├────────────────────────────────────────────────────────────────────────────────────────────┤
+│  [03] Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                        │
+│       4-tasoinen interaktiivinen kangas, 3x data gates, turvalevykirjoitus (CTO/Product)   │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 *Agentic Engineering Suite &nbsp;·&nbsp; Arkkitehtuuri & Tekninen Toteutus: **Sami Rautanen** &nbsp;·&nbsp; Lisenssi: MIT*

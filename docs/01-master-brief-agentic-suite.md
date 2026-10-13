@@ -137,15 +137,15 @@ Tuotantoympäristöissä tekoälyä ei voida päästää suorittamaan mielivalta
 Agentic Architectin levykirjoitusarkkitehtuuri perustuu viiteen itsenäiseen suojakerrokseen:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       TIEDOSTOJÄRJESTELMÄN SUOJAUS                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ 1. Kohdekansiotarkastus:  Järjestelmäkansiot (System32, /etc) estetty      │
-│ 2. Canonical Containment: path.relative -varmennus estää '..' -ylitykset   │
-│ 3. Kirjoituksen Allowlist:Vain ennalta määritellyt kohdepolut sallittu     │
-│ 4. Varmuuskopionti:       Automaattinen snapshot .agentic-backup/ -kansioon│
-│ 5. Human-in-the-Loop:     Visuaalinen diff-esikatselu ennen kirjoitusta     │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                          TIEDOSTOJÄRJESTELMÄN SUOJAUS                          │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ 1. Kohdekansiotarkastus:   Järjestelmäkansiot (System32, /etc) estetty         │
+│ 2. Canonical Containment:  path.relative -varmennus estää '..' -ylitykset      │
+│ 3. Kirjoituksen Allowlist: Vain ennalta määritellyt kohdepolut sallittu        │
+│ 4. Varmuuskopiointi:       Automaattinen snapshot .agentic-backup/ -kansioon   │
+│ 5. Human-in-the-Loop:      Visuaalinen diff-esikatselu ennen kirjoitusta       │
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 3.2 Tietoturvan ja Koodin Laadun Mittarit
@@ -213,20 +213,20 @@ Kokonaisuuden yksityiskohtaiset tekniset raportit:
 * 📁 **[adr/](./adr/README.md)** — *Arkkitehtuuripäätökset (ADR) ja teknologiavalinnat*
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│  🏛️ AGENTIC ENGINEERING SUITE — DOKUMENTAATIOSARJAN KOKONAISUUS                       │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📜 01: Agentic Engineering Suite — Master Executive Brief [TÄMÄ DOKUMENTTI]           │
-│     Kohderyhmä: CEO, CTO, Hallitus · Yksikköekonomia, laatuportit, arvolupaus          │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📘 02: Part 1 — Agentic Fullstack Development System (Kehitysmoottori)                │
-│     Kohderyhmä: CTO, Lead Architect · 18 agenttityökalua, muistiprotokolla, laatusykli │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  📗 03: Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                  │
-│     Kohderyhmä: CTO, Tuotejohto · 4-tasoinen kangas, 3x data gates, turvalevykirjoitus │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  🛡️ LIITTEET: Järjestelmätason Tietoturva-auditointi (OWASP Top 10) & ADR-kirjasto     │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│  AGENTIC ENGINEERING SUITE — DOKUMENTAATIOSARJAN KOKONAISUUS                              │
+├───────────────────────────────────────────────────────────────────────────────────────────┤
+│  [01] Agentic Engineering Suite — Master Executive Brief [TÄMÄ DOKUMENTTI]                │
+│       Kohderyhmä: CEO, CTO, Hallitus · Yksikköekonomia, laatuportit, arvolupaus           │
+├───────────────────────────────────────────────────────────────────────────────────────────┤
+│  [02] Part 1 — Agentic Fullstack Development System (Kehitysmoottori)                     │
+│       Kohderyhmä: CTO, Lead Architect · 18 agenttityökalua, muistiprotokolla, laatusykli  │
+├───────────────────────────────────────────────────────────────────────────────────────────┤
+│  [03] Part 2 — Agentic Architect (Tuotealusta & Visuaalinen Kangas)                       │
+│       Kohderyhmä: CTO, Tuotejohto · 4-tasoinen kangas, 3x data gates, turvalevykirjoitus  │
+├───────────────────────────────────────────────────────────────────────────────────────────┤
+│  [Liitteet] Järjestelmätason Tietoturva-auditointi (OWASP Top 10) & ADR-kirjasto          │
+└───────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
