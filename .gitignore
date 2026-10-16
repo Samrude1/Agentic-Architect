@@ -45,3 +45,4 @@ docs/future-project-vision.md
 /src/generated/prisma
 .audit-cache
 .agentic-backup
+export-docs/
