@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, Sparkles, Loader2, HardDrive, Check, AlertCircle } from "lucide-react";
+import { LayoutGrid, Sparkles, Loader2, HardDrive, Check, AlertCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CodeViewer } from "@/components/code-viewer";
 
@@ -58,13 +58,14 @@ export function Gate3UiTab({
               <span>Tallenna muutokset levylle</span>
             </Button>
           ) : isSaved && onNavigateNext ? (
-            /* Priority 2: When saved, guide to next step (Canvas view) */
+            /* Priority 2: When saved, guide to next step (Project Handover) */
             <Button
               onClick={onNavigateNext}
               size="sm"
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-sm"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-sm flex items-center"
             >
-              <span>🎉 Kaikki 3 Gatea valmiina! Avaa kaavio</span>
+              <Package className="mr-1.5 h-4 w-4" />
+              <span>🎉 Kaikki 3 Gatea valmiina! Paketoi ja luovuta projekti</span>
               <span className="ml-1 text-sm font-black">➔</span>
             </Button>
           ) : uiCode ? (

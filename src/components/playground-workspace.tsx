@@ -20,6 +20,8 @@ import { ConfirmActionDialog } from "@/components/confirm-action-dialog";
 import { AuditModal } from "@/components/audit-modal";
 import { EnvDialog } from "@/components/env-dialog";
 import { ExportModal } from "@/components/export-modal";
+import { ProjectHandoverModal } from "@/components/project-handover-modal";
+import { canvasToMermaid } from "@/lib/mermaid-export";
 import { HomebasePathCard } from "@/components/workspace/homebase-path-card";
 import { Gate1SchemaTab } from "@/components/workspace/gate1-schema-tab";
 import { Gate2ApiTab } from "@/components/workspace/gate2-api-tab";
@@ -163,8 +165,9 @@ export function PlaygroundWorkspace({
     gate3: !!initialUiCode,
   });
 
-  // Export Diagram Modal State
+  // Export Diagram & Project Handover Modal States
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isHandoverModalOpen, setIsHandoverModalOpen] = useState(false);
 
   // Quality & Security Audit Suite States
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
@@ -939,6 +942,7 @@ export function PlaygroundWorkspace({
         isOptimizing={isOptimizing}
         isAuditingSecurity={isAuditingSecurity}
         onExportClick={() => setIsExportModalOpen(true)}
+        onHandoverClick={() => setIsHandoverModalOpen(true)}
         onSecurityCheck={handleSecurityClick}
         onOptimizationCheck={handleOptimizationClick}
         onEnvClick={() => setIsEnvDialogOpen(true)}
@@ -1183,7 +1187,7 @@ export function PlaygroundWorkspace({
                 agentUpdate={agentUpdatedGates.gate3}
                 onGenerateUi={triggerGenerateUiConfirmation}
                 onWriteToDisk={triggerWriteUiToDiskConfirmation}
-                onNavigateNext={() => setActiveTab("canvas")}
+                onNavigateNext={() => setIsHandoverModalOpen(true)}
                 onDismissAgentUpdate={() =>
                   setAgentUpdatedGates((prev) => {
                     const next = { ...prev };
@@ -1250,6 +1254,8 @@ export function PlaygroundWorkspace({
             ? () => setActiveTab("api")
             : diffDialog.relativePath === "src/app/api/endpoints/route.ts"
             ? () => setActiveTab("ui")
+            : diffDialog.relativePath === "src/components/features/dashboard.tsx"
+            ? () => setIsHandoverModalOpen(true)
             : undefined
         }
         nextStepLabel={
@@ -1257,6 +1263,8 @@ export function PlaygroundWorkspace({
             ? "Siirry Data Gate 2:een (API) →"
             : diffDialog.relativePath === "src/app/api/endpoints/route.ts"
             ? "Siirry Data Gate 3:een (UI) →"
+            : diffDialog.relativePath === "src/components/features/dashboard.tsx"
+            ? "🎉 Kaikki 3 Gatea valmiina! Paketoi ja luovuta projekti →"
             : "Valmis"
         }
       />
@@ -1300,6 +1308,24 @@ export function PlaygroundWorkspace({
         nodes={nodes}
         edges={edges}
         projectName={currentProjectName}
+      />
+
+      {/* Project Handover & Packaging Modal (.ZIP & Instructions) */}
+      <ProjectHandoverModal
+        open={isHandoverModalOpen}
+        onOpenChange={setIsHandoverModalOpen}
+        projectId={currentProjectId}
+        projectName={currentProjectName}
+        targetPath={targetPath}
+        prismaSchema={prismaSchema}
+        apiCode={apiCode}
+        uiCode={uiCode}
+        techProfile={techProfile}
+        mermaidDiagram={canvasToMermaid(nodes, edges, { title: currentProjectName })}
+        onTriggerCopilotGuidance={(copilotPrompt) => {
+          setActiveTab("canvas");
+          setExternalPrompt(copilotPrompt);
+        }}
       />
     </div>
   );

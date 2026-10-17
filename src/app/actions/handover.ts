@@ -1,0 +1,693 @@
+"use server";
+
+import fs from "fs";
+import path from "path";
+import JSZip from "jszip";
+import { prisma } from "@/lib/prisma";
+import {
+  validateProjectTargetPath,
+  validateProjectScaffoldWritePath,
+  ALLOWED_SCAFFOLD_PATHS,
+} from "@/lib/path-security";
+import type { TechStackProfile } from "@/app/actions/tech-stack";
+
+export interface ProjectScaffoldOptions {
+  projectName?: string;
+  targetPath?: string;
+  prismaSchema?: string;
+  apiCode?: string;
+  uiCode?: string;
+  techProfile?: TechStackProfile | null;
+  mermaidDiagram?: string;
+}
+
+export interface TargetProjectInspection {
+  isValidTarget: boolean;
+  targetPath: string;
+  error?: string;
+  exists: boolean;
+  files: {
+    hasPackageJson: boolean;
+    hasTsConfig: boolean;
+    hasPrisma: boolean;
+    hasApiRoutes: boolean;
+    hasUiComponents: boolean;
+    hasLayout: boolean;
+    hasPage: boolean;
+    hasEnvExample: boolean;
+    hasSecurityAudit: boolean;
+    hasOptimizationReport: boolean;
+  };
+  totalFilesCount: number;
+}
+
+/**
+ * Clean project slug for package.json and filenames
+ */
+function cleanSlug(name?: string): string {
+  if (!name) return "my-app";
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || "my-app";
+}
+
+/**
+ * Generates all essential production scaffolding files for a runnable Next.js 15 App Router app.
+ */
+export async function generateProjectScaffoldFiles(
+  options: ProjectScaffoldOptions
+): Promise<Record<string, string>> {
+  const slug = cleanSlug(options.projectName);
+  const displayName = options.projectName?.trim() || "Fullstack Sovellus";
+  const isPostgres = options.techProfile?.database?.type === "postgresql";
+
+  const packageJson = JSON.stringify(
+    {
+      name: slug,
+      version: "0.1.0",
+      private: true,
+      scripts: {
+        dev: "next dev",
+        build: "next build",
+        start: "next start",
+        lint: "next lint",
+        "db:push": "prisma db push",
+        "db:migrate": "prisma migrate dev",
+        "db:studio": "prisma studio",
+        "db:generate": "prisma generate",
+      },
+      dependencies: {
+        "@prisma/client": "^6.2.1",
+        clsx: "^2.1.1",
+        "lucide-react": "^0.460.0",
+        next: "^15.1.4",
+        react: "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^2.6.0",
+        zod: "^3.24.1",
+      },
+      devDependencies: {
+        "@types/node": "^22.10.7",
+        "@types/react": "^19.0.7",
+        "@types/react-dom": "^19.0.3",
+        postcss: "^8.4.49",
+        prisma: "^6.2.1",
+        tailwindcss: "^3.4.17",
+        typescript: "^5.7.3",
+      },
+    },
+    null,
+    2
+  );
+
+  const tsconfigJson = JSON.stringify(
+    {
+      compilerOptions: {
+        target: "ES2017",
+        lib: ["dom", "dom.iterable", "esnext"],
+        allowJs: true,
+        skipLibCheck: true,
+        strict: true,
+        noEmit: true,
+        esModuleInterop: true,
+        module: "esnext",
+        moduleResolution: "bundler",
+        resolveJsonModule: true,
+        isolatedModules: true,
+        jsx: "preserve",
+        incremental: true,
+        plugins: [{ name: "next" }],
+        paths: {
+          "@/*": ["./src/*"],
+        },
+      },
+      include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+      exclude: ["node_modules"],
+    },
+    null,
+    2
+  );
+
+  const nextConfig = `import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+};
+
+export default nextConfig;
+`;
+
+  const tailwindConfig = `import type { Config } from "tailwindcss";
+
+export default {
+  darkMode: ["class"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;
+`;
+
+  const postcssConfig = `export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+`;
+
+  const prismaClient = `import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+`;
+
+  const globalsCss = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+`;
+
+  const layoutTsx = `import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "${displayName}",
+  description: "Generoitu Agentic Architect -alustalla",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="fi">
+      <body className="antialiased min-h-screen bg-background text-foreground">
+        {children}
+      </body>
+    </html>
+  );
+}
+`;
+
+  const pageTsx = `import FeatureDashboard from "@/components/features/dashboard";
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen p-4 sm:p-8 max-w-7xl mx-auto">
+      <header className="mb-8 border-b pb-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            ${displayName}
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+            Käynnistysvalmis Fullstack-sovellus • Generoitu Agentic Architectilla
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            ✓ Tuotantovalmis koodipohja
+          </span>
+        </div>
+      </header>
+
+      <section className="bg-card rounded-xl border p-4 sm:p-6 shadow-sm">
+        <FeatureDashboard />
+      </section>
+    </main>
+  );
+}
+`;
+
+  const envExample = isPostgres
+    ? `# PostgreSQL -tietokantayhteys (Prisma)
+DATABASE_URL="postgresql://postgres:salasana@localhost:5432/${slug}?schema=public"
+
+# Sovelluksen URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+`
+    : `# SQLite -tietokantayhteys (Prisma)
+DATABASE_URL="file:./dev.db"
+
+# Sovelluksen URL
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+`;
+
+  const gitignore = `# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# SQLite
+*.db
+*.db-journal
+
+# Agentic backup
+.agentic-backup/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+`;
+
+  const readmeMd = `# ${displayName}
+
+Tämä on **Agentic Architect** -alustalla suunniteltu ja generoitu tuotantovalmis Fullstack Next.js -sovellus.
+
+---
+
+## 🚀 Pika-aloitus (Asennus 5 minuutissa)
+
+Kun purat tämän paketin tai avaat kansion IDE-ympäristössä (esim. **VS Code**, **Cursor**, **Windsurf** tai **Antigravity**), seuraa näitä helppoja askeleita:
+
+### 1. Avaa projektikansio komentorivillä tai IDE:ssä
+\`\`\`bash
+cd ${slug}
+code .
+\`\`\`
+
+### 2. Asenna projektin riippuvuudet
+\`\`\`bash
+npm install
+\`\`\`
+
+### 3. Aseta ympäristömuuttujat (.env)
+Kopioi esimerkkipohja paikalliseksi asetustiedostoksi:
+\`\`\`bash
+# Linux / macOS / Git Bash:
+cp .env.example .env.local
+
+# Windows PowerShell:
+Copy-Item .env.example .env.local
+\`\`\`
+
+### 4. Alusta tietokanta (Prisma)
+Luo tietokantataulut skeeman mukaan:
+\`\`\`bash
+npx prisma db push
+\`\`\`
+*(Vinkki: Voit tutkia tietokannan sisältöä suoraan selaimessa ajamalla: \`npx prisma studio\`)*
+
+### 5. Käynnistä kehityspalvelin
+\`\`\`bash
+npm run dev
+\`\`\`
+Avaa selain osoitteessa **[http://localhost:3000](http://localhost:3000)**! 🎉
+
+---
+
+## 📁 Projektin Rakenne & Tiedostot
+
+- **\`prisma/schema.prisma\`**: Tietokantamallit ja relaatiot (Data Gate 1).
+- **\`src/app/api/endpoints/route.ts\`**: REST API Route Handlerit ja Zod-syötevalidoinnit (Data Gate 2).
+- **\`src/components/features/dashboard.tsx\`**: Reaktiivinen React 19 + Tailwind CSS käyttöliittymä (Data Gate 3).
+- **\`src/lib/prisma.ts\`**: PrismaClient-yhteys singleton Next.js -ympäristöön.
+- **\`src/app/layout.tsx\` & \`src/app/page.tsx\`**: Sovelluksen pääsivu ja tyylit.
+- **\`docs/\`**: Arkkitehtuurikaaviot, tietoturva- ja optimointiraportit.
+
+---
+
+## 🛠️ Hyödylliset Komennot
+
+| Komento | Kuvaus |
+| :--- | :--- |
+| \`npm run dev\` | Käynnistää Next.js Turbopack kehityspalvelimen |
+| \`npm run build\` | Kääntää tuotantobundlen |
+| \`npx prisma db push\` | Synkronoi \`schema.prisma\` -mallit tietokantaan |
+| \`npx prisma studio\` | Avaa visuaalisen tietokantaselaimen porttiin 5555 |
+| \`npx prisma generate\` | Generoi tuoreen PrismaClientin TypeScript-tyypit |
+
+---
+*Luotu ja validoitu Agentic Architect -kehitysympäristöllä.*
+`;
+
+  const files: Record<string, string> = {
+    "package.json": packageJson,
+    "tsconfig.json": tsconfigJson,
+    "next.config.ts": nextConfig,
+    "postcss.config.mjs": postcssConfig,
+    "tailwind.config.ts": tailwindConfig,
+    "src/lib/prisma.ts": prismaClient,
+    "src/app/globals.css": globalsCss,
+    "src/app/layout.tsx": layoutTsx,
+    "src/app/page.tsx": pageTsx,
+    ".env.example": envExample,
+    ".gitignore": gitignore,
+    "README.md": readmeMd,
+  };
+
+  if (options.mermaidDiagram) {
+    files["docs/ARCHITECTURE.md"] = `# ${displayName} - Arkkitehtuuri\n\n\`\`\`mermaid\n${options.mermaidDiagram}\n\`\`\`\n`;
+  }
+
+  return files;
+}
+
+/**
+ * Inspects a target directory on disk to see what parts already exist.
+ */
+export async function inspectTargetProject(
+  targetPath: string
+): Promise<TargetProjectInspection> {
+  const val = validateProjectTargetPath(targetPath);
+  if (!val.isValid || !val.normalizedPath) {
+    return {
+      isValidTarget: false,
+      targetPath,
+      error: val.error || "Virheellinen kotikansio.",
+      exists: false,
+      files: {
+        hasPackageJson: false,
+        hasTsConfig: false,
+        hasPrisma: false,
+        hasApiRoutes: false,
+        hasUiComponents: false,
+        hasLayout: false,
+        hasPage: false,
+        hasEnvExample: false,
+        hasSecurityAudit: false,
+        hasOptimizationReport: false,
+      },
+      totalFilesCount: 0,
+    };
+  }
+
+  const normalized = val.normalizedPath;
+  const exists = fs.existsSync(normalized);
+
+  if (!exists) {
+    return {
+      isValidTarget: true,
+      targetPath: normalized,
+      exists: false,
+      files: {
+        hasPackageJson: false,
+        hasTsConfig: false,
+        hasPrisma: false,
+        hasApiRoutes: false,
+        hasUiComponents: false,
+        hasLayout: false,
+        hasPage: false,
+        hasEnvExample: false,
+        hasSecurityAudit: false,
+        hasOptimizationReport: false,
+      },
+      totalFilesCount: 0,
+    };
+  }
+
+  const check = (rel: string) => fs.existsSync(path.resolve(normalized, rel));
+
+  let totalFilesCount = 0;
+  function countFilesRecursively(dir: string, depth = 0): void {
+    if (depth > 6) return;
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (
+          entry.name === "node_modules" ||
+          entry.name === ".git" ||
+          entry.name === ".next" ||
+          entry.name === ".agentic-backup"
+        ) {
+          continue;
+        }
+        if (entry.isDirectory()) {
+          countFilesRecursively(path.resolve(dir, entry.name), depth + 1);
+        } else if (entry.isFile()) {
+          totalFilesCount++;
+        }
+      }
+    } catch {
+      // ignore read permission errors
+    }
+  }
+  countFilesRecursively(normalized);
+
+  return {
+    isValidTarget: true,
+    targetPath: normalized,
+    exists: true,
+    files: {
+      hasPackageJson: check("package.json"),
+      hasTsConfig: check("tsconfig.json"),
+      hasPrisma: check("prisma/schema.prisma"),
+      hasApiRoutes: check("src/app/api/endpoints/route.ts") || check("src/app/api"),
+      hasUiComponents: check("src/components/features/dashboard.tsx") || check("src/components/features"),
+      hasLayout: check("src/app/layout.tsx"),
+      hasPage: check("src/app/page.tsx"),
+      hasEnvExample: check(".env.example") || check(".env.local.example"),
+      hasSecurityAudit: check("docs/SECURITY_AUDIT.md"),
+      hasOptimizationReport: check("docs/OPTIMIZATION_REPORT.md"),
+    },
+    totalFilesCount,
+  };
+}
+
+/**
+ * Scaffolds the missing project files directly to the target directory on disk.
+ */
+export async function scaffoldProjectTargetFolder(
+  projectId: string,
+  options: ProjectScaffoldOptions
+): Promise<{
+  success: boolean;
+  error?: string;
+  writtenFiles?: string[];
+  skippedFiles?: string[];
+  targetPath?: string;
+}> {
+  let targetPath = options.targetPath;
+
+  if (projectId) {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+    if (project?.targetPath) {
+      targetPath = project.targetPath;
+    }
+  }
+
+  if (!targetPath) {
+    return {
+      success: false,
+      error: "Kotikansiota (Project Homebase Directory) ei ole asetettu.",
+    };
+  }
+
+  const targetDirVal = validateProjectTargetPath(targetPath);
+  if (!targetDirVal.isValid || !targetDirVal.normalizedPath) {
+    return { success: false, error: targetDirVal.error };
+  }
+  const targetDir = targetDirVal.normalizedPath;
+
+  const scaffoldFiles = await generateProjectScaffoldFiles(options);
+
+  const writtenFiles: string[] = [];
+  const skippedFiles: string[] = [];
+
+  for (const [relPath, content] of Object.entries(scaffoldFiles)) {
+    const pathVal = validateProjectScaffoldWritePath(targetDir, relPath);
+    if (!pathVal.isValid || !pathVal.fullPath) {
+      skippedFiles.push(relPath);
+      continue;
+    }
+
+    const fullPath = pathVal.fullPath;
+    try {
+      const fileExists = fs.existsSync(fullPath);
+
+      // Create backup if modifying existing file
+      if (fileExists) {
+        const existing = await fs.promises.readFile(fullPath, "utf-8");
+        if (existing !== content) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          const backupPath = path.resolve(targetDir, ".agentic-backup", timestamp, relPath);
+          await fs.promises.mkdir(path.dirname(backupPath), { recursive: true });
+          await fs.promises.writeFile(backupPath, existing, "utf-8");
+        }
+      }
+
+      await fs.promises.mkdir(path.dirname(fullPath), { recursive: true });
+      await fs.promises.writeFile(fullPath, content, "utf-8");
+      writtenFiles.push(relPath);
+    } catch (err) {
+      console.error(`Failed to write scaffold file ${relPath}:`, err);
+      skippedFiles.push(relPath);
+    }
+  }
+
+  return {
+    success: true,
+    writtenFiles,
+    skippedFiles,
+    targetPath: targetDir,
+  };
+}
+
+/**
+ * Builds a complete standalone .ZIP package of the project.
+ * Returns a base64-encoded string representing the zip binary data.
+ */
+export async function buildProjectZipBase64(
+  options: ProjectScaffoldOptions
+): Promise<{
+  success: boolean;
+  error?: string;
+  zipBase64?: string;
+  filename?: string;
+  fileCount?: number;
+}> {
+  try {
+    const zip = new JSZip();
+    const slug = cleanSlug(options.projectName);
+    const scaffoldFiles = await generateProjectScaffoldFiles(options);
+
+    const addedFiles = new Set<string>();
+
+    // 1. If targetPath is valid and exists on disk, read disk files first!
+    if (options.targetPath) {
+      const targetDirVal = validateProjectTargetPath(options.targetPath);
+      if (targetDirVal.isValid && targetDirVal.normalizedPath) {
+        const targetDir = targetDirVal.normalizedPath;
+        if (fs.existsSync(targetDir)) {
+          function addDirectoryToZip(currentDir: string, relativePrefix = ""): void {
+            const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+            for (const entry of entries) {
+              const fullEntryPath = path.resolve(currentDir, entry.name);
+              const zipRelativePath = relativePrefix ? `${relativePrefix}/${entry.name}` : entry.name;
+
+              // Filter out system and node cache dirs
+              if (
+                entry.name === "node_modules" ||
+                entry.name === ".git" ||
+                entry.name === ".next" ||
+                entry.name === ".agentic-backup" ||
+                entry.name === ".DS_Store"
+              ) {
+                continue;
+              }
+
+              if (entry.isDirectory()) {
+                addDirectoryToZip(fullEntryPath, zipRelativePath);
+              } else if (entry.isFile()) {
+                try {
+                  const content = fs.readFileSync(fullEntryPath);
+                  zip.file(zipRelativePath, content);
+                  addedFiles.add(zipRelativePath.replace(/\\/g, "/"));
+                } catch {
+                  // Ignore read errors
+                }
+              }
+            }
+          }
+
+          addDirectoryToZip(targetDir);
+        }
+      }
+    }
+
+    // 2. Add Gate codes from memory if not already in zip or if missing on disk
+    if (options.prismaSchema && !addedFiles.has("prisma/schema.prisma")) {
+      zip.file("prisma/schema.prisma", options.prismaSchema);
+      addedFiles.add("prisma/schema.prisma");
+    }
+
+    if (options.apiCode && !addedFiles.has("src/app/api/endpoints/route.ts")) {
+      zip.file("src/app/api/endpoints/route.ts", options.apiCode);
+      addedFiles.add("src/app/api/endpoints/route.ts");
+    }
+
+    if (options.uiCode && !addedFiles.has("src/components/features/dashboard.tsx")) {
+      zip.file("src/components/features/dashboard.tsx", options.uiCode);
+      addedFiles.add("src/components/features/dashboard.tsx");
+    }
+
+    // 3. Add scaffold files for any missing essential files (package.json, layout.tsx, etc.)
+    for (const [relPath, content] of Object.entries(scaffoldFiles)) {
+      const normalizedRel = relPath.replace(/\\/g, "/");
+      if (!addedFiles.has(normalizedRel)) {
+        zip.file(normalizedRel, content);
+        addedFiles.add(normalizedRel);
+      }
+    }
+
+    const zipBase64 = await zip.generateAsync({
+      type: "base64",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 },
+    });
+
+    return {
+      success: true,
+      zipBase64,
+      filename: `${slug}-valmis-paketti.zip`,
+      fileCount: addedFiles.size,
+    };
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : "Zip-paketin luonti epäonnistui.";
+    console.error("Failed to build project zip:", error);
+    return { success: false, error: errorMsg };
+  }
+}

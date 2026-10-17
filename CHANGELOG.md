@@ -17,6 +17,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team collaboration via shared project links
 - Cloud deployment packaging (Vercel / Railway)
 
+## [1.4.0] - 2026-10-17
+
+> **Turnkey Project Handover, Packaging & Scaffolding Engine** — One-click standalone `.zip` export (JSZip) with turnkey Next.js 15 App Router boilerplate, local target folder scaffolding with automated backups, interactive 5-step IDE quickstart guide, and Co-Pilot handover guidance trigger.
+
+### Added
+- **Turnkey Project Handover Engine (`src/app/actions/handover.ts`)**: Generates standalone Next.js 15 App Router applications (`package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `src/lib/prisma.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`, `README.md`, `docs/ARCHITECTURE.md`) bundling all Gate 1-3 codes into a single downloadable `.zip` package via `JSZip`.
+- **Local Target Folder Scaffolding (`scaffoldProjectTargetFolder`)**: Scaffolds missing root files directly into the active project directory on disk (`pulsedesk`) with automated timestamped backups under `.agentic-backup/`.
+- **Project Handover Modal (`ProjectHandoverModal`)**: Interactive dialog with 3 tabs:
+  1. *Paketointi & Luovutus*: Instant `.zip` download with file count indicator and local folder scaffolding.
+  2. *Asennus- & IDE-ohjeet*: 5-step IDE setup guide (VS Code, Cursor, Windsurf, Antigravity) with one-click copyable quickstart commands (`npm install && npx prisma db push && npm run dev`).
+  3. *Co-Pilot Opastus*: 1-click trigger sending a tailored handover prompt directly into the Co-Pilot chat.
+- **Workflow & Header Integration**: Added prominent `[ 📦 Paketoi ]` button in `WorkspaceHeader` and automatic next-step progression in Gate 3 (`[ 🎉 Kaikki 3 Gatea valmiina! Paketoi ja luovuta projekti ➔ ]`).
+- **Scaffold Security Guardrails (`path-security.ts`)**: Added `ALLOWED_SCAFFOLD_PATHS` and `validateProjectScaffoldWritePath` with strict directory traversal prevention.
+- **Testing**: Added unit test suite `tests/unit/handover.test.ts` (6 tests). Total Vitest suite passing: **60 tests across 13 test files (100%)**.
+
+### Fixed
+- **Modal Width & Button Clipping**: Fixed Tailwind CSS v4 dialog max-width constraint (`w-[95vw] sm:max-w-3xl md:max-w-4xl lg:max-w-5xl`) and added responsive two-line button layout to prevent text clipping on long project names.
+
 ## [1.3.1] - 2026-10-12
 
 > **Foolproof UX & Unambiguous Gate Step Progression** — Simplified single-action workflow for non-technical users, step banners (Vaihe 1/3, 2/3, 3/3), sequential next-step buttons upon disk writes, and reactive header state badges.

@@ -15,6 +15,7 @@ import {
   Zap,
   Key,
   Download,
+  Package,
   CheckCircle2,
   MoreHorizontal,
 } from "lucide-react";
@@ -44,6 +45,7 @@ export interface WorkspaceHeaderProps {
   isOptimizing?: boolean;
   isAuditingSecurity?: boolean;
   onExportClick: () => void;
+  onHandoverClick?: () => void;
   onSecurityCheck: () => void;
   onOptimizationCheck: () => void;
   onEnvClick: () => void;
@@ -63,6 +65,7 @@ export function WorkspaceHeader({
   isOptimizing = false,
   isAuditingSecurity = false,
   onExportClick,
+  onHandoverClick,
   onSecurityCheck,
   onOptimizationCheck,
   onEnvClick,
@@ -215,6 +218,20 @@ export function WorkspaceHeader({
                 <button
                   onClick={() => {
                     setShowToolsMenu(false);
+                    onHandoverClick?.();
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium hover:bg-muted transition-colors text-left"
+                >
+                  <Package className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  <div>
+                    <div className="font-semibold text-foreground">Paketoi & Luovuta</div>
+                    <div className="text-[10px] text-muted-foreground">Lataa .ZIP & Asennusohjeet</div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowToolsMenu(false);
                     onSecurityCheck();
                   }}
                   disabled={isAuditingSecurity}
@@ -274,6 +291,17 @@ export function WorkspaceHeader({
 
         {/* Desktop tool suite (>= lg) */}
         <div className="hidden lg:flex items-center space-x-1 sm:space-x-1.5">
+          <Button
+            onClick={onHandoverClick}
+            variant="outline"
+            size="sm"
+            className="h-8 px-2.5 border-purple-500/50 bg-purple-600/10 text-purple-600 dark:text-purple-400 hover:bg-purple-600/20 font-bold shadow-sm flex items-center"
+            title="Projektin Luovutus & Paketointi (.ZIP & Asennusohjeet)"
+          >
+            <Package className="h-3.5 w-3.5 text-purple-500 mr-1.5" />
+            <span>Paketoi</span>
+          </Button>
+
           <Button
             onClick={onExportClick}
             variant="outline"

@@ -130,3 +130,62 @@ export function validateProjectFileWritePath(
     fullPath,
   };
 }
+
+export const ALLOWED_SCAFFOLD_PATHS = [
+  "package.json",
+  "tsconfig.json",
+  "next.config.ts",
+  "postcss.config.mjs",
+  "tailwind.config.ts",
+  "src/lib/prisma.ts",
+  "src/app/globals.css",
+  "src/app/layout.tsx",
+  "src/app/page.tsx",
+  ".env.example",
+  ".gitignore",
+  "README.md",
+  "docs/ARCHITECTURE.md",
+] as const;
+
+export type AllowedScaffoldPath = (typeof ALLOWED_SCAFFOLD_PATHS)[number];
+
+/**
+ * Validates relative file path against scaffold allowlist and ensures path containment within targetDir.
+ */
+export function validateProjectScaffoldWritePath(
+  targetDir: string,
+  relativePath: string
+): {
+  isValid: boolean;
+  error?: string;
+  fullPath?: string;
+} {
+  const resolvedTarget = path.resolve(targetDir);
+  const fullPath = path.resolve(resolvedTarget, relativePath);
+
+  // Path traversal check
+  const rel = path.relative(resolvedTarget, fullPath);
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
+    return {
+      isValid: false,
+      error: "Laiton tiedostopolku (Path traversal check failed).",
+    };
+  }
+
+  // Normalize forward/backward slashes for comparison
+  const normalizedRelative = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
+
+  // Check scaffold allowlist
+  const isAllowed = ALLOWED_SCAFFOLD_PATHS.some((allowed) => allowed === normalizedRelative);
+  if (!isAllowed) {
+    return {
+      isValid: false,
+      error: `Laiton kohdepolku: Tiedostoa '${relativePath}' ei ole sallittujen paketointikohteiden listalla.`,
+    };
+  }
+
+  return {
+    isValid: true,
+    fullPath,
+  };
+}

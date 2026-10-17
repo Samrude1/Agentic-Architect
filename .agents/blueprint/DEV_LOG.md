@@ -274,6 +274,35 @@ Chronological record of architectural decisions, completed sprints, and developm
   - `npx tsc --noEmit`: **0 TypeScript-virhettä**.
   - `npm run build`: Next.js Turbopack -tuotantopaketti kääntyy puhtaasti.
 
+---
+
+### 2026-10-17 — Projektin Luovutus & Paketointi (.ZIP-lataus, Kohdekansion Täydennys & Co-Pilot Asennusopas)
+- **Projektin Loppupaketointi & Turnkey Handover ([src/app/actions/handover.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/app/actions/handover.ts))**:
+  - Toteutettu `buildProjectZipBase64` (`JSZip`), joka paketoi arkkitehtuurin ja koodin suoraan ladattavaksi `.zip`-arkistoksi.
+  - Paketti sisältää täyden itsenäisen Next.js 15 App Router -pohjan:
+    - `package.json` (Next.js 15, React 19, Prisma, Tailwind CSS, Lucide React, Zod ja skriptit: `dev`, `build`, `start`, `lint`, `db:push`, `db:studio`).
+    - `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`.
+    - `src/lib/prisma.ts`: PrismaClient-singleton Next.js App Routerille.
+    - `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`: Kotisivu, joka esittää Gate 3 -käyttöliittymän.
+    - `prisma/schema.prisma` (Gate 1), `src/app/api/endpoints/route.ts` (Gate 2), `src/components/features/dashboard.tsx` (Gate 3).
+    - `.env.example`, `.gitignore`, `README.md` ja `docs/ARCHITECTURE.md`.
+- **Kohdekansion Täydennys Levylle (Scaffold to Disk)**:
+  - Toteutettu `scaffoldProjectTargetFolder`, joka kirjoittaa puuttuvat ajotiedostot suoraan kotikansioon (`C:\Users\samru\DEVELOPER\PROJECTS\pulsedesk`) automaattisilla varmuuskopioilla (`.agentic-backup/`).
+  - Lisätty `ALLOWED_SCAFFOLD_PATHS` ja `validateProjectScaffoldWritePath` turvatarkastukset ([src/lib/path-security.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/lib/path-security.ts)).
+- **Projektin Luovutus & Paketointi -modaali ([src/components/project-handover-modal.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/project-handover-modal.tsx))**:
+  - **Välilehti 1: Paketointi & Luovutus**: `.ZIP`-latauspainike tiedostonimellä ja tiedostolaskurilla, kohdekansion täydennys levylle, sekä toimitettavan paketin tarkistuslista.
+  - **Välilehti 2: Asennus- & IDE-ohjeet**: 5-vaiheinen asennusopas IDE-ympäristöihin (VS Code, Cursor, Windsurf, Antigravity) ja yhden rivin pikakomento (`npm install && npx prisma db push && npm run dev`) helppokäyttöisellä kopiointipainikkeella.
+  - **Välilehti 3: Co-Pilot Opastus**: Painike `[ 🤖 Pyydä Co-Pilotia opastamaan chatissa ➔ ]`, joka siirtää suoraan chatiin räätälöidyn kehotteen koodin käyttöönoton opastamiseen.
+- **Käyttöliittymäintegraatio & Työnkulun Viimeistely**:
+  - Yläpalkkiin ([src/components/workspace/workspace-header.tsx](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/src/components/workspace/workspace-header.tsx)) lisätty selkeä **`[ 📦 Paketoi ]`** -toiminto (ja mobiilivalikkoon "Paketoi & Luovuta").
+  - Data Gate 3:n ja `DiffPreviewDialog`:n lopputoiminto ohjaa automaattisesti suoraan paketointiin: `[ 🎉 Kaikki 3 Gatea valmiina! Paketoi ja luovuta projekti ➔ ]`.
+  - Korjattu modaalin leveys (`sm:max-w-3xl md:max-w-4xl lg:max-w-5xl`) ja kaksirivinen nappiasettelu niin, että pitkätkään projektinimet eivät leikkaa tekstejä.
+- **Automated Verification**:
+  - Lisätty [tests/unit/handover.test.ts](file:///c:/Users/samru/DEVELOPER/PROJECTS/Fullstack-developer/tests/unit/handover.test.ts) (6 testiä: scaffold generation, zip packaging, traversal security, directory inspection).
+  - Kaikki **60 yksikkötestiä läpäisty** 13 testitiedostossa (`npx vitest run`).
+  - **0 TypeScript-virhettä** (`npx tsc --noEmit`).
+
+
 
 
 
