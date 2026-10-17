@@ -20,6 +20,7 @@ export function DeleteProjectButton({ projectId, projectName }: DeleteProjectBut
     startTransition(async () => {
       await deleteProject(projectId);
       router.push("/");
+      router.refresh();
     });
   };
 
