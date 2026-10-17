@@ -141,6 +141,8 @@ export const ALLOWED_SCAFFOLD_PATHS = [
   "src/app/globals.css",
   "src/app/layout.tsx",
   "src/app/page.tsx",
+  "src/types/index.ts",
+  ".env",
   ".env.example",
   ".gitignore",
   "README.md",

@@ -5,7 +5,7 @@ This document tracks verified implementation progress, active feature matrix, te
 ---
 
 ## 1. Executive Status
-- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Codebase Optimization Engine (Bloated Files > 1k lines & Spaghetti Detection), Smart Tech Stack & .env Inference, Confirmation Dialogs, Live Workspace Bridge (Ihminen ⟷ Agentti), Project Handover & Turnkey Packaging (.ZIP & Local Scaffolding) & Automated Testing Suite (60 Vitest tests) Complete
+- **Current State**: Phase 1 (Canvas), Data Gate 1 (Prisma SQLite Zero-Config), Data Gate 2 (Backend APIs), Data Gate 3 (UI Components & Master-Detail), Multi-Format Diagram Export (PNG, SVG, Mermaid.js), Quality Suite (Security & Optimize), Codebase Optimization Engine (Bloated Files > 1k lines & Spaghetti Detection), Smart Tech Stack & .env Inference, Confirmation Dialogs, Live Workspace Bridge (Ihminen ⟷ Agentti), Project Handover & Zero-Config Turnkey Packaging (.ZIP & Local Scaffolding with .env, types contract & 2-step setup) & Automated Testing Suite (60 Vitest tests) Complete
 - **Estimated Completion**: 100% (Production Ready)
 - **Last Updated**: 2026-10-17
 - **Key Focus**:
@@ -13,11 +13,11 @@ This document tracks verified implementation progress, active feature matrix, te
   - Node Inspector with live audit & AI descriptions.
   - AI Co-Pilot Chat upgraded to AI SDK 7 SSE streaming with modern `sendMessage`, progress HUD, and empty state triggers.
   - Document parsing (`.pdf`, `.txt`, `.md`) with `pdf-parse` v2 native class support.
-  - Data Gate 1: AI Prisma database schema generator & direct local disk write.
+  - Data Gate 1: AI Prisma SQLite database schema generator & bidirectional relation integrity.
   - Data Gate 2: AI Next.js Route Handlers & Server Actions generator with Zod validation & local disk write.
-  - Data Gate 3: AI React 19 + Tailwind CSS feature component generator with live metrics, search filtering, modal forms, and local disk write.
+  - Data Gate 3: AI React 19 + Tailwind CSS feature component generator with 4 KPI cards, search filtering, Master-Detail modal, and zero phantom imports.
   - Canvas Diagram Export: One-click export to PNG (2x retina), SVG vector, and Mermaid.js markdown syntax (`.mmd` & `.md`).
-  - Project Handover & Packaging: One-click turnkey standalone `.zip` export (JSZip) with complete Next.js 15 App Router boilerplate, local target folder scaffolding with backups, interactive 5-step IDE quickstart, and Co-Pilot guidance trigger.
+  - Project Handover & Packaging: Zero-config turnkey standalone `.zip` export (JSZip) with complete Next.js 15 App Router boilerplate, embedded active `.env` (`file:./dev.db`), generated `src/types/index.ts`, `"setup"` script (`prisma db push && dev`), local target folder scaffolding with backups, interactive 5-step IDE quickstart, and Co-Pilot guidance trigger.
   - Smart Tech Inference: Auto-detects lightweight apps (no DB/API keys needed) vs. heavy SaaS (PostgreSQL, Stripe, Resend).
   - Environment Guidance: Auto-generates `.env.local.example` with exact API key sourcing instructions and disk-writer.
   - Quality Suite: One-click "Security Check" (OWASP) and "Optimize Code" (Bloated files > 1,000 lines, spaghetti code, composite indexes, caching, memoization).
@@ -35,11 +35,11 @@ This document tracks verified implementation progress, active feature matrix, te
 | **Visual Canvas** | `architecture-canvas.tsx` | 🟩 Complete | 4-tier React Flow diagram with custom node styles |
 | **Node Inspector** | `node-inspector.tsx` | 🟩 Complete | Live node title, tag editing, AI descriptions, single-node audit |
 | **AI Co-Pilot** | `architecture-agent.ts`, `/api/chat` | 🟩 Complete | Structured AI system breakdown & OpenRouter streaming |
-| **Data Gate 1 (Prisma)** | `codegen.ts`, `code-viewer.tsx` | 🟩 Complete | AI Prisma schema generation & direct filesystem output |
+| **Data Gate 1 (Prisma)** | `codegen.ts`, `code-viewer.tsx` | 🟩 Complete | AI Prisma SQLite schema generation & direct filesystem output |
 | **Data Gate 2 (APIs)** | `codegen.ts`, `playground-workspace.tsx` | 🟩 Complete | Next.js Route Handlers & Server Actions generator with Zod validation |
-| **Data Gate 3 (UI)** | `codegen.ts`, `playground-workspace.tsx` | 🟩 Complete | React 19 + Tailwind CSS feature components with reactive state & disk writer |
+| **Data Gate 3 (UI)** | `codegen.ts`, `playground-workspace.tsx` | 🟩 Complete | React 19 + Tailwind CSS feature components with 4 KPI cards & Master-Detail modal |
 | **Export Formats** | `mermaid-export.ts`, `export-modal.tsx` | 🟩 Complete | Canvas diagram export as PNG (2x), SVG, and Mermaid.js (`.mmd` & `.md`) |
-| **Project Handover & .ZIP**| `handover.ts`, `project-handover-modal.tsx` | 🟩 Complete | Standalone `.zip` generation, target folder scaffolding with backups, 5-step IDE guide & Co-Pilot trigger |
+| **Project Handover & .ZIP**| `handover.ts`, `project-handover-modal.tsx` | 🟩 Complete | Standalone `.zip` generation with active `.env`, `src/types/index.ts`, target folder scaffolding, 2-step setup & Co-Pilot trigger |
 | **Tech Inference & .env** | `tech-stack.ts`, `env-dialog.tsx` | 🟩 Complete | Auto-detects app tier (Lightweight/Standard/Heavy), DB need, and generates `.env.local.example` |
 | **Quality Suite (Audit)** | `audit.ts`, `audit-modal.tsx` | 🟩 Complete | 1-click Security Check (OWASP) & Optimize Code with scorecard modal |
 | **Codebase Optimizer** | `audit.ts`, `playground-workspace.tsx` | 🟩 Complete | Scans disk for files > 1,000 lines, spaghetti code, indexes, Next.js cache |

@@ -2,6 +2,27 @@
 
 Chronological record of architectural decisions, completed sprints, and development milestones.
 
+### 2026-10-17 — Zero-Config Turnkey Export & Gate 1-4 Post-Mortem Implementation
+- **Zero-Config SQLite Oletus & Täysi Asennusvalmius (Gate 1 & Gate 4)**:
+   - Vaihdettu sekä Prisma LLM-promptin että `handover.ts`:n oletustietokannaksi SQLite (`file:./dev.db`), jotta generoitu projekti toimii suoraan `npm run setup` -komennolla ilman PostgreSQL-palvelimen konfigurointia.
+   - Pakettiin sisällytetään automaattisesti toimintavalmis `.env`-tiedosto (`DATABASE_URL="file:./dev.db"`).
+   - Lisätty `package.json`:iin yhdistetty käynnistyskomento `"setup": "npx prisma db push && npm run dev"` sekä `"autoprefixer": "^10.4.20"`.
+   - Päivitetty `README.md` selkeään 2-step asennukseen: `npm install` ja `npm run setup`.
+- **Jaetut TypeScript-sopimukset (Gate 1 -> Gate 3)**:
+   - Rakennettu automaattinen `generateTypeScriptContracts` -generaattori, joka tulkkaa Prisma-skeeman mallit `src/types/index.ts` -tiedostoksi.
+   - Injektoidaan tyyppisopimukset suoraan Gate 3 UI-generaattorin kehotteeseen.
+- **Haamuimporttien & Haamusopimusten Estäminen (Gate 3 UI Prompt)**:
+   - Tiukennettu LLM-järjestelmäpromptia: kielletty haamuimportit (`@/api/...`, `// Assume...`) ja asentamattomat paketit (`next-auth/react`, `@tanstack/react-query`).
+   - Vaadittu 3–4 KPI-analytiikkakorttia trendi-indikaattoreilla ja Lucide-ikoneilla.
+   - Vaadittu Master-Detail -vuorovaikutus: kortin tai rivin klikkaus avaa aina yksityiskohtamodaalin.
+- **Tietoturva & Sallitut Tiedostopolut**:
+   - `ALLOWED_SCAFFOLD_PATHS` päivitetty sisältämään `.env` ja `src/types/index.ts`.
+- **Automaattinen Testaus & Laatu**:
+   - Yksikkötestit `tests/unit/handover.test.ts` päivitetty ja laajennettu tarkistamaan `.env`, `src/types/index.ts`, setup-skripti ja autoprefixer.
+   - 100% testiläpäisy: 60/60 testiä vihreänä, `tsc --noEmit` 0 virhettä.
+
+---
+
 ### 2026-10-12 — Foolproof Step-by-Step Gate Guidance & Co-Pilot Autonomy Verification
 - **Loppukäyttäjälle Suunniteltu Askellettu Ohjaus (Foolproof UX)**:
   - Poistettu kilpailevat toiminnot: kussakin tilassa on vain **yksi selkeä ensisijainen toimintapainike** (sykkivä vihreä `[ Tallenna muutokset levylle ]` kun AI-päivitys on odottamassa, ja suora seuraavan vaiheen siirtymä kun tallennettu).

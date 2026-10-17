@@ -14,6 +14,7 @@ import {
   validateProjectFileWritePath,
 } from "@/lib/path-security";
 import { computeLineDiff, type DiffResult } from "@/lib/diff";
+import { generateTypeScriptContracts } from "@/app/actions/handover";
 import {
   generateSmartEnglishPrismaSchema,
   generateSmartEnglishApiCode,
@@ -69,17 +70,19 @@ Your task is to design a clean, production-ready Prisma schema (schema.prisma) b
 
 STRICT RULES:
 1. ALL model names, field names, relations, enum names, and code comments MUST BE STRICTLY IN STANDARD ENGLISH. Do not use Finnish or any other language in model names or comments.
-2. Use PostgreSQL as the datasource provider unless SQLite is explicitly requested:
+2. Default to SQLite as the datasource provider for zero-config local development unless PostgreSQL is explicitly requested:
    datasource db {
-     provider = "postgresql"
+     provider = "sqlite"
      url      = env("DATABASE_URL")
    }
    generator client {
      provider = "prisma-client-js"
    }
-3. Security: NEVER store plain text passwords. Always use "passwordHash String" or NextAuth models (Account, Session, User).
-4. Define complete models with primary keys (@id @default(uuid())), creation/update timestamps (@default(now()), @updatedAt), appropriate indexes (@@index), and cascade relations.
-5. Return ONLY valid raw Prisma schema content. Do NOT wrap it in markdown code blocks (\`\`\`prisma).`;
+3. RELATIONAL INTEGRITY: All relations MUST be fully bidirectional. If model A defines a relation field referencing model B, model B MUST define the opposite relation field (e.g. if Comment has user User @relation(...), User must have comments Comment[]).
+4. SQLite Compatibility: When using SQLite, avoid native enum syntax if possible, or use Prisma-supported enums/strings.
+5. Security: NEVER store plain text passwords. Always use "passwordHash String" or NextAuth models (Account, Session, User).
+6. Define complete models with primary keys (@id @default(uuid())), creation/update timestamps (@default(now()), @updatedAt), appropriate indexes (@@index), and cascade relations where appropriate.
+7. Return ONLY valid raw Prisma schema content. Do NOT wrap it in markdown code blocks (\`\`\`prisma).`;
 
       const userContent = `Project Business Requirement: "${prompt}"
 
@@ -255,15 +258,28 @@ export async function generateUiComponentsForProject(
         },
       });
 
+      const typesContract = generateTypeScriptContracts({
+        prismaSchema: prismaSchema || undefined,
+      });
+
       const systemPrompt = `You are a Principal Frontend & Fullstack UI Engineer AI.
 Your task is to design production-ready, beautiful React 19 + TypeScript + Tailwind CSS UI components tailored to the user's project requirements, architecture diagram nodes, and Prisma/API models.
 
 STRICT RULES:
-1. Output must be a complete, self-contained, copy-pasteable TSX module (e.g., Dashboard or Management feature component).
+1. Output must be a complete, self-contained, copy-pasteable TSX module (e.g., export default function FeatureDashboard()).
 2. Start with "use client"; at the very top.
-3. Use Tailwind CSS with modern dark mode aesthetic (zinc/purple palette, subtle borders, glassmorphism, responsive grid).
-4. Use Lucide React icons for visual cues and status indicators.
-5. Include interactive local state: search filter, status badges, metric counters, creation modal/drawer form, item cards, and empty state.
+3. ZERO PHANTOM IMPORTS / ASSUMPTIONS:
+   - NEVER import from imaginary paths like "@/api/...", "./api/...", or "@/services/...". In Next.js App Router, API routes are HTTP endpoints called via native fetch('/api/endpoints', { ... }), NEVER imported as local JavaScript modules.
+   - NEVER write comment assumptions like "// Assume createFeedback exists" or "// Assume @/types is defined elsewhere".
+   - Allowed imports: "react" (useState, useEffect, useMemo, etc.), "lucide-react" (standard icons), "clsx", "tailwind-merge", and "@/types" (shared types provided below).
+   - DO NOT import packages that are not installed (e.g. DO NOT import next-auth, next-auth/react, @tanstack/react-query, framer-motion, recharts, or @radix-ui/*). Use native React state, standard CSS/Tailwind transitions, and lucide-react.
+4. REQUIRED CORE UI FEATURES:
+   - TOP KPI METRIC CARDS: Render 3 to 4 prominent metric summary cards at the top (e.g. Total Items, Active/Pending, Completed/Resolved, Success Rate) with Lucide icons, numbers, and trend badges.
+   - MASTER-DETAIL INSPECTION MODAL: Clicking any item card or row in the list MUST open a detailed inspection modal or drawer displaying full attributes, timestamps, and action buttons.
+   - CREATION MODAL / DRAWER: A functional form modal with input validation to add new records.
+   - SEARCH & FILTER: Instant search input and status tabs/pills.
+   - RESILIENT DATA FETCHING: In useEffect, attempt to fetch from "/api/endpoints" with native fetch, and initialize with realistic initial mock items so the UI is immediately interactive and visually stunning out-of-the-box.
+5. Use Tailwind CSS with modern aesthetic (dark/light friendly zinc palette, subtle borders, glassmorphic headers, responsive grid).
 6. All component code, prop types, and comments must be in STANDARD ENGLISH.
 7. Return ONLY raw TypeScript/TSX code. Do NOT wrap in markdown fences (\`\`\`tsx).`;
 
@@ -275,10 +291,13 @@ ${nodesSummary || "Standard React/Next.js frontend"}
 Database Prisma Schema:
 ${prismaSchema || "Standard data models"}
 
+Shared TypeScript Contracts (available in @/types):
+${typesContract}
+
 API Endpoints Reference:
 ${apiCode || "Standard CRUD route handlers"}
 
-Generate a complete, high-quality production UI component for this application.`;
+Generate a complete, high-quality production UI component for this application following all strict rules.`;
 
       const response = await openai.chat.completions.create({
         model: "openai/gpt-4o-mini",
