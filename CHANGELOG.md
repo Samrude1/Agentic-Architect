@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Team collaboration via shared project links
 - Cloud deployment packaging (Vercel / Railway)
 
+## [1.4.1] - 2026-10-17
+
+> **Zero-Config Turnkey Execution & Post-Mortem Hardening** — SQLite zero-config defaults, pre-bundled active `.env`, automated Prisma-to-TypeScript contract generation (`src/types/index.ts`), strict UI import rules forbidding phantom modules, and 2-step setup (`npm install && npm run setup`).
+
+### Added
+- **Zero-Config SQLite Default**: Configured both Prisma LLM system prompt and scaffold engine to default to `provider = "sqlite"` and `DATABASE_URL="file:./dev.db"`, eliminating Postgres connection errors on non-configured machines.
+- **Pre-Bundled Active `.env`**: Bundled `.env` alongside `.env.example` in both `.zip` archives and local directory scaffolding.
+- **Automated Shared TypeScript Contracts (`generateTypeScriptContracts`)**: Automatically parses Prisma schema models and outputs typed TypeScript interfaces directly to `src/types/index.ts`, eliminating phantom type imports.
+- **Combined Setup Script**: Added `"setup": "npx prisma db push && npm run dev"` and `"autoprefixer": "^10.4.20"` to generated `package.json`.
+- **Strict UI Generation Rules**: Hardened Gate 3 system prompt to forbid phantom module imports (`@/api/...`, `// Assume...`) and uninstalled packages (`next-auth/react`), while strictly enforcing 4 KPI analytics cards and master-detail modal inspection.
+
+### Fixed
+- **PostCSS / Tailwind Error**: Added `autoprefixer` dependency to scaffolded `package.json` to prevent build crashes in fresh environments.
+- **Path Security Allowlist**: Added `.env` and `src/types/index.ts` to `ALLOWED_SCAFFOLD_PATHS` in `path-security.ts`.
+
 ## [1.4.0] - 2026-10-17
 
 > **Turnkey Project Handover, Packaging & Scaffolding Engine** — One-click standalone `.zip` export (JSZip) with turnkey Next.js 15 App Router boilerplate, local target folder scaffolding with automated backups, interactive 5-step IDE quickstart guide, and Co-Pilot handover guidance trigger.
